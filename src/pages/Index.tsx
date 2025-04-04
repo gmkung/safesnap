@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { retrieveQuestions, Question } from 'reality-kleros-subgraph';
 
@@ -26,7 +25,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="p-4 bg-pink-100 min-h-screen">
+    <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">RealityETH Questions</h1>
 
       {error ? (
@@ -36,7 +35,7 @@ export default function Home() {
       ) : questions.length > 0 ? (
         <div className="space-y-4">
           {questions.map((question) => (
-            <div key={question.id} className="border rounded-lg p-4 space-y-2 bg-white">
+            <div key={question.id} className="border rounded-lg p-4 space-y-2">
               <h3 className="text-lg font-medium">{question.title}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
