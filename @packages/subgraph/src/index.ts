@@ -1,0 +1,316 @@
+import { chainData } from "@reality.eth/contracts";
+import { Question, QuestionPhase, Chain } from "./types/questions";
+
+// Constants
+const BATCH_SIZE = 1000;
+const ANSWERED_TOO_SOON =
+  "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe";
+const INVALID_ANSWER =
+  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+
+export interface ChainInfo {
+  chainId: string;
+  chainName: string;
+  nativeCurrency: {
+    name: string;
+    symbol: string;
+    decimals: number;
+  };
+  network_name: string;
+  rpcUrls: string[];
+  hostedRPC: string;
+  graphURL?: string;
+  blockExplorerUrls: string[];
+  deprecated?: boolean;
+  atprotoBot?: string;
+}
+
+export interface QuestionFilters {
+  searchTerm?: string;
+  arbitrator?: string;
+  phase?: QuestionPhase;
+  lastCreatedTimestamp?: number;
+}
+
+export function getChainInfo(chainId: number): ChainInfo {
+  const info = chainData(chainId);
+  if (!info) {
+    throw new Error(`Chain ${chainId} not found`);
+  }
+  return info;
+}
+
+export async function retrieveQuestions(
+  chainId: number,
+  filters: QuestionFilters = {}
+): Promise<Question[]> {
+  const chainInfo = getChainInfo(chainId);
+  if (!chainInfo.graphURL) {
+    throw new Error(`No subgraph URL found for chain ${chainId}`);
+  }
+
+  const query = buildQuery(filters);
+
+  const response = await fetch(chainInfo.graphURL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Network error: ${response.status} ${response.statusText}`);
+  }
+
+  const json = await response.json();
+  if (json.errors) {
+    throw new Error("GraphQL errors: " + JSON.stringify(json.errors));
+  }
+
+  const chain: Chain = {
+    id: chainId,
+    name: chainInfo.chainName,
+    subgraphUrl: chainInfo.graphURL,
+  };
+
+  return json.data.questions.map((q: any) => transformQuestion(q, chain));
+}
+
+function buildQuery(filters: QuestionFilters): string {
+  const whereConditions = [];
+
+  if (filters.searchTerm?.trim()) {
+    whereConditions.push(
+      `data_contains_nocase: "${filters.searchTerm.trim()}"`
+    );
+  }
+
+  if (filters.arbitrator) {
+    whereConditions.push(`arbitrator: "${filters.arbitrator.toLowerCase()}"`);
+  }
+
+  if (filters.lastCreatedTimestamp) {
+    whereConditions.push(
+      `createdTimestamp_lt: ${filters.lastCreatedTimestamp}`
+    );
+  }
+
+  const whereClause =
+    whereConditions.length > 0
+      ? `where: { ${whereConditions.join(", ")} }`
+      : "";
+
+  return `
+    query GetQuestions {
+      questions(
+        orderBy: createdTimestamp
+        orderDirection: desc
+        first: ${BATCH_SIZE}
+        ${whereClause}
+      ) {
+        id
+        questionId
+        arbitrator
+        data
+        minBond
+        contract
+        createdTimestamp
+        timeout
+        qType
+        bounty
+        currentAnswer
+        currentAnswerBond
+        template {
+          id
+          user
+          templateId
+          questionText
+        }
+        openingTimestamp
+        currentScheduledFinalizationTimestamp
+        answerFinalizedTimestamp
+        isPendingArbitration
+        arbitrationRequestedBy
+        responses (orderBy: timestamp) {
+          id
+          answer
+          bond
+          user
+          timestamp
+        }
+        answers(orderBy: timestamp) {
+          id
+          answer
+          lastBond
+          timestamp
+        }
+      }
+    }
+  `;
+}
+
+function transformQuestion(q: any, chain: Chain): Question {
+  const parsedData = parseQuestionData(q.data, q.qType, q.template);
+  const phase = determineQuestionPhase(q);
+
+  return {
+    id: q.questionId,
+    title: parsedData.title,
+    description: parsedData.description || "No description available",
+    options: parsedData.options || [],
+    arbitrator: q.arbitrator,
+    contract: q.contract,
+    chain,
+    phase,
+    qType: q.qType,
+    currentAnswer: q.currentAnswer,
+    currentBond: q.currentAnswerBond || q.bounty,
+    minimumBond: q.minBond,
+    timeRemaining: calculateTimeRemaining(q),
+    timeToOpen: calculateTimeToOpen(q),
+    createdTimestamp: parseInt(q.createdTimestamp),
+    openingTimestamp: parseInt(q.openingTimestamp),
+    arbitrationRequestedBy: q.arbitrationRequestedBy,
+    currentScheduledFinalizationTimestamp:
+      q.currentScheduledFinalizationTimestamp,
+    answers: transformAnswers(q.answers),
+    responses: transformResponses(q.responses),
+    finalAnswer:
+      phase === QuestionPhase.FINALIZED
+        ? parseAnswer(q.currentAnswer)
+        : undefined,
+    template: q.template
+      ? {
+          templateId: q.template.templateId,
+          questionText: q.template.questionText,
+          creationTimestamp: q.template.creationTimestamp,
+          creator: q.template.creator,
+        }
+      : undefined,
+  };
+}
+
+function parseQuestionData(
+  data: string,
+  qType: string,
+  template?: { questionText: string }
+) {
+  try {
+    if (template?.questionText) {
+      const dataValues = data.split("␟");
+      let valueIndex = 0;
+      const unescapedTemplate = template.questionText;
+      const completedTemplate = unescapedTemplate.replace(/%s/g, () => {
+        const value = dataValues[valueIndex];
+        valueIndex++;
+        return value || "";
+      });
+
+      try {
+        const questionData = JSON.parse(completedTemplate);
+        const options =
+          questionData.type === "single-select" && questionData.outcomes
+            ? Array.isArray(questionData.outcomes)
+              ? questionData.outcomes
+              : questionData.outcomes
+                  .split(",")
+                  .map((opt: string) => opt.trim())
+            : questionData.type === "bool"
+              ? ["No", "Yes"]
+              : [];
+
+        return {
+          title: questionData.title,
+          options,
+          description:
+            questionData.description || "Please select one of the options",
+          category: questionData.category,
+        };
+      } catch (parseError) {
+        console.error("Failed to parse template:", parseError);
+        return defaultQuestionData(data);
+      }
+    }
+
+    const [title, optionsStr, category] = data.split("␟");
+    const options =
+      qType === "single-select"
+        ? optionsStr
+            .match(/(?:[^,"]|"(?:[^"])*")+/g)
+            ?.map((opt) => opt.trim().replace(/^"|"$/g, "").trim()) || []
+        : [];
+
+    return {
+      title,
+      options,
+      description: "Please select one of the options",
+      category,
+    };
+  } catch (error) {
+    console.error("Error parsing question data:", error);
+    return defaultQuestionData(data);
+  }
+}
+
+function defaultQuestionData(data: string) {
+  return {
+    title: data,
+    options: [],
+    description: "Please select one of the options",
+    category: "Unknown",
+  };
+}
+
+function determineQuestionPhase(q: any): QuestionPhase {
+  const now = Math.floor(Date.now() / 1000);
+  const timeout = parseInt(q.timeout);
+  const finalizedTime = parseInt(q.answerFinalizedTimestamp);
+  const openingTime = parseInt(q.openingTimestamp);
+
+  if (timeout === 0) return QuestionPhase.NOT_CREATED;
+  if (q.isPendingArbitration) return QuestionPhase.PENDING_ARBITRATION;
+  if (finalizedTime !== 0 && finalizedTime <= now)
+    return QuestionPhase.FINALIZED;
+  if (openingTime > now) return QuestionPhase.UPCOMING;
+  return QuestionPhase.OPEN;
+}
+
+function calculateTimeRemaining(q: any): number {
+  const now = Math.floor(Date.now() / 1000);
+  const finalizationTime = q.currentScheduledFinalizationTimestamp
+    ? parseInt(q.currentScheduledFinalizationTimestamp)
+    : 0;
+  return finalizationTime && finalizationTime > now
+    ? (finalizationTime - now) * 1000
+    : 0;
+}
+
+function calculateTimeToOpen(q: any): number {
+  const now = Math.floor(Date.now() / 1000);
+  const openingTime = parseInt(q.openingTimestamp);
+  return openingTime && openingTime > now ? (openingTime - now) * 1000 : 0;
+}
+
+function parseAnswer(answerHex: string): string {
+  if (answerHex === ANSWERED_TOO_SOON) return "Answered Too Soon";
+  if (answerHex === INVALID_ANSWER) return "Invalid Answer";
+  return answerHex;
+}
+
+function transformAnswers(answers: any[]): Question["answers"] {
+  return answers.map((a) => ({
+    value: parseAnswer(a.answer),
+    bond: a.lastBond,
+    timestamp: parseInt(a.timestamp) * 1000,
+  }));
+}
+
+function transformResponses(responses: any[]): Question["responses"] {
+  return responses.map((r) => ({
+    value: parseAnswer(r.answer),
+    timestamp: parseInt(r.timestamp) * 1000,
+    bond: r.bond,
+    user: r.user,
+  }));
+}
+
+export type { Question, QuestionPhase, Chain } from "./types/questions";
