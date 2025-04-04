@@ -31,6 +31,21 @@ export interface QuestionFilters {
   phase?: QuestionPhase;
   lastCreatedTimestamp?: number;
   batchSize?: number;
+  questionId?: string;
+  contract?: string;
+  data?: string;
+  minBond?: string;
+  qType?: string;
+  bounty?: string;
+  currentAnswer?: string;
+  currentAnswerBond?: string;
+  openingTimestamp?: number;
+  currentScheduledFinalizationTimestamp?: number;
+  answerFinalizedTimestamp?: number;
+  isPendingArbitration?: boolean;
+  arbitrationRequestedBy?: string;
+  user?: string;
+  templateId?: string;
 }
 
 export interface QuestionProgress {
@@ -167,6 +182,62 @@ function buildQuery(filters: QuestionFilters & { batchSize?: number }): string {
     whereConditions.push(`arbitrator: "${filters.arbitrator.toLowerCase()}"`);
   }
 
+  if (filters.questionId) {
+    whereConditions.push(`questionId: "${filters.questionId}"`);
+  }
+
+  if (filters.contract) {
+    whereConditions.push(`contract: "${filters.contract.toLowerCase()}"`);
+  }
+
+  if (filters.minBond) {
+    whereConditions.push(`minBond: "${filters.minBond}"`);
+  }
+
+  if (filters.qType) {
+    whereConditions.push(`qType: "${filters.qType}"`);
+  }
+
+  if (filters.bounty) {
+    whereConditions.push(`bounty: "${filters.bounty}"`);
+  }
+
+  if (filters.currentAnswer) {
+    whereConditions.push(`currentAnswer: "${filters.currentAnswer}"`);
+  }
+
+  if (filters.currentAnswerBond) {
+    whereConditions.push(`currentAnswerBond: "${filters.currentAnswerBond}"`);
+  }
+
+  if (filters.openingTimestamp) {
+    whereConditions.push(`openingTimestamp: ${filters.openingTimestamp}`);
+  }
+
+  if (filters.currentScheduledFinalizationTimestamp) {
+    whereConditions.push(`currentScheduledFinalizationTimestamp: ${filters.currentScheduledFinalizationTimestamp}`);
+  }
+
+  if (filters.answerFinalizedTimestamp) {
+    whereConditions.push(`answerFinalizedTimestamp: ${filters.answerFinalizedTimestamp}`);
+  }
+
+  if (filters.isPendingArbitration !== undefined) {
+    whereConditions.push(`isPendingArbitration: ${filters.isPendingArbitration}`);
+  }
+
+  if (filters.arbitrationRequestedBy) {
+    whereConditions.push(`arbitrationRequestedBy: "${filters.arbitrationRequestedBy.toLowerCase()}"`);
+  }
+
+  if (filters.user) {
+    whereConditions.push(`user: "${filters.user.toLowerCase()}"`);
+  }
+
+  if (filters.templateId) {
+    whereConditions.push(`template_: { templateId: "${filters.templateId}" }`);
+  }
+
   if (filters.lastCreatedTimestamp) {
     whereConditions.push(
       `createdTimestamp_lt: ${filters.lastCreatedTimestamp}`
@@ -191,6 +262,7 @@ function buildQuery(filters: QuestionFilters & { batchSize?: number }): string {
         arbitrator
         data
         minBond
+        user
         contract
         createdTimestamp
         timeout
