@@ -1,17 +1,44 @@
 import { useEffect, useState } from 'react';
-import { retrieveQuestions, Question } from 'reality-kleros-subgraph';
+import { retrieveQuestions, Question, QuestionProgress } from 'reality-kleros-subgraph';
 
 export default function Home() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<QuestionProgress>({
+    total: 0,
+    processed: 0,
+    failed: 0
+  });
 
   useEffect(() => {
     const loadQuestions = async () => {
       try {
         setIsLoading(true);
-        const fetchedQuestions = await retrieveQuestions(1); // Ethereum mainnet
-        setQuestions(fetchedQuestions.slice(0, 5)); // Get first 5 questions
+        setQuestions([]);
+        setProgress({ total: 0, processed: 0, failed: 0 });
+
+        // Keep track of accumulated questions
+        let accumulatedQuestions: Question[] = [];
+
+        await retrieveQuestions(
+          1, // Ethereum mainnet
+          { 
+            batchSize: 100, // Outer batch size for API calls
+          },
+          (progress) => {
+            setProgress(progress);
+            // Get new questions since last update
+            const newQuestions = accumulatedQuestions.slice(questions.length, progress.processed);
+            if (newQuestions.length > 0) {
+              setQuestions(prev => [...prev, ...newQuestions]);
+            }
+          }
+        ).then(fetchedQuestions => {
+          accumulatedQuestions = fetchedQuestions;
+          setQuestions(fetchedQuestions);
+        });
+
         setError(null);
       } catch (err) {
         console.error('Error loading questions:', err);
@@ -30,133 +57,62 @@ export default function Home() {
 
       {error ? (
         <div className="text-red-500">{error}</div>
-      ) : isLoading ? (
-        <div>Loading questions...</div>
-      ) : questions.length > 0 ? (
-        <div className="space-y-4">
-          {questions.map((question) => (
-            <div key={question.id} className="border rounded-lg p-4 space-y-2">
-              <h3 className="text-lg font-medium">{question.title}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <div className="font-semibold">ID:</div>
-                  <div className="font-mono">{question.id}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Description:</div>
-                  <div>{question.description}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Phase:</div>
-                  <div>{question.phase}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Type:</div>
-                  <div>{question.qType}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Arbitrator:</div>
-                  <div className="font-mono">{question.arbitrator}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Contract:</div>
-                  <div className="font-mono">{question.contract}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Current Answer:</div>
-                  <div>{question.currentAnswer}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Current Bond:</div>
-                  <div>{question.currentBond}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Minimum Bond:</div>
-                  <div>{question.minimumBond}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Time Remaining:</div>
-                  <div>{question.timeRemaining}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Time to Open:</div>
-                  <div>{question.timeToOpen}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Created:</div>
-                  <div>{new Date(question.createdTimestamp * 1000).toLocaleString()}</div>
-                </div>
-                <div>
-                  <div className="font-semibold">Opening:</div>
-                  <div>{new Date(question.openingTimestamp * 1000).toLocaleString()}</div>
-                </div>
-                {question.arbitrationRequestedBy && (
-                  <div>
-                    <div className="font-semibold">Arbitration Requested By:</div>
-                    <div className="font-mono">{question.arbitrationRequestedBy}</div>
-                  </div>
+      ) : (
+        <>
+          {/* Progress indicator */}
+          {progress.total > 0 && (
+            <div className="mb-4 p-2 bg-gray-100 rounded">
+              <div className="text-sm text-gray-600">
+                <div>Loading questions: {progress.processed} / {progress.total}</div>
+                {progress.failed > 0 && (
+                  <div className="text-yellow-500">Failed to process: {progress.failed}</div>
                 )}
-                {question.currentScheduledFinalizationTimestamp && (
-                  <div>
-                    <div className="font-semibold">Finalization Scheduled:</div>
-                    <div>{new Date(parseInt(question.currentScheduledFinalizationTimestamp) * 1000).toLocaleString()}</div>
-                  </div>
-                )}
-                {question.finalAnswer && (
-                  <div>
-                    <div className="font-semibold">Final Answer:</div>
-                    <div>{question.finalAnswer}</div>
-                  </div>
-                )}
-                {question.options.length > 0 && (
-                  <div className="col-span-2">
-                    <div className="font-semibold">Options:</div>
-                    <ul className="list-disc list-inside">
-                      {question.options.map((option, index) => (
-                        <li key={index}>{option}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {question.answers.length > 0 && (
-                  <div className="col-span-2">
-                    <div className="font-semibold">Answers:</div>
-                    <ul className="list-disc list-inside">
-                      {question.answers.map((answer, index) => (
-                        <li key={index}>
-                          Value: {answer.value} | Bond: {answer.bond} | Timestamp: {new Date(answer.timestamp).toLocaleString()}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {question.responses.length > 0 && (
-                  <div className="col-span-2">
-                    <div className="font-semibold">Responses:</div>
-                    <ul className="list-disc list-inside">
-                      {question.responses.map((response, index) => (
-                        <li key={index}>
-                          Value: {response.value} | Bond: {response.bond} | User: {response.user} | Timestamp: {new Date(response.timestamp).toLocaleString()}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {question.template && (
-                  <div className="col-span-2">
-                    <div className="font-semibold">Template:</div>
-                    <div>Template ID: {question.template.templateId}</div>
-                    <div>Question Text: {question.template.questionText}</div>
-                    <div>Creator: {question.template.creator}</div>
-                    <div>Created: {new Date(question.template.creationTimestamp * 1000).toLocaleString()}</div>
+                {progress.lastTimestamp && (
+                  <div className="text-gray-400">
+                    Last update: {new Date(progress.lastTimestamp * 1000).toLocaleString()}
                   </div>
                 )}
               </div>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div>No questions found</div>
+          )}
+
+          {/* Questions display */}
+          <div className="space-y-4">
+            {questions.map((question) => (
+              <div key={question.id} className="border p-4 rounded-lg">
+                <h2 className="text-xl font-semibold">{question.title}</h2>
+                <p className="text-gray-600 mt-2">{question.description}</p>
+                <div className="mt-4 space-y-2">
+                  <div className="text-sm">
+                    <span className="font-medium">Status:</span> {question.phase}
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">Current Answer:</span> {question.currentAnswer}
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">Time Remaining:</span> {question.timeRemaining}
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">Created:</span> {new Date(question.createdTimestamp * 1000).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Loading state */}
+          {isLoading && questions.length === 0 && (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+              <p className="mt-2 text-gray-600">Loading questions...</p>
+            </div>
+          )}
+
+          {/* No results */}
+          {!isLoading && questions.length === 0 && (
+            <div className="text-center py-8 text-gray-500">No questions found</div>
+          )}
+        </>
       )}
     </div>
   );

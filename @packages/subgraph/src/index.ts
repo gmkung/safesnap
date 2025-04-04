@@ -30,6 +30,14 @@ export interface QuestionFilters {
   arbitrator?: string;
   phase?: QuestionPhase;
   lastCreatedTimestamp?: number;
+  batchSize?: number;
+}
+
+export interface QuestionProgress {
+  total: number;
+  processed: number;
+  failed: number;
+  lastTimestamp?: number;
 }
 
 export function getChainInfo(chainId: number): ChainInfo {
@@ -42,40 +50,111 @@ export function getChainInfo(chainId: number): ChainInfo {
 
 export async function retrieveQuestions(
   chainId: number,
-  filters: QuestionFilters = {}
+  filters: QuestionFilters = {},
+  onProgress?: (progress: QuestionProgress) => void
 ): Promise<Question[]> {
   const chainInfo = getChainInfo(chainId);
   if (!chainInfo.graphURL) {
     throw new Error(`No subgraph URL found for chain ${chainId}`);
   }
 
-  const query = buildQuery(filters);
+  const processedQuestions: Question[] = [];
+  let lastTimestamp: number | undefined = filters.lastCreatedTimestamp;
+  let hasMore = true;
+  let totalProcessed = 0;
+  let totalFailed = 0;
+  const batchSize = filters.batchSize || 1000;
 
-  const response = await fetch(chainInfo.graphURL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query }),
-  });
+  while (hasMore) {
+    const query = buildQuery({
+      ...filters,
+      lastCreatedTimestamp: lastTimestamp,
+      batchSize,
+    });
 
-  if (!response.ok) {
-    throw new Error(`Network error: ${response.status} ${response.statusText}`);
+    const response = await fetch(chainInfo.graphURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Network error: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const json = await response.json();
+    if (json.errors) {
+      throw new Error("GraphQL errors: " + JSON.stringify(json.errors));
+    }
+
+    const chain: Chain = {
+      id: chainId,
+      name: chainInfo.chainName,
+      subgraphUrl: chainInfo.graphURL,
+    };
+
+    const questions = json.data.questions;
+    if (questions.length === 0) {
+      hasMore = false;
+      break;
+    }
+
+    // Process questions in smaller batches for better progress tracking
+    const processBatchSize = 10;
+    for (let i = 0; i < questions.length; i += processBatchSize) {
+      const batch = questions.slice(i, i + processBatchSize);
+
+      // Process each batch in parallel
+      const batchPromises = batch.map(async (q: any) => {
+        try {
+          const processedQuestion = transformQuestion(q, chain);
+          totalProcessed++;
+          if (onProgress) {
+            onProgress({
+              total: totalProcessed + totalFailed,
+              processed: totalProcessed,
+              failed: totalFailed,
+              lastTimestamp: parseInt(q.createdTimestamp),
+            });
+          }
+          return processedQuestion;
+        } catch (err) {
+          console.error(`Error processing question ${q.id}:`, err);
+          totalFailed++;
+          if (onProgress) {
+            onProgress({
+              total: totalProcessed + totalFailed,
+              processed: totalProcessed,
+              failed: totalFailed,
+              lastTimestamp: parseInt(q.createdTimestamp),
+            });
+          }
+          return null;
+        }
+      });
+
+      // Wait for the current batch to complete
+      const batchResults = await Promise.all(batchPromises);
+      processedQuestions.push(
+        ...(batchResults.filter((q) => q !== null) as Question[])
+      );
+    }
+
+    // Update lastTimestamp for next batch
+    lastTimestamp = parseInt(questions[questions.length - 1].createdTimestamp);
+
+    // If we got fewer results than requested, we've reached the end
+    if (questions.length < batchSize) {
+      hasMore = false;
+    }
   }
 
-  const json = await response.json();
-  if (json.errors) {
-    throw new Error("GraphQL errors: " + JSON.stringify(json.errors));
-  }
-
-  const chain: Chain = {
-    id: chainId,
-    name: chainInfo.chainName,
-    subgraphUrl: chainInfo.graphURL,
-  };
-
-  return json.data.questions.map((q: any) => transformQuestion(q, chain));
+  return processedQuestions;
 }
 
-function buildQuery(filters: QuestionFilters): string {
+function buildQuery(filters: QuestionFilters & { batchSize?: number }): string {
   const whereConditions = [];
 
   if (filters.searchTerm?.trim()) {
@@ -104,7 +183,7 @@ function buildQuery(filters: QuestionFilters): string {
       questions(
         orderBy: createdTimestamp
         orderDirection: desc
-        first: ${BATCH_SIZE}
+        first: ${filters.batchSize || BATCH_SIZE}
         ${whereClause}
       ) {
         id

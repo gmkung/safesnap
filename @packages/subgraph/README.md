@@ -37,7 +37,34 @@ const filteredQuestions = await retrieveQuestions(1, {
   phase: QuestionPhase.OPEN,
   lastCreatedTimestamp: 1234567890,
 });
+
+// Get questions with progress tracking
+const questions = await retrieveQuestions(1, {}, (progress) => {
+  console.log(`Processed ${progress.processed} of ${progress.total} questions`);
+  console.log(`Failed: ${progress.failed}`);
+  console.log(`Last timestamp: ${progress.lastTimestamp}`);
+});
 ```
+
+### Progressive Loading
+
+The package implements a two-level batching system for efficient data retrieval and processing:
+
+1. **Outer Batch (API Level)**
+   - Controls how many questions to fetch from the GraphQL API in a single request
+   - Default size: 1000 questions per API call
+   - Configurable via `batchSize` parameter
+
+2. **Inner Batch (Processing Level)**
+   - Controls how many questions to process in memory simultaneously
+   - Fixed size: 10 questions per processing batch
+   - Enables parallel processing and detailed progress tracking
+
+This architecture provides:
+- Efficient network usage (fewer API calls)
+- Controlled memory usage (processing in smaller chunks)
+- Parallel processing benefits
+- Detailed progress tracking
 
 ## Types
 
@@ -100,6 +127,17 @@ enum QuestionPhase {
   OPEN = "OPEN",
   PENDING_ARBITRATION = "PENDING_ARBITRATION",
   FINALIZED = "FINALIZED",
+}
+```
+
+### QuestionProgress
+
+```typescript
+interface QuestionProgress {
+  total: number;      // Total number of questions processed
+  processed: number;  // Number of successfully processed questions
+  failed: number;     // Number of failed questions
+  lastTimestamp?: number; // Timestamp of the last processed question
 }
 ```
 

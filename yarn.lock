@@ -3651,10 +3651,10 @@ reality-kleros-subgraph@^1.0.0:
     "@reality.eth/contracts" "^3.2.2"
     ethers "^5.8.0"
 
-reality-kleros-subgraph@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/reality-kleros-subgraph/-/reality-kleros-subgraph-1.0.2.tgz#d90a1143882e46863f641431bfa00e0c3f8aa603"
-  integrity sha512-JQZX7Fv6fk8oK5Zhm/VSrVGahe498ATOHeLWmo+8xdoTqXxUJap9PK3Q5Ca0kCdWRqPpffGG99OJd7lMacSEUg==
+reality-kleros-subgraph@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/reality-kleros-subgraph/-/reality-kleros-subgraph-1.1.0.tgz#2fb5911d2cc94ac1302e195eb2e447a91cf0d882"
+  integrity sha512-9bAZ3dgJwDNwyMK9+LnXim0mvLHVmUt3mOkO4CtL000tXp1hmr8zQk6TsFB0Ek1vQQEbD7scvX46iPC5fMD2Jg==
   dependencies:
     "@reality.eth/contracts" "^3.2.2"
     ethers "^5.8.0"
