@@ -8,6 +8,7 @@ import { mainnet } from 'viem/chains';
 // ENS Resolver contract address
 const ENS_RESOLVER_ADDRESS = '0x231b0ee14048e9dccd1d247744d114a4eb5e8e63';
 
+
 // Create Viem public client
 const publicClient = createPublicClient({
   chain: mainnet,
