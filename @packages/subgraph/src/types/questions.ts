@@ -4,17 +4,32 @@ export interface Chain {
   subgraphUrl: string;
 }
 
+export interface ContractConfig {
+  address: string;
+  arbitrators: string[];
+  version_number: string;
+  chain_id: string;
+  contract_name: string;
+  contract_version: string;
+  token_ticker: string;
+}
+
+export interface Contract {
+  address: string;
+  config: ContractConfig;
+}
+
 export interface Question {
   id: string;
   title: string;
   description: string;
   options: string[];
   arbitrator: string;
-  contract: string;
+  contract: Contract;
   chain: Chain;
   phase: QuestionPhase;
   qType: string;
-  currentAnswer: string;
+  currentAnswer?: string;
   currentBond: string;
   minimumBond: string;
   timeRemaining: number;
@@ -27,6 +42,7 @@ export interface Question {
   responses: Response[];
   finalAnswer?: string;
   template?: Template;
+  data: string;
 }
 
 export interface Answer {
@@ -35,10 +51,7 @@ export interface Answer {
   timestamp: number;
 }
 
-export interface Response {
-  value: string;
-  timestamp: number;
-  bond: string;
+export interface Response extends Answer {
   user: string;
 }
 

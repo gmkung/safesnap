@@ -92,7 +92,7 @@ export default function Home() {
 
         await retrieveQuestions(
           1, // Ethereum mainnet
-          { 
+          {
             batchSize: 100,
             ...(userFilter && { user: userFilter })
           },

@@ -1,5 +1,11 @@
-import { chainData } from "@reality.eth/contracts";
-import { Question, QuestionPhase, Chain } from "./types/questions";
+const { configForAddress, chainData } = require("@reality.eth/contracts");
+import {
+  Question,
+  QuestionPhase,
+  Chain,
+  Contract,
+  ContractConfig,
+} from "./types/questions";
 
 // Constants
 const BATCH_SIZE = 1000;
@@ -215,19 +221,27 @@ function buildQuery(filters: QuestionFilters & { batchSize?: number }): string {
   }
 
   if (filters.currentScheduledFinalizationTimestamp) {
-    whereConditions.push(`currentScheduledFinalizationTimestamp: ${filters.currentScheduledFinalizationTimestamp}`);
+    whereConditions.push(
+      `currentScheduledFinalizationTimestamp: ${filters.currentScheduledFinalizationTimestamp}`
+    );
   }
 
   if (filters.answerFinalizedTimestamp) {
-    whereConditions.push(`answerFinalizedTimestamp: ${filters.answerFinalizedTimestamp}`);
+    whereConditions.push(
+      `answerFinalizedTimestamp: ${filters.answerFinalizedTimestamp}`
+    );
   }
 
   if (filters.isPendingArbitration !== undefined) {
-    whereConditions.push(`isPendingArbitration: ${filters.isPendingArbitration}`);
+    whereConditions.push(
+      `isPendingArbitration: ${filters.isPendingArbitration}`
+    );
   }
 
   if (filters.arbitrationRequestedBy) {
-    whereConditions.push(`arbitrationRequestedBy: "${filters.arbitrationRequestedBy.toLowerCase()}"`);
+    whereConditions.push(
+      `arbitrationRequestedBy: "${filters.arbitrationRequestedBy.toLowerCase()}"`
+    );
   }
 
   if (filters.user) {
@@ -302,6 +316,7 @@ function buildQuery(filters: QuestionFilters & { batchSize?: number }): string {
 function transformQuestion(q: any, chain: Chain): Question {
   const parsedData = parseQuestionData(q.data, q.qType, q.template);
   const phase = determineQuestionPhase(q);
+  const contractConfig = configForAddress(q.contract);
 
   return {
     id: q.questionId,
@@ -309,7 +324,18 @@ function transformQuestion(q: any, chain: Chain): Question {
     description: parsedData.description || "No description available",
     options: parsedData.options || [],
     arbitrator: q.arbitrator,
-    contract: q.contract,
+    contract: {
+      address: q.contract,
+      config: contractConfig || {
+        address: q.contract,
+        arbitrators: [],
+        version_number: "unknown",
+        chain_id: chain.id.toString(),
+        contract_name: "Unknown",
+        contract_version: "Unknown",
+        token_ticker: "ETH",
+      },
+    },
     chain,
     phase,
     qType: q.qType,
@@ -337,6 +363,7 @@ function transformQuestion(q: any, chain: Chain): Question {
           creator: q.template.creator,
         }
       : undefined,
+    data: q.data,
   };
 }
 
