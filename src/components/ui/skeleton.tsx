@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils"
 
 interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -41,7 +40,7 @@ function CardSkeleton() {
 
 function QuestionRowSkeleton() {
   return (
-    <div className="rounded-lg border border-tron-dark/30 bg-tron-black/20 shadow-holo animate-slow-pulse p-4 mb-3 w-full max-w-5xl mx-auto">
+    <div className="rounded-lg border border-tron-dark/30 bg-tron-black/20 p-4 mb-6 w-full max-w-5xl mx-auto relative before:absolute before:inset-0 before:bg-gradient-to-r before:from-tron/5 before:to-transparent before:rounded-lg before:-z-10 before:blur-md before:translate-y-1 before:translate-x-1">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
         <div className="flex-1">
           <Skeleton className="h-6 w-3/4 bg-tron-dark/30 mb-2" />
@@ -97,4 +96,3 @@ function QuestionDetailsSkeleton() {
 }
 
 export { Skeleton, CardSkeleton, QuestionRowSkeleton, QuestionDetailsSkeleton }
-
