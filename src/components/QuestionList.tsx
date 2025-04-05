@@ -8,6 +8,7 @@ import { Progress } from './ui/progress';
 import { formatUnits } from 'viem';
 import { Button } from './ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { extractDaoName } from '@/utils/daoUtils';
 
 interface QuestionListProps {
   questions: Question[];
@@ -43,12 +44,12 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
   const parseQuestionData = (question: Question) => {
     const parts = question.data.split('␟');
     if (parts.length >= 2) {
-      // Extract DAO name from the title - it's usually in the format "Did the Snapshot proposal ... in the {dao}.eth space pass ..."
-      const daoMatch = question.title.match(/in the ([a-zA-Z0-9]+\.eth) space/);
+      // Extract DAO name using our utility function
+      const dao = extractDaoName(question);
       return {
         proposalId: parts[0],
         transactionHash: parts[1],
-        dao: daoMatch ? daoMatch[1] : null
+        dao
       };
     }
     return null;
@@ -62,7 +63,15 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
       <div className="space-y-2">
         {parsedData.dao && (
           <div className="text-tron text-sm font-medium">
-            DAO: {parsedData.dao}
+            DAO: <span 
+              className="cursor-pointer hover:underline" 
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/dao/${parsedData.dao}`);
+              }}
+            >
+              {parsedData.dao}
+            </span>
           </div>
         )}
         <div className="space-y-1">

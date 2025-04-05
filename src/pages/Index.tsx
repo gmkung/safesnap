@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { retrieveQuestions, Question, QuestionProgress } from 'reality-kleros-subgraph';
 import { namehash, normalize } from 'viem/ens';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 import { QuestionList } from '../components/QuestionList';
@@ -30,19 +30,26 @@ export default function Home() {
     failed: 0
   });
   const [currentPage, setCurrentPage] = useState(1);
+  const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
 
-  // Get ENS name from URL path
-  const { '*': ensPath } = useParams();
-  const ensName = ensPath || null;
+  // Get path from URL
+  const { '*': path } = useParams();
+  const location = useLocation();
+  const pathSegments = location.pathname.split('/');
+  const isDao = pathSegments[1] === 'dao';
+  const ensName = path || null;
+  const daoEns = isDao ? ensName : null;
 
-  // Log when ENS is detected
+  // Log when ENS or DAO is detected
   useEffect(() => {
-    if (ensName) {
+    if (daoEns) {
+      console.log('🔍 DAO ENS detected in URL:', daoEns);
+    } else if (ensName && !isDao) {
       console.log('🔍 ENS name detected in URL:', ensName);
     } else {
       console.log('📄 No ENS name in URL - showing all questions');
     }
-  }, [ensName]);
+  }, [ensName, daoEns, isDao]);
 
   useEffect(() => {
     const loadQuestions = async () => {
@@ -54,7 +61,7 @@ export default function Home() {
         let userFilter: string | undefined;
 
         // If we have an ENS name, get the SafeSnap text record
-        if (ensName) {
+        if (ensName && !isDao) {
           try {
             // Calculate namehash
             const normalizedName = normalize(ensName);
@@ -115,12 +122,35 @@ export default function Home() {
     };
 
     loadQuestions();
-  }, [ensName]);
+  }, [ensName, isDao]);
 
-  // Calculate paginated questions
+  // Filter questions by DAO ENS if needed
+  useEffect(() => {
+    if (daoEns) {
+      // Normalize the DAO ENS for comparison (lowercase)
+      const normalizedDaoEns = daoEns.toLowerCase();
+      
+      // Filter questions that mention the DAO in their title or data
+      const filtered = questions.filter(question => {
+        // Extract DAO name from the title - it's usually in the format "Did the Snapshot proposal ... in the {dao}.eth space pass ..."
+        const daoMatch = question.title.match(/in the ([a-zA-Z0-9]+\.eth) space/i);
+        const mentionedDao = daoMatch ? daoMatch[1].toLowerCase() : null;
+        
+        // Check if the mentioned DAO matches our filter
+        return mentionedDao === normalizedDaoEns;
+      });
+      
+      setFilteredQuestions(filtered);
+      console.log(`Filtered ${filtered.length} questions for DAO: ${daoEns}`);
+    } else {
+      setFilteredQuestions(questions);
+    }
+  }, [questions, daoEns]);
+
+  // Calculate paginated questions from the filtered list
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedQuestions = questions.slice(startIndex, endIndex);
+  const paginatedQuestions = filteredQuestions.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -136,7 +166,8 @@ export default function Home() {
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">
         RealityETH Questions
-        {ensName && <span className="text-gray-600 ml-2">for {ensName}</span>}
+        {ensName && !isDao && <span className="text-gray-600 ml-2">for {ensName}</span>}
+        {daoEns && <span className="text-gray-600 ml-2">for DAO: {daoEns}</span>}
       </h1>
 
       {error ? (
@@ -147,7 +178,7 @@ export default function Home() {
           currentPage={currentPage}
           onPageChange={handlePageChange}
           isLoading={isLoading}
-          totalQuestions={questions.length}
+          totalQuestions={filteredQuestions.length}
         />
       )}
 
