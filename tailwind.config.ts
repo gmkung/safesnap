@@ -120,6 +120,14 @@ export default {
 						boxShadow: '0 0 8px theme("colors.space.DEFAULT"), 0 0 15px rgba(51, 195, 240, 0.3)' 
 					},
 				},
+				'slow-pulse': {
+					'0%, 100%': { 
+						boxShadow: '0 0 3px theme("colors.space.DEFAULT"), 0 0 5px rgba(51, 195, 240, 0.1)' 
+					},
+					'50%': { 
+						boxShadow: '0 0 6px theme("colors.space.DEFAULT"), 0 0 10px rgba(51, 195, 240, 0.2)' 
+					},
+				},
 				'ethereal-fade': {
 					'0%': { 
 						opacity: '0.8' 
@@ -164,6 +172,7 @@ export default {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'holo-glow': 'holo-glow 4s ease-in-out infinite',
+				'slow-pulse': 'slow-pulse 8s ease-in-out infinite',
 				'ethereal-fade': 'ethereal-fade 3s infinite',
 				'holo-scan': 'holo-scan 15s linear infinite',
 				'float': 'float 5s ease-in-out infinite',

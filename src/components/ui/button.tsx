@@ -31,7 +31,7 @@ const buttonVariants = cva(
       },
       glow: {
         default: "",
-        true: "animate-holo-glow",
+        true: "animate-slow-pulse",
       }
     },
     defaultVariants: {
