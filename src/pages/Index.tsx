@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { retrieveQuestions, Question, QuestionProgress } from 'reality-kleros-subgraph';
 import { namehash, normalize } from 'viem/ens';
@@ -7,7 +6,6 @@ import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 import { QuestionList } from '../components/QuestionList';
 import { Progress } from '@/components/ui/progress';
-import LoadingSpinner from '@/components/LoadingSpinner';
 
 // ENS Resolver contract address
 const ENS_RESOLVER_ADDRESS = '0x231b0ee14048e9dccd1d247744d114a4eb5e8e63';
@@ -133,37 +131,37 @@ export default function Home() {
     : 0;
 
   return (
-    <div className="p-4 space-y-6">
-      <h1 className="text-2xl font-bold mb-6 text-center ethereal-text">
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">
         RealityETH Questions
-        {ensName && <span className="text-space-light/70 ml-2">for {ensName}</span>}
+        {ensName && <span className="text-gray-600 ml-2">for {ensName}</span>}
       </h1>
 
       {error ? (
-        <div className="text-red-500 text-center">{error}</div>
+        <div className="text-red-500">{error}</div>
       ) : (
         <QuestionList
           questions={paginatedQuestions}
           currentPage={currentPage}
           onPageChange={handlePageChange}
-          isLoading={isLoading && questions.length === 0}
+          isLoading={isLoading}
           totalQuestions={questions.length}
         />
       )}
 
-      {/* Loading state with Space/Tron-styled Progress */}
+      {/* Loading state with Tron-styled Progress */}
       {isLoading && (
         <div className="mt-6 max-w-3xl mx-auto space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-space">Loading questions: {progress.processed} / {progress.total}</span>
-            <span className="text-sm text-space">{progressPercentage}%</span>
+            <span className="text-sm text-tron">Loading questions: {progress.processed} / {progress.total}</span>
+            <span className="text-sm text-tron">{progressPercentage}%</span>
           </div>
           <Progress value={progressPercentage} className="h-2" />
           {progress.failed > 0 && (
             <div className="text-yellow-500 text-sm mt-1">Failed to process: {progress.failed}</div>
           )}
           {progress.lastTimestamp && (
-            <div className="text-space-light/60 text-xs">
+            <div className="text-tron/60 text-xs">
               Last update: {new Date(progress.lastTimestamp * 1000).toLocaleString()}
             </div>
           )}
