@@ -6,11 +6,11 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 steel-highlight",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 steel-highlight relative overflow-hidden",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-steel",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-steel before:bg-space/10 before:absolute before:inset-0 before:w-full before:h-full before:translate-x-[-100%] hover:before:animate-light-reflect",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-steel",
         outline:
@@ -19,8 +19,9 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-steel",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        glass: "glass-button text-white hover:shadow-glass",
-        steel: "steel-button text-white hover:shadow-steel",
+        glass: "glass-button text-white hover:shadow-glass before:bg-white/5 before:absolute before:inset-0 before:w-full before:h-full before:translate-x-[-100%] hover:before:animate-light-reflect",
+        steel: "steel-button text-white hover:shadow-steel before:bg-space/10 before:absolute before:inset-0 before:w-full before:h-full before:translate-x-[-100%] hover:before:animate-light-reflect",
+        tron: "relative bg-transparent text-space border border-space/40 hover:border-space/70 hover:text-space hover:shadow-holo before:absolute before:inset-0 before:bg-space/5 before:opacity-0 hover:before:opacity-100 before:transition-opacity",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -28,10 +29,15 @@ const buttonVariants = cva(
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
       },
+      glow: {
+        default: "",
+        true: "animate-holo-glow",
+      }
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      glow: "default",
     },
   }
 )
@@ -43,11 +49,11 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, glow, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, glow, className }))}
         ref={ref}
         {...props}
       />

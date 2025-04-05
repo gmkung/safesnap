@@ -10,14 +10,16 @@ import ContractInfo from './ContractInfo';
 import { Badge } from './ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { cn } from '@/lib/utils';
+import { QuestionDetailsSkeleton } from './ui/skeleton';
 
 interface QuestionDetailsProps {
     question: Question;
     onArbitrationRequested: () => void;
-    onViewProposal: (proposalId: string) => void;
+    onViewProposal?: (proposalId: string) => void;
     proposalData?: any;
     hashVerification?: any;
     onViewHashDetails?: () => void;
+    isLoading?: boolean;
 }
 
 export default function QuestionDetails({ 
@@ -26,8 +28,13 @@ export default function QuestionDetails({
     onViewProposal,
     proposalData,
     hashVerification,
-    onViewHashDetails
+    onViewHashDetails,
+    isLoading = false
 }: QuestionDetailsProps) {
+    if (isLoading) {
+        return <QuestionDetailsSkeleton />;
+    }
+    
     const parsedData = parseQuestionData(question);
     
     const getSnapshotUrl = (spaceId: string, proposalId: string) => {
@@ -49,8 +56,19 @@ export default function QuestionDetails({
             : "Unable to verify: No transactions found in proposal to calculate hash";
     
     return (
-        <div className="steel-panel h-full">
-            <h2 className="text-xl font-semibold mb-4 ethereal-text p-4 border-b border-space-dark/30">Question Details</h2>
+        <div className="steel-panel h-full relative overflow-hidden">
+            <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-space/30 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-space/20 to-transparent"></div>
+                <div className="absolute top-0 bottom-0 left-0 w-[1px] bg-gradient-to-b from-transparent via-space/20 to-transparent"></div>
+                <div className="absolute top-0 bottom-0 right-0 w-[1px] bg-gradient-to-b from-transparent via-space/20 to-transparent"></div>
+            </div>
+            
+            <h2 className="text-xl font-semibold mb-4 ethereal-text p-4 border-b border-space-dark/30 relative">
+                Question Details
+                <span className="absolute bottom-0 left-[5%] right-[5%] h-[1px] bg-gradient-to-r from-transparent via-space/30 to-transparent"></span>
+            </h2>
+            
             <dl className="grid grid-cols-1 gap-4 p-4">
                 <div>
                     <dt className="font-medium text-space-light/70">Status</dt>
@@ -104,7 +122,7 @@ export default function QuestionDetails({
                 <div className="flex space-x-4">
                     <Dialog>
                         <DialogTrigger asChild>
-                            <Button variant="steel" size="sm">
+                            <Button variant="tron" size="sm" glow="true">
                                 <Info className="mr-2 h-4 w-4" />
                                 Additional Details
                             </Button>
@@ -162,7 +180,9 @@ export default function QuestionDetails({
             
             {/* Additional data at the bottom */}
             {(parsedData?.proposalId || parsedData?.transactionHash) && (
-                <div className="border-t border-space-dark/30 p-4">
+                <div className="border-t border-space-dark/30 p-4 relative">
+                    <span className="absolute top-0 left-[5%] right-[5%] h-[1px] bg-gradient-to-r from-transparent via-space/30 to-transparent"></span>
+                    
                     <dl className="grid grid-cols-1 gap-4">
                         {parsedData?.proposalId && (
                             <div>
@@ -175,7 +195,7 @@ export default function QuestionDetails({
                                             rel="noopener noreferrer"
                                             className="ml-2"
                                         >
-                                            <ExternalLink className="h-4 w-4 text-space-light/70 hover:text-space" />
+                                            <ExternalLink className="h-4 w-4 text-space-light/70 hover:text-space transition-colors" />
                                         </a>
                                     )}
                                 </dt>
@@ -207,7 +227,7 @@ export default function QuestionDetails({
                                                         <span>{hashVerification.match ? "Match" : "Invalid"}</span>
                                                     </Badge>
                                                 </TooltipTrigger>
-                                                <TooltipContent className="max-w-xs">
+                                                <TooltipContent className="max-w-xs glass-panel border-space/30">
                                                     <div className="flex items-start space-x-2">
                                                         <Info className="h-4 w-4 mt-0.5 shrink-0" />
                                                         <span>{tooltipText}</span>
