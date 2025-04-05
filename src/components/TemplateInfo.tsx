@@ -1,0 +1,39 @@
+
+import { Question } from 'reality-kleros-subgraph';
+import { formatDate } from '@/utils/questionUtils';
+
+interface TemplateInfoProps {
+    question: Question;
+}
+
+export default function TemplateInfo({ question }: TemplateInfoProps) {
+    if (!question.template) return null;
+
+    return (
+        <div className="tron-card mb-6">
+            <h2 className="text-xl font-semibold mb-4 text-tron p-4 border-b border-tron-dark/30">Template Information</h2>
+            <dl className="grid grid-cols-1 gap-6 p-6">
+                <div>
+                    <dt className="font-medium text-tron-light/70">Template ID</dt>
+                    <dd className="mt-1 text-foreground">{question.template.templateId}</dd>
+                </div>
+                <div>
+                    <dt className="font-medium text-tron-light/70">Question Text</dt>
+                    <dd className="mt-1 text-foreground">{question.template.questionText}</dd>
+                </div>
+                {question.template.creator && (
+                    <div>
+                        <dt className="font-medium text-tron-light/70">Creator</dt>
+                        <dd className="mt-1 text-foreground">{question.template.creator}</dd>
+                    </div>
+                )}
+                {question.template.creationTimestamp && (
+                    <div>
+                        <dt className="font-medium text-tron-light/70">Created</dt>
+                        <dd className="mt-1 text-foreground">{formatDate(question.template.creationTimestamp * 1000)}</dd>
+                    </div>
+                )}
+            </dl>
+        </div>
+    );
+}
