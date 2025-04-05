@@ -17,7 +17,7 @@ export default function QuestionDetails({
     return (
         <div className="steel-panel h-full">
             <h2 className="text-xl font-semibold mb-4 ethereal-text p-4 border-b border-space-dark/30">Question Status</h2>
-            <dl className="grid grid-cols-1 gap-3 p-4">
+            <dl className="grid grid-cols-1 gap-4 p-4">
                 <div>
                     <dt className="font-medium text-space-light/70">Status</dt>
                     <dd className="mt-1 flex items-center gap-4">
@@ -29,42 +29,6 @@ export default function QuestionDetails({
                             onArbitrationRequested={onArbitrationRequested}
                         />
                     </dd>
-                </div>
-                <div>
-                    <dt className="font-medium text-space-light/70">Current Answer</dt>
-                    <dd className="mt-1 text-foreground font-medium">
-                        {question.currentAnswer ? getHumanReadableAnswer(question.currentAnswer, question) : 'No answer yet'}
-                    </dd>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                    <div>
-                        <dt className="font-medium text-space-light/70">Current Bond</dt>
-                        <dd className="mt-1 text-foreground">{formatBond(question.currentBond, question)}</dd>
-                    </div>
-                    <div>
-                        <dt className="font-medium text-space-light/70">Minimum Bond</dt>
-                        <dd className="mt-1 text-foreground">{formatBond(question.minimumBond, question)}</dd>
-                    </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                    <div>
-                        <dt className="font-medium text-space-light/70">Time Remaining</dt>
-                        <dd className="mt-1 text-foreground">{question.timeRemaining ? `${Math.floor(question.timeRemaining / 1000)} seconds` : 'No time remaining'}</dd>
-                    </div>
-                    <div>
-                        <dt className="font-medium text-space-light/70">Question Type</dt>
-                        <dd className="mt-1 text-foreground">{question.qType}</dd>
-                    </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                    <div>
-                        <dt className="font-medium text-space-light/70">Opening Time</dt>
-                        <dd className="mt-1 text-foreground">{formatDate(question.openingTimestamp * 1000)}</dd>
-                    </div>
-                    <div>
-                        <dt className="font-medium text-space-light/70">Created</dt>
-                        <dd className="mt-1 text-foreground">{formatDate(question.createdTimestamp * 1000)}</dd>
-                    </div>
                 </div>
                 {question.options && question.options.length > 0 && (
                     <div>
@@ -78,10 +42,42 @@ export default function QuestionDetails({
                         </dd>
                     </div>
                 )}
+                <div>
+                    <dt className="font-medium text-space-light/70">Question Type</dt>
+                    <dd className="mt-1 text-foreground">{question.qType}</dd>
+                </div>
+                <div>
+                    <dt className="font-medium text-space-light/70">Current Answer</dt>
+                    <dd className="mt-1 flex items-center gap-4">
+                        <span className="text-foreground">
+                            {question.currentAnswer ? getHumanReadableAnswer(question.currentAnswer, question) : 'No answer yet'}
+                        </span>
+                    </dd>
+                </div>
+                <div>
+                    <dt className="font-medium text-space-light/70">Current Bond</dt>
+                    <dd className="mt-1 text-foreground">{formatBond(question.currentBond, question)}</dd>
+                </div>
+                <div>
+                    <dt className="font-medium text-space-light/70">Minimum Bond</dt>
+                    <dd className="mt-1 text-foreground">{formatBond(question.minimumBond, question)}</dd>
+                </div>
+                <div>
+                    <dt className="font-medium text-space-light/70">Time Remaining</dt>
+                    <dd className="mt-1 text-foreground">{question.timeRemaining ? `${Math.floor(question.timeRemaining / 1000)} seconds` : 'No time remaining'}</dd>
+                </div>
+                <div>
+                    <dt className="font-medium text-space-light/70">Opening Time</dt>
+                    <dd className="mt-1 text-foreground">{formatDate(question.openingTimestamp * 1000)}</dd>
+                </div>
+                <div>
+                    <dt className="font-medium text-space-light/70">Created</dt>
+                    <dd className="mt-1 text-foreground">{formatDate(question.createdTimestamp * 1000)}</dd>
+                </div>
                 {question.arbitrationRequestedBy && (
                     <div>
                         <dt className="font-medium text-space-light/70">Arbitration Requested By</dt>
-                        <dd className="mt-1 text-foreground font-mono text-sm">{question.arbitrationRequestedBy}</dd>
+                        <dd className="mt-1 text-foreground font-mono">{question.arbitrationRequestedBy}</dd>
                     </div>
                 )}
             </dl>
