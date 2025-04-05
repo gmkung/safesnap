@@ -19,6 +19,7 @@ import { RealityEthV3Abi__factory } from '@/types/contracts/factories/RealityEth
 import { RealityEthV21Witharbitratorappeals__factory } from '@/types/contracts/factories/RealityEthV21Witharbitratorappeals__factory';
 import { injected } from 'wagmi/connectors';
 import ProposalModal from '@/components/ProposalModal';
+import SubmitAnswerButton from '@/components/SubmitAnswer';
 
 interface ContractConfig {
     address: string;
@@ -35,7 +36,6 @@ interface SubmitAnswerButtonProps {
     onAnswerSubmitted: () => void;
 }
 
-// Answer constants
 const ANSWERED_TOO_SOON = "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe";
 const INVALID_ANSWER = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
@@ -53,7 +53,6 @@ function ConnectWallet() {
             await connectAsync({ connector: injected() });
         } catch (error) {
             console.error('Failed to connect:', error);
-            // Only show error if it's not a user rejection
             if (!(error instanceof Error) || !error.message.includes('UserRejectedRequestError')) {
                 toast({
                     variant: "destructive",
@@ -84,189 +83,6 @@ function ConnectWallet() {
         >
             {isConnecting ? "Connecting..." : "Connect Wallet"}
         </Button>
-    );
-}
-
-function SubmitAnswerButton({ question, onAnswerSubmitted }: SubmitAnswerButtonProps) {
-    const [isOpen, setIsOpen] = useState(false);
-    const [answer, setAnswer] = useState('');
-    const [bond, setBond] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const { toast } = useToast();
-    const { address, isConnected } = useAccount();
-    const chains = useChains();
-    const chain = chains[0];
-    const { data: walletClient } = useWalletClient();
-
-    const getDisabledReason = () => {
-        if (question.phase === 'PENDING_ARBITRATION') return 'Question is under arbitration';
-        if (question.phase === 'FINALIZED') return 'Question is already finalized';
-        if (question.timeToOpen && question.timeToOpen > 0) return 'Question is not open for answers yet';
-        return null;
-    };
-
-    const disabledReason = getDisabledReason();
-
-    const getAnswerBytes = (selectedOption: string): `0x${string}` => {
-        // Handle special cases
-        if (selectedOption === 'invalid') return INVALID_ANSWER as `0x${string}`;
-        if (selectedOption === 'too soon') return ANSWERED_TOO_SOON as `0x${string}`;
-
-        // For single-select questions, convert the index to bytes32
-        if (question.options && question.options.length > 0) {
-            const index = question.options.indexOf(selectedOption);
-            if (index !== -1) {
-                // Convert index to hex and pad to 64 characters (32 bytes)
-                return `0x${index.toString(16).padStart(64, '0')}` as `0x${string}`;
-            }
-        }
-
-        // Fallback for unknown options
-        return `0x${Buffer.from(selectedOption).toString('hex').padEnd(64, '0')}` as `0x${string}`;
-    };
-
-    const handleSubmit = async () => {
-        try {
-            setIsSubmitting(true);
-
-            if (!isConnected || !address) {
-                throw new Error('Please connect your wallet first');
-            }
-
-            if (!walletClient) {
-                throw new Error('Wallet client not available');
-            }
-
-            if (!answer) {
-                throw new Error('Please select an answer');
-            }
-
-            if (!bond) {
-                throw new Error('Please enter a bond amount');
-            }
-
-            // Convert bond to wei
-            const bondWei = parseUnits(bond, 18);
-            const minBond = BigInt(question.minimumBond);
-
-            if (bondWei < minBond) {
-                throw new Error(`Bond must be at least ${formatUnits(minBond, 18)} ${question.contract.config.token_ticker}`);
-            }
-
-            // Convert answer to bytes32 using our predefined values
-            const answerBytes = getAnswerBytes(answer);
-
-            // Convert question ID to bytes32
-            const questionIdBytes = `0x${question.id.replace('0x', '').padStart(64, '0')}` as `0x${string}`;
-
-            // Get contract instance
-            const contract = RealityEthV3Abi__factory.connect(
-                question.contract.address as `0x${string}`,
-                walletClient as any // Type assertion needed for wagmi v2 compatibility
-            );
-
-            // Submit answer
-            const tx = await contract.submitAnswer(
-                questionIdBytes,
-                answerBytes,
-                0n, // max_previous as bigint
-                { value: bondWei }
-            );
-
-            await tx.wait();
-
-            toast({
-                title: 'Answer submitted',
-                description: 'Your answer has been submitted successfully.',
-            });
-
-            setIsOpen(false);
-            onAnswerSubmitted();
-        } catch (error) {
-            console.error('Error submitting answer:', error);
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: error instanceof Error ? error.message : 'Failed to submit answer',
-            });
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    return (
-        <TooltipProvider>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <span>
-                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                            <DialogTrigger asChild>
-                                <Button
-                                    className="flex items-center gap-2"
-                                    disabled={!!disabledReason}
-                                >
-                                    <Plus className="w-4 h-4" />
-                                    Submit Answer
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                                <DialogHeader>
-                                    <DialogTitle>Submit Answer</DialogTitle>
-                                </DialogHeader>
-                                <div className="grid gap-4 py-4">
-                                    <div className="grid gap-2">
-                                        <label htmlFor="answer" className="text-sm font-medium">
-                                            Answer
-                                        </label>
-                                        <Select value={answer} onValueChange={setAnswer}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select an answer" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {/* Show question options if they exist */}
-                                                {question.options?.map((option, index) => (
-                                                    <SelectItem key={index} value={option}>
-                                                        {option}
-                                                    </SelectItem>
-                                                ))}
-                                                {/* Always show special options */}
-                                                <SelectItem value="invalid">Invalid</SelectItem>
-                                                <SelectItem value="too soon">Answered too Soon</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="grid gap-2">
-                                        <label htmlFor="bond" className="text-sm font-medium">
-                                            Bond Amount ({question.contract.config.token_ticker})
-                                        </label>
-                                        <Input
-                                            id="bond"
-                                            type="number"
-                                            placeholder={`Minimum: ${formatUnits(BigInt(question.minimumBond), 18)}`}
-                                            value={bond}
-                                            onChange={(e) => setBond(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex justify-end gap-2">
-                                    <Button variant="outline" onClick={() => setIsOpen(false)}>
-                                        Cancel
-                                    </Button>
-                                    <Button onClick={handleSubmit} disabled={isSubmitting}>
-                                        {isSubmitting ? 'Submitting...' : 'Submit Answer'}
-                                    </Button>
-                                </div>
-                            </DialogContent>
-                        </Dialog>
-                    </span>
-                </TooltipTrigger>
-                {disabledReason && (
-                    <TooltipContent>
-                        <p>{disabledReason}</p>
-                    </TooltipContent>
-                )}
-            </Tooltip>
-        </TooltipProvider>
     );
 }
 
@@ -303,7 +119,6 @@ function RequestArbitrationButton({ question, onArbitrationRequested }: { questi
 
             const questionIdBytes = `0x${question.id.replace('0x', '').padStart(64, '0')}` as `0x${string}`;
 
-            // Get arbitration fee using public client
             const arbitrationFee = await publicClient.readContract({
                 address: question.arbitrator as `0x${string}`,
                 abi: RealityEthV21Witharbitratorappeals__factory.abi,
@@ -311,7 +126,6 @@ function RequestArbitrationButton({ question, onArbitrationRequested }: { questi
                 args: [questionIdBytes]
             });
 
-            // Request arbitration using wallet client
             const { request } = await publicClient.simulateContract({
                 address: question.arbitrator as `0x${string}`,
                 abi: RealityEthV21Witharbitratorappeals__factory.abi,
@@ -406,7 +220,6 @@ export default function QuestionDetail() {
     const loadQuestionDetails = async () => {
         try {
             setLoading(true);
-            // No need to load contract config separately as it's already in the question data
         } catch (err) {
             console.error('Error loading question details:', err);
             setError(err instanceof Error ? err.message : 'Failed to load question details');
@@ -431,7 +244,6 @@ export default function QuestionDetail() {
         if (!question?.contract?.config) return `${bond} ETH`;
 
         try {
-            // Convert from wei to the appropriate unit
             const formattedAmount = formatUnits(BigInt(bond), 18);
             return `${formattedAmount} ${question.contract.config.token_ticker}`;
         } catch (error) {
@@ -454,14 +266,11 @@ export default function QuestionDetail() {
     };
 
     const getHumanReadableAnswer = (answerHex: string): string => {
-        // Handle special cases
         if (answerHex === INVALID_ANSWER) return "Invalid";
         if (answerHex === ANSWERED_TOO_SOON) return "Answered too Soon";
 
-        // For single-select questions with options
         if (question?.options && question.options.length > 0) {
             try {
-                // Convert hex to number (remove '0x' prefix and parse)
                 const index = parseInt(answerHex.slice(2), 16);
                 return question.options[index] || `Unknown Option (${answerHex})`;
             } catch (error) {
@@ -481,7 +290,6 @@ export default function QuestionDetail() {
     const parseQuestionData = (question: Question) => {
         const parts = question.data.split('␟');
         if (parts.length >= 2) {
-            // Extract DAO name from the title - it's usually in the format "Did the Snapshot proposal ... in the {dao}.eth space pass ..."
             const daoMatch = question.title.match(/in the ([a-zA-Z0-9]+\.eth) space/);
             return {
                 proposalId: parts[0],
@@ -588,7 +396,6 @@ export default function QuestionDetail() {
                 {formatTitle(question)}
             </h1>
 
-            {/* Basic Question Details */}
             <div className="tron-card mb-6">
                 <h2 className="text-xl font-semibold mb-4 text-tron p-4 border-b border-tron-dark/30">Question Details</h2>
                 <dl className="grid grid-cols-1 gap-6 p-6">
@@ -694,13 +501,14 @@ export default function QuestionDetail() {
             </div>
 
             <div className="flex justify-end mb-6">
-                <SubmitAnswerButton
-                    question={question}
-                    onAnswerSubmitted={() => loadQuestionDetails()}
-                />
+                {question && (
+                    <SubmitAnswerButton
+                        question={question}
+                        onAnswerSubmitted={() => loadQuestionDetails()}
+                    />
+                )}
             </div>
 
-            {/* Template Information */}
             {question.template && (
                 <div className="tron-card mb-6">
                     <h2 className="text-xl font-semibold mb-4 text-tron p-4 border-b border-tron-dark/30">Template Information</h2>
@@ -729,7 +537,6 @@ export default function QuestionDetail() {
                 </div>
             )}
 
-            {/* Answers History */}
             {question.answers && question.answers.length > 0 && (
                 <div className="tron-card mb-6">
                     <h2 className="text-xl font-semibold mb-4 text-tron p-4 border-b border-tron-dark/30">Answer History</h2>
@@ -756,7 +563,6 @@ export default function QuestionDetail() {
                 </div>
             )}
 
-            {/* Responses */}
             {question.responses && question.responses.length > 0 && (
                 <div className="tron-card mb-6">
                     <h2 className="text-xl font-semibold mb-4 text-tron p-4 border-b border-tron-dark/30">Responses</h2>
@@ -785,7 +591,6 @@ export default function QuestionDetail() {
                 </div>
             )}
 
-            {/* Contract Information */}
             {question.contract && (
                 <div className="tron-card">
                     <h2 className="text-xl font-semibold mb-4 text-tron p-4 border-b border-tron-dark/30">Contract Information</h2>
