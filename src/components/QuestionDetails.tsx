@@ -30,7 +30,7 @@ export default function QuestionDetails({
     return (
         <div className="steel-panel h-full">
             <h2 className="text-xl font-semibold mb-4 ethereal-text p-4 border-b border-space-dark/30">Question Details</h2>
-            <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+            <dl className="grid grid-cols-1 gap-4 p-4">
                 <div>
                     <dt className="font-medium text-space-light/70">Status</dt>
                     <dd className="mt-1 flex items-center gap-4">
@@ -73,11 +73,6 @@ export default function QuestionDetails({
                     <dd className="mt-1 text-foreground">{formatDate(question.openingTimestamp * 1000)}</dd>
                 </div>
                 
-                <div>
-                    <dt className="font-medium text-space-light/70">Created</dt>
-                    <dd className="mt-1 text-foreground">{formatDate(question.createdTimestamp * 1000)}</dd>
-                </div>
-                
                 {question.arbitrationRequestedBy && (
                     <div>
                         <dt className="font-medium text-space-light/70">Arbitration Requested By</dt>
@@ -85,7 +80,7 @@ export default function QuestionDetails({
                     </div>
                 )}
                 
-                <div className="md:col-span-2 flex space-x-4">
+                <div className="flex space-x-4">
                     <Dialog>
                         <DialogTrigger asChild>
                             <Button variant="steel" size="sm">
