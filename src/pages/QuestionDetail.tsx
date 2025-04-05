@@ -1,7 +1,8 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
-import { ArrowLeft, Info, Database, Loader2, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Info, Database, Loader2, ExternalLink, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SubmitAnswerButton from '@/components/SubmitAnswer';
 import QuestionTitle from '@/components/QuestionTitle';
@@ -11,13 +12,10 @@ import ResponseHistory from '@/components/ResponseHistory';
 import ContractInfo from '@/components/ContractInfo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
-import { getProposalDetails } from '@/lib/snapshotQuery';
+import { getProposalDetails, calculateTransactionArrayHash, compareTransactionHashes } from '@/lib/snapshotQuery';
 import { useToast } from '@/hooks/use-toast';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
-import rehypeSanitize from 'rehype-sanitize';
 import { parseQuestionData } from '@/utils/questionUtils';
+import { cn } from '@/lib/utils';
 
 export default function QuestionDetail() {
     const { id } = useParams<{ id: string }>();
@@ -28,6 +26,13 @@ export default function QuestionDetail() {
     const [error, setError] = useState<string | null>(null);
     const [proposalData, setProposalData] = useState<any>(null);
     const [proposalLoading, setProposalLoading] = useState(false);
+    const [hashVerification, setHashVerification] = useState<{
+        calculatedHash: string | null;
+        match: boolean;
+        matchText: string;
+        matchClass: string;
+        transactionHashes: string[];
+    } | null>(null);
     const { toast } = useToast();
 
     const loadQuestionDetails = async () => {
@@ -55,6 +60,28 @@ export default function QuestionDetail() {
             }
         }
     }, [question]);
+
+    useEffect(() => {
+        if (proposalData && question) {
+            validateTransactionHash();
+        }
+    }, [proposalData, question]);
+
+    const validateTransactionHash = () => {
+        const parsedData = parseQuestionData(question!);
+        if (!parsedData?.transactionHash || !proposalData) return;
+
+        const { calculatedHash, transactionHashes } = calculateTransactionArrayHash(proposalData);
+        const verification = compareTransactionHashes(parsedData.transactionHash, calculatedHash);
+
+        setHashVerification({
+            calculatedHash,
+            match: verification.match,
+            matchText: verification.matchText,
+            matchClass: verification.matchClass,
+            transactionHashes
+        });
+    };
 
     const fetchProposalData = async (proposalId: string) => {
         try {
@@ -166,6 +193,53 @@ export default function QuestionDetail() {
                                     View Complete Proposal on Snapshot
                                 </a>
                             </div>
+                            
+                            {/* Transaction Hash Verification Panel */}
+                            {hashVerification && (
+                                <div className={cn(
+                                    "p-4 rounded-md border",
+                                    hashVerification.match 
+                                        ? "border-green-500/30 bg-green-500/10" 
+                                        : hashVerification.calculatedHash 
+                                            ? "border-red-500/30 bg-red-500/10"
+                                            : "border-yellow-500/30 bg-yellow-500/10"
+                                )}>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        {hashVerification.match ? (
+                                            <CheckCircle className="h-6 w-6 text-green-500" />
+                                        ) : hashVerification.calculatedHash ? (
+                                            <XCircle className="h-6 w-6 text-red-500" />
+                                        ) : (
+                                            <AlertTriangle className="h-6 w-6 text-yellow-500" />
+                                        )}
+                                        <span className={cn("text-lg font-medium", hashVerification.matchClass)}>
+                                            {hashVerification.matchText}
+                                        </span>
+                                    </div>
+                                    
+                                    {hashVerification.calculatedHash && (
+                                        <div className="space-y-2">
+                                            <div className="text-sm">
+                                                <span className="font-medium text-space-light/70">Calculated Hash:</span>
+                                                <code className="ml-2 bg-space-dark/30 px-2 py-1 rounded text-sm font-mono break-all">
+                                                    {hashVerification.calculatedHash}
+                                                </code>
+                                            </div>
+                                            <div className="text-sm">
+                                                <span className="font-medium text-space-light/70">Transaction Hashes Used:</span>
+                                                <div className="mt-1 ml-2 space-y-1">
+                                                    {hashVerification.transactionHashes.map((hash, index) => (
+                                                        <code key={index} className="block bg-space-dark/30 px-2 py-1 rounded text-xs font-mono break-all">
+                                                            {hash}
+                                                        </code>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             <div className="text-sm text-space-light/70">
                                 Space: {proposalData.space.name}
                             </div>
