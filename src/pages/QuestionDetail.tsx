@@ -229,23 +229,11 @@ export default function QuestionDetail() {
                                     </div>
                                     
                                     {hashVerification.calculatedHash && (
-                                        <div className="space-y-2">
-                                            <div className="text-sm">
-                                                <span className="font-medium text-space-light/70">Calculated Hash:</span>
-                                                <code className="ml-2 bg-space-dark/30 px-2 py-1 rounded text-sm font-mono break-all">
-                                                    {hashVerification.calculatedHash}
-                                                </code>
-                                            </div>
-                                            <div className="text-sm">
-                                                <span className="font-medium text-space-light/70">Transaction Hashes Used:</span>
-                                                <div className="mt-1 ml-2 space-y-1">
-                                                    {hashVerification.transactionHashes.map((hash, index) => (
-                                                        <code key={index} className="block bg-space-dark/30 px-2 py-1 rounded text-xs font-mono break-all">
-                                                            {hash}
-                                                        </code>
-                                                    ))}
-                                                </div>
-                                            </div>
+                                        <div className="text-sm mt-2">
+                                            <span className="font-medium text-space-light/70">Calculated Hash:</span>
+                                            <code className="ml-2 bg-space-dark/30 px-2 py-1 rounded text-sm font-mono break-all">
+                                                {hashVerification.calculatedHash}
+                                            </code>
                                         </div>
                                     )}
                                 </div>
