@@ -91,9 +91,9 @@ export default function Home() {
           }
         }
 
-        // Keep track of accumulated questions
+        // Initialize batch handler to update questions as they're processed
         let accumulatedQuestions: Question[] = [];
-
+        
         await retrieveQuestions(
           1, // Ethereum mainnet
           {
@@ -102,28 +102,59 @@ export default function Home() {
           },
           (progress) => {
             setProgress(progress);
+            
             // Get new questions since last update
-            const newQuestions = accumulatedQuestions.slice(questions.length, progress.processed);
-            if (newQuestions.length > 0) {
-              setQuestions(prev => [...prev, ...newQuestions]);
+            if (progress.processed > accumulatedQuestions.length) {
+              // We have new questions to show
+              const newBatchSize = progress.processed - accumulatedQuestions.length;
+              console.log(`Received ${newBatchSize} new questions`);
+              
+              // This will trigger a re-render with the currently available questions
+              // without waiting for the full retrieval to complete
+              setIsLoading(progress.processed < progress.total);
             }
           }
         ).then(fetchedQuestions => {
           accumulatedQuestions = fetchedQuestions;
           setQuestions(fetchedQuestions);
+          setIsLoading(false);
         });
 
         setError(null);
       } catch (err) {
         console.error('Error loading questions:', err);
         setError(err instanceof Error ? err.message : 'Failed to load questions');
-      } finally {
         setIsLoading(false);
       }
     };
 
     loadQuestions();
   }, [ensName]);
+
+  // Update the questions array with new batch data as it comes in
+  useEffect(() => {
+    if (progress.processed > questions.length && progress.processed > 0) {
+      console.log(`Updating questions display with ${progress.processed} questions`);
+      
+      // Only fetch a new batch if we have significantly more processed questions
+      if (progress.processed >= questions.length + 20 || progress.processed === progress.total) {
+        console.log('Refreshing questions from accumulated data');
+        
+        // Retrieve the currently accumulated questions again
+        retrieveQuestions(
+          1,
+          {
+            batchSize: progress.processed,
+            ...(ensName && { user: ensName })
+          }
+        ).then(batchQuestions => {
+          setQuestions(batchQuestions);
+        }).catch(err => {
+          console.error('Error getting batch update:', err);
+        });
+      }
+    }
+  }, [progress, questions.length, ensName]);
 
   // Calculate paginated questions
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -164,12 +195,12 @@ export default function Home() {
           questions={paginatedQuestions}
           currentPage={currentPage}
           onPageChange={handlePageChange}
-          isLoading={isLoading}
+          isLoading={isLoading && questions.length === 0}
           totalQuestions={questions.length}
         />
       )}
 
-      {/* Loading state */}
+      {/* Only show loading state when no questions are loaded yet */}
       {isLoading && questions.length === 0 && (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-14 w-14 border-2 border-tron border-t-transparent mx-auto mb-4 shadow-tron"></div>
@@ -177,7 +208,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Progress indicator */}
+      {/* Progress indicator - always show when loading is in progress */}
       {progress.total > 0 && (
         <Card className="tron-card mt-6 max-w-md mx-auto">
           <CardHeader className="pb-2">
@@ -187,6 +218,7 @@ export default function Home() {
             </CardTitle>
             <CardDescription className="text-xs">
               {progress.processed} of {progress.total} questions loaded
+              {!isLoading && progress.processed > 0 && ' (completed)'}
             </CardDescription>
           </CardHeader>
           <CardContent>
