@@ -3,7 +3,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import QuestionDetails from '@/components/QuestionDetails';
 import ResponseHistory from '@/components/ResponseHistory';
 import SubmitAnswerButton from '@/components/SubmitAnswer';
-import HashVerificationPanel from '@/components/HashVerificationPanel';
 import { Question } from 'reality-kleros-subgraph';
 import { parseQuestionData } from '@/utils/questionUtils';
 
@@ -33,19 +32,10 @@ export default function QuestionDetailsPanel({
           onArbitrationRequested={onArbitrationRequested}
           onViewProposal={() => {}} 
           proposalData={proposalData}
+          hashVerification={hashVerification}
+          onViewHashDetails={onViewHashDetails}
         />
       </div>
-      
-      {/* Transaction Hash Verification Section (compact version) */}
-      {hashVerification && parsedData?.transactionHash && (
-        <div className="w-full px-4">
-          <HashVerificationPanel 
-            hashVerification={hashVerification}
-            onViewDetails={onViewHashDetails}
-            question={{decodedData: parsedData}}
-          />
-        </div>
-      )}
       
       {/* Answer History Section */}
       <div className="w-full">
