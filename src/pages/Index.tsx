@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { retrieveQuestions, Question, QuestionProgress } from 'reality-kleros-subgraph';
 import { namehash, normalize } from 'viem/ens';
@@ -6,6 +7,7 @@ import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 import { QuestionList } from '../components/QuestionList';
 import { Progress } from '@/components/ui/progress';
+import { Card } from '@/components/ui/card';
 
 // ENS Resolver contract address
 const ENS_RESOLVER_ADDRESS = '0x231b0ee14048e9dccd1d247744d114a4eb5e8e63';
@@ -151,21 +153,23 @@ export default function Home() {
 
       {/* Loading state with Tron-styled Progress */}
       {isLoading && (
-        <div className="mt-6 max-w-3xl mx-auto space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-tron">Loading questions: {progress.processed} / {progress.total}</span>
-            <span className="text-sm text-tron">{progressPercentage}%</span>
-          </div>
-          <Progress value={progressPercentage} className="h-2" />
-          {progress.failed > 0 && (
-            <div className="text-yellow-500 text-sm mt-1">Failed to process: {progress.failed}</div>
-          )}
-          {progress.lastTimestamp && (
-            <div className="text-tron/60 text-xs">
-              Last update: {new Date(progress.lastTimestamp * 1000).toLocaleString()}
+        <Card className="mt-6 max-w-3xl mx-auto p-4 shadow-holo">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-tron">Loading questions: {progress.processed} / {progress.total}</span>
+              <span className="text-sm text-tron">{progressPercentage}%</span>
             </div>
-          )}
-        </div>
+            <Progress value={progressPercentage} className="h-2" />
+            {progress.failed > 0 && (
+              <div className="text-yellow-500 text-sm mt-1">Failed to process: {progress.failed}</div>
+            )}
+            {progress.lastTimestamp && (
+              <div className="text-tron/60 text-xs">
+                Last update: {new Date(progress.lastTimestamp * 1000).toLocaleString()}
+              </div>
+            )}
+          </div>
+        </Card>
       )}
     </div>
   );

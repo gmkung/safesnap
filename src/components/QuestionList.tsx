@@ -1,18 +1,11 @@
+
 import { Question } from 'reality-kleros-subgraph';
 import { useNavigate } from 'react-router-dom';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { Skeleton } from './ui/skeleton';
+import { QuestionRowSkeleton } from './ui/skeleton';
 import { Progress } from './ui/progress';
 import { formatUnits } from 'viem';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
 import { Button } from './ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -99,13 +92,9 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
     return (
       <Card className="tron-card max-w-5xl mx-auto">
         <div className="p-4">
-          <div className="space-y-4">
+          <div className="space-y-3">
             {Array(5).fill(0).map((_, i) => (
-              <div key={i} className="flex flex-col space-y-2">
-                <Skeleton className="h-6 w-3/4 bg-tron-dark/30" />
-                <Skeleton className="h-4 w-1/4 bg-tron-dark/20" />
-                <Skeleton className="h-10 w-full bg-tron-dark/10" />
-              </div>
+              <QuestionRowSkeleton key={i} />
             ))}
           </div>
         </div>
@@ -116,49 +105,41 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
   return (
     <Card className="tron-card max-w-5xl mx-auto">
       <div className="p-4 space-y-4">
-        {/* Questions Table */}
-        <div className="overflow-x-auto rounded-lg border border-tron-dark/30">
-          <Table className="tron-table min-w-full divide-y divide-tron-dark/30">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="bg-tron-gray/50 text-tron-light">Details</TableHead>
-                <TableHead className="bg-tron-gray/50 text-tron-light">Status</TableHead>
-                <TableHead className="bg-tron-gray/50 text-tron-light">Created</TableHead>
-                <TableHead className="bg-tron-gray/50 text-tron-light">Bond</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="divide-y divide-tron-dark/20 bg-tron-black/20">
-              {questions.map((question) => (
-                <TableRow 
-                  key={question.id}
-                  onClick={() => handleQuestionClick(question)}
-                  className="transition-colors duration-200 hover:bg-tron-dark/20 cursor-pointer"
-                >
-                  <TableCell className="font-medium text-tron-light">
+        {/* Questions List */}
+        <div className="space-y-3">
+          {questions.map((question) => (
+            <div 
+              key={question.id}
+              onClick={() => handleQuestionClick(question)}
+              className="rounded-lg border border-tron-dark/30 bg-tron-black/20 shadow-holo transition-all duration-300 hover:shadow-holo-lg hover:bg-tron-dark/20 cursor-pointer p-4"
+            >
+              <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+                <div className="flex-1 text-left">
+                  <div className="font-medium text-tron-light">
                     {formatTitle(question)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      className={`${
-                        question.phase === 'OPEN' ? 'bg-tron/20 text-tron border-tron/30' : 
-                        question.phase === 'PENDING_ARBITRATION' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' :
-                        question.phase === 'FINALIZED' ? 'bg-tron-blue/20 text-tron-blue border-tron-blue/30' :
-                        'bg-tron-gray/20 text-tron-light/70 border-tron-light/20'
-                      }`}
-                    >
-                      {question.phase}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-tron-light/70">
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3 items-center justify-between md:justify-end">
+                  <Badge 
+                    className={`${
+                      question.phase === 'OPEN' ? 'bg-tron/20 text-tron border-tron/30' : 
+                      question.phase === 'PENDING_ARBITRATION' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' :
+                      question.phase === 'FINALIZED' ? 'bg-tron-blue/20 text-tron-blue border-tron-blue/30' :
+                      'bg-tron-gray/20 text-tron-light/70 border-tron-light/20'
+                    }`}
+                  >
+                    {question.phase}
+                  </Badge>
+                  <div className="text-tron-light/70 whitespace-nowrap">
                     {formatDate(question.createdTimestamp)}
-                  </TableCell>
-                  <TableCell className="text-tron-light/70">
+                  </div>
+                  <div className="text-tron-light/70 whitespace-nowrap">
                     {formatBond(question.currentBond, question)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Pagination */}

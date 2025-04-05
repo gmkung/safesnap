@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils"
 
 interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -34,6 +33,24 @@ function CardSkeleton() {
       <div className="pt-2 flex justify-between">
         <Skeleton className="h-10 w-24 bg-space-dark/50 rounded-md" glowing />
         <Skeleton className="h-10 w-32 bg-space-dark/50 rounded-md" glowing />
+      </div>
+    </div>
+  )
+}
+
+function QuestionRowSkeleton() {
+  return (
+    <div className="rounded-lg border border-tron-dark/30 bg-tron-black/20 shadow-holo animate-slow-pulse p-4 mb-3">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+        <div className="flex-1">
+          <Skeleton className="h-6 w-3/4 bg-tron-dark/30 mb-2" />
+          <Skeleton className="h-4 w-1/2 bg-tron-dark/20" />
+        </div>
+        <div className="flex gap-3 items-center">
+          <Skeleton className="h-8 w-24 bg-tron-dark/30 rounded-full" glowing />
+          <Skeleton className="h-6 w-28 bg-tron-dark/30" />
+          <Skeleton className="h-6 w-20 bg-tron-dark/30" />
+        </div>
       </div>
     </div>
   )
@@ -78,4 +95,4 @@ function QuestionDetailsSkeleton() {
   )
 }
 
-export { Skeleton, CardSkeleton, QuestionDetailsSkeleton }
+export { Skeleton, CardSkeleton, QuestionRowSkeleton, QuestionDetailsSkeleton }
