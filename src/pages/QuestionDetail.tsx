@@ -1,9 +1,16 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
-import { formatUnits } from 'viem';
-import { ArrowLeft } from 'lucide-react';
+import { formatUnits, parseUnits } from 'viem';
+import { ArrowLeft, Plus } from 'lucide-react';
+import { useAccount, useChains, useWalletClient, useConnect } from 'wagmi';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { RealityEthV3Abi__factory } from '@/types/contracts/factories/RealityEthV3Abi__factory';
+import { injected } from 'wagmi/connectors';
 
 interface ContractConfig {
     address: string;
@@ -15,6 +22,228 @@ interface ContractConfig {
     token_ticker: string;
 }
 
+interface SubmitAnswerButtonProps {
+    question: Question;
+    onAnswerSubmitted: () => void;
+}
+
+// Answer constants
+const YES = "0x0000000000000000000000000000000000000000000000000000000000000001";
+const NO = "0x0000000000000000000000000000000000000000000000000000000000000000";
+const ANSWERED_TOO_SOON = "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe";
+const INVALID_ANSWER = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+
+function ConnectWallet() {
+    const { address, isConnected } = useAccount();
+    const { connectAsync } = useConnect();
+    const [isConnecting, setIsConnecting] = useState(false);
+    const { toast } = useToast();
+
+    const handleConnect = async () => {
+        if (isConnecting) return;
+
+        try {
+            setIsConnecting(true);
+            await connectAsync({ connector: injected() });
+        } catch (error) {
+            console.error('Failed to connect:', error);
+            // Only show error if it's not a user rejection
+            if (!(error instanceof Error) || !error.message.includes('UserRejectedRequestError')) {
+                toast({
+                    variant: "destructive",
+                    title: "Connection Error",
+                    description: "Failed to connect wallet. Please try again."
+                });
+            }
+        } finally {
+            setIsConnecting(false);
+        }
+    };
+
+    if (isConnected) {
+        return (
+            <div className="flex items-center gap-2">
+                <span className="text-sm text-tron-light">Connected:</span>
+                <code className="text-sm bg-tron-dark/30 px-2 py-1 rounded">{`${address?.slice(0, 6)}...${address?.slice(-4)}`}</code>
+            </div>
+        );
+    }
+
+    return (
+        <Button
+            onClick={handleConnect}
+            variant="outline"
+            className="border-tron"
+            disabled={isConnecting}
+        >
+            {isConnecting ? "Connecting..." : "Connect Wallet"}
+        </Button>
+    );
+}
+
+function SubmitAnswerButton({ question, onAnswerSubmitted }: SubmitAnswerButtonProps) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [answer, setAnswer] = useState('');
+    const [bond, setBond] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { toast } = useToast();
+    const { address, isConnected } = useAccount();
+    const chains = useChains();
+    const chain = chains[0];
+    const { data: walletClient } = useWalletClient();
+
+    // Only show button for open questions
+    if (question.phase !== 'OPEN') {
+        return null;
+    }
+
+    const getAnswerBytes = (selectedOption: string): `0x${string}` => {
+        // Handle special cases
+        if (selectedOption === 'invalid') return INVALID_ANSWER as `0x${string}`;
+        if (selectedOption === 'too soon') return ANSWERED_TOO_SOON as `0x${string}`;
+
+        // For single-select questions, convert the index to bytes32
+        if (question.options && question.options.length > 0) {
+            const index = question.options.indexOf(selectedOption);
+            if (index !== -1) {
+                // Convert index to hex and pad to 64 characters (32 bytes)
+                return `0x${index.toString(16).padStart(64, '0')}` as `0x${string}`;
+            }
+        }
+
+        // Fallback for unknown options
+        return `0x${Buffer.from(selectedOption).toString('hex').padEnd(64, '0')}` as `0x${string}`;
+    };
+
+    const handleSubmit = async () => {
+        try {
+            setIsSubmitting(true);
+
+            if (!isConnected || !address) {
+                throw new Error('Please connect your wallet first');
+            }
+
+            if (!walletClient) {
+                throw new Error('Wallet client not available');
+            }
+
+            if (!answer) {
+                throw new Error('Please select an answer');
+            }
+
+            if (!bond) {
+                throw new Error('Please enter a bond amount');
+            }
+
+            // Convert bond to wei
+            const bondWei = parseUnits(bond, 18);
+            const minBond = BigInt(question.minimumBond);
+
+            if (bondWei < minBond) {
+                throw new Error(`Bond must be at least ${formatUnits(minBond, 18)} ${question.contract.config.token_ticker}`);
+            }
+
+            // Convert answer to bytes32 using our predefined values
+            const answerBytes = getAnswerBytes(answer);
+
+            // Convert question ID to bytes32
+            const questionIdBytes = `0x${question.id.replace('0x', '').padStart(64, '0')}` as `0x${string}`;
+
+            // Get contract instance
+            const contract = RealityEthV3Abi__factory.connect(
+                question.contract.address as `0x${string}`,
+                walletClient as any // Type assertion needed for wagmi v2 compatibility
+            );
+
+            // Submit answer
+            const tx = await contract.submitAnswer(
+                questionIdBytes,
+                answerBytes,
+                0n, // max_previous as bigint
+                { value: bondWei }
+            );
+
+            await tx.wait();
+
+            toast({
+                title: 'Answer submitted',
+                description: 'Your answer has been submitted successfully.',
+            });
+
+            setIsOpen(false);
+            onAnswerSubmitted();
+        } catch (error) {
+            console.error('Error submitting answer:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: error instanceof Error ? error.message : 'Failed to submit answer',
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                <Button className="fixed bottom-6 right-6 z-50 flex items-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    Submit Answer
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Submit Answer</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                        <label htmlFor="answer" className="text-sm font-medium">
+                            Answer
+                        </label>
+                        <Select value={answer} onValueChange={setAnswer}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select an answer" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {/* Show question options if they exist */}
+                                {question.options?.map((option, index) => (
+                                    <SelectItem key={index} value={option}>
+                                        {option}
+                                    </SelectItem>
+                                ))}
+                                {/* Always show special options */}
+                                <SelectItem value="invalid">Invalid</SelectItem>
+                                <SelectItem value="too soon">Answered too Soon</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid gap-2">
+                        <label htmlFor="bond" className="text-sm font-medium">
+                            Bond Amount ({question.contract.config.token_ticker})
+                        </label>
+                        <Input
+                            id="bond"
+                            type="number"
+                            placeholder={`Minimum: ${formatUnits(BigInt(question.minimumBond), 18)}`}
+                            value={bond}
+                            onChange={(e) => setBond(e.target.value)}
+                        />
+                    </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setIsOpen(false)}>
+                        Cancel
+                    </Button>
+                    <Button onClick={handleSubmit} disabled={isSubmitting}>
+                        {isSubmitting ? 'Submitting...' : 'Submit Answer'}
+                    </Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 export default function QuestionDetail() {
     const { id } = useParams<{ id: string }>();
     const location = useLocation();
@@ -23,19 +252,19 @@ export default function QuestionDetail() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const loadQuestionDetails = async () => {
-            try {
-                setLoading(true);
-                // No need to load contract config separately as it's already in the question data
-            } catch (err) {
-                console.error('Error loading question details:', err);
-                setError(err instanceof Error ? err.message : 'Failed to load question details');
-            } finally {
-                setLoading(false);
-            }
-        };
+    const loadQuestionDetails = async () => {
+        try {
+            setLoading(true);
+            // No need to load contract config separately as it's already in the question data
+        } catch (err) {
+            console.error('Error loading question details:', err);
+            setError(err instanceof Error ? err.message : 'Failed to load question details');
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         loadQuestionDetails();
     }, [question]);
 
@@ -71,6 +300,26 @@ export default function QuestionDetail() {
             default:
                 return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
         }
+    };
+
+    const getHumanReadableAnswer = (answerHex: string): string => {
+        // Handle special cases
+        if (answerHex === INVALID_ANSWER) return "Invalid";
+        if (answerHex === ANSWERED_TOO_SOON) return "Answered too Soon";
+
+        // For single-select questions with options
+        if (question?.options && question.options.length > 0) {
+            try {
+                // Convert hex to number (remove '0x' prefix and parse)
+                const index = parseInt(answerHex.slice(2), 16);
+                return question.options[index] || `Unknown Option (${answerHex})`;
+            } catch (error) {
+                console.error('Error parsing answer hex:', error);
+                return `Invalid Format (${answerHex})`;
+            }
+        }
+
+        return answerHex;
     };
 
     if (loading && !question) {
@@ -116,14 +365,17 @@ export default function QuestionDetail() {
 
     return (
         <div className="max-w-4xl mx-auto p-6">
-            {/* Back button */}
-            <button
-                onClick={handleBack}
-                className="mb-6 tron-button inline-flex items-center"
-            >
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Back to Questions
-            </button>
+            {/* Add ConnectWallet at the top */}
+            <div className="flex justify-between items-center mb-6">
+                <button
+                    onClick={handleBack}
+                    className="tron-button inline-flex items-center"
+                >
+                    <ArrowLeft className="w-5 h-5 mr-2" />
+                    Back to Questions
+                </button>
+                <ConnectWallet />
+            </div>
 
             <h1 className="text-3xl font-bold mb-6 text-tron text-glow">{question.title}</h1>
 
@@ -169,7 +421,7 @@ export default function QuestionDetail() {
                     </div>
                     <div>
                         <dt className="font-medium text-tron-light/70">Current Answer</dt>
-                        <dd className="mt-1 text-foreground">{question.currentAnswer || 'No answer yet'}</dd>
+                        <dd className="mt-1 text-foreground">{question.currentAnswer ? getHumanReadableAnswer(question.currentAnswer) : 'No answer yet'}</dd>
                     </div>
                     <div>
                         <dt className="font-medium text-tron-light/70">Current Bond</dt>
@@ -249,7 +501,7 @@ export default function QuestionDetail() {
                             <tbody className="divide-y divide-tron-dark/30">
                                 {question.answers.map((answer, index) => (
                                     <tr key={index}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{answer.value}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{getHumanReadableAnswer(answer.value)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">{formatBond(answer.bond)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-tron-light/70">{formatDate(answer.timestamp)}</td>
                                     </tr>
@@ -278,7 +530,7 @@ export default function QuestionDetail() {
                                 {question.responses.map((response, index) => (
                                     <tr key={index}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-tron-light/80">{response.user}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{response.value}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{getHumanReadableAnswer(response.value)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">{formatBond(response.bond)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-tron-light/70">{formatDate(response.timestamp)}</td>
                                     </tr>
@@ -331,6 +583,10 @@ export default function QuestionDetail() {
                     </dl>
                 </div>
             )}
+            <SubmitAnswerButton question={question} onAnswerSubmitted={() => {
+                // Refresh question data
+                loadQuestionDetails();
+            }} />
         </div>
     );
 }
