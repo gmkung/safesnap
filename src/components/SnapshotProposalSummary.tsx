@@ -1,4 +1,3 @@
-
 import { formatDate } from '@/utils/questionUtils';
 import { Loader2 } from 'lucide-react';
 
@@ -29,9 +28,9 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData 
   }
 
   return (
-    <div className="w-full steel-panel h-full">
+    <div className="w-full steel-panel">
       <h2 className="text-xl font-semibold ethereal-text p-4 border-b border-space-dark/30">Snapshot Proposal Summary</h2>
-      <div className="p-4 space-y-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 240px)' }}>
+      <div className="p-4 space-y-4 overflow-y-auto">
         <div className="flex justify-between items-center">
           <div className="text-xl font-bold text-space">
             {proposalData.title}
