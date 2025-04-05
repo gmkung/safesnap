@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { retrieveQuestions, Question, QuestionProgress } from 'reality-kleros-subgraph';
 import { useParams } from 'react-router-dom';
@@ -81,13 +82,27 @@ export default function Home() {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">
-        RealityETH Questions
-        {ensName && <span className="text-gray-600 ml-2">for {ensName}</span>}
-      </h1>
+      <div className="mb-8 text-center">
+        <h1 className="text-3xl md:text-4xl font-bold relative inline-block">
+          <span className="relative z-10 bg-gradient-to-r from-space via-space-light to-space bg-clip-text text-transparent animate-ethereal-fade">
+            RealityETH Questions
+          </span>
+          <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-space/60 to-transparent"></div>
+        </h1>
+        {ensName && (
+          <div className="mt-2 text-xl">
+            <span className="bg-space-dark/60 text-space px-3 py-1 rounded-md border border-space/30 shadow-holo">
+              {ensName}
+            </span>
+          </div>
+        )}
+      </div>
 
       {error ? (
-        <div className="text-red-500">{error}</div>
+        <div className="text-destructive bg-destructive/10 p-4 rounded-md border border-destructive/30">
+          <p className="font-medium">Error</p>
+          <p className="text-sm opacity-80">{error}</p>
+        </div>
       ) : (
         <QuestionList
           questions={paginatedQuestions}
@@ -100,17 +115,20 @@ export default function Home() {
 
       {/* Loading state with Tron-styled Progress */}
       {isLoading && (
-        <div className="mt-6 max-w-3xl mx-auto space-y-3">
+        <div className="mt-6 max-w-3xl mx-auto space-y-3 bg-space-dark/20 p-4 rounded-lg border border-space/20 backdrop-blur-sm">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-tron">Loading questions: {progress.processed} / {progress.total}</span>
-            <span className="text-sm text-tron">{progressPercentage}%</span>
+            <span className="text-sm text-space font-medium">Loading questions: {progress.processed} / {progress.total}</span>
+            <span className="text-sm text-space font-medium">{progressPercentage}%</span>
           </div>
           <Progress value={progressPercentage} className="h-2" />
           {progress.failed > 0 && (
-            <div className="text-yellow-500 text-sm mt-1">Failed to process: {progress.failed}</div>
+            <div className="text-amber-500 text-sm mt-1 flex items-center space-x-2">
+              <span className="inline-block w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+              <span>Failed to process: {progress.failed}</span>
+            </div>
           )}
           {progress.lastTimestamp && (
-            <div className="text-tron/60 text-xs">
+            <div className="text-space-accent/60 text-xs">
               Last update: {new Date(progress.lastTimestamp * 1000).toLocaleString()}
             </div>
           )}

@@ -61,20 +61,22 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
     return (
       <div className="space-y-2">
         {parsedData.dao && (
-          <div className="text-tron text-sm font-medium">
-            DAO: {parsedData.dao}
+          <div className="text-space text-sm font-medium flex items-center">
+            <span className="bg-space/10 px-2 py-0.5 rounded border border-space/20 shadow-holo-sm">
+              {parsedData.dao}
+            </span>
           </div>
         )}
-        <div className="space-y-1">
-          <div className="text-sm">
-            <span className="text-tron-light/70">Proposal ID:</span>
-            <code className="ml-2 bg-tron-dark/30 px-2 py-1 rounded text-xs">
+        <div className="space-y-1.5">
+          <div className="text-sm flex items-center">
+            <span className="text-space-light/70 font-medium min-w-24">Proposal ID:</span>
+            <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light">
               {parsedData.proposalId}
             </code>
           </div>
-          <div className="text-sm">
-            <span className="text-tron-light/70">Transaction Array Hash:</span>
-            <code className="ml-2 bg-tron-dark/30 px-2 py-1 rounded text-xs">
+          <div className="text-sm flex items-center">
+            <span className="text-space-light/70 font-medium min-w-24">Tx Array Hash:</span>
+            <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light overflow-hidden text-ellipsis whitespace-nowrap max-w-[calc(100%-100px)]">
               {parsedData.transactionHash}
             </code>
           </div>
@@ -111,31 +113,33 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
             <div 
               key={question.id}
               onClick={() => handleQuestionClick(question)}
-              className="rounded-lg border border-tron-dark/30 bg-tron-black/20 transition-all duration-300 hover:shadow-holo-lg hover:bg-tron-dark/20 cursor-pointer p-4 mb-6 relative
-                        before:absolute before:inset-0 before:bg-gradient-to-r before:from-tron/5 before:to-transparent before:rounded-lg before:-z-10 before:blur-md before:translate-y-1 before:translate-x-1
-                        hover:translate-y-[-2px] hover:translate-x-[-1px]"
+              className="rounded-lg border border-space/20 bg-space-darkBlue/30 transition-all duration-300 
+                        hover:shadow-holo-lg hover:bg-space-darkBlue/40 cursor-pointer p-4 mb-6 relative
+                        before:absolute before:inset-0 before:bg-gradient-to-r before:from-space/5 before:to-transparent 
+                        before:rounded-lg before:-z-10 before:blur-md before:translate-y-1 before:translate-x-1
+                        hover:translate-y-[-2px] hover:translate-x-[-1px] tron-scanner"
             >
               <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
                 <div className="flex-1 text-left">
-                  <div className="font-medium text-tron-light">
+                  <div className="font-medium text-space-light">
                     {formatTitle(question)}
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3 items-center justify-between md:justify-end">
                   <Badge 
                     className={`${
-                      question.phase === 'OPEN' ? 'bg-tron/20 text-tron border-tron/30' : 
+                      question.phase === 'OPEN' ? 'bg-space/20 text-space border-space/30' : 
                       question.phase === 'PENDING_ARBITRATION' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' :
-                      question.phase === 'FINALIZED' ? 'bg-tron-blue/20 text-tron-blue border-tron-blue/30' :
-                      'bg-tron-gray/20 text-tron-light/70 border-tron-light/20'
-                    }`}
+                      question.phase === 'FINALIZED' ? 'bg-space-accent/20 text-space-accent border-space-accent/30' :
+                      'bg-space-gray/20 text-space-light/70 border-space-light/20'
+                    } shadow-holo-sm`}
                   >
                     {question.phase}
                   </Badge>
-                  <div className="text-tron-light/70 whitespace-nowrap">
+                  <div className="text-space-light/80 whitespace-nowrap bg-space-darkBlue/30 px-2 py-0.5 rounded border border-space/10 text-xs">
                     {formatDate(question.createdTimestamp)}
                   </div>
-                  <div className="text-tron-light/70 whitespace-nowrap">
+                  <div className="text-space whitespace-nowrap bg-space-darkBlue/30 px-2 py-0.5 rounded border border-space/10 text-xs font-medium">
                     {formatBond(question.currentBond, question)}
                   </div>
                 </div>
@@ -145,42 +149,48 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between border-t border-tron-dark/30 px-4 py-3">
+        <div className="flex items-center justify-between border-t border-space/20 px-4 py-3 mt-4">
           <div className="flex flex-1 justify-between sm:hidden">
             <Button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
               variant="outline"
-              className="tron-button"
+              className="holo-button"
             >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Prev
             </Button>
             <Button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
               variant="outline"
-              className="tron-button"
+              className="holo-button"
             >
               Next
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
           <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm text-tron-light/70">
-                Showing <span className="font-medium text-tron-light">{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> to{' '}
-                <span className="font-medium text-tron-light">{Math.min(currentPage * ITEMS_PER_PAGE, totalQuestions)}</span> of{' '}
-                <span className="font-medium text-tron-light">{totalQuestions}</span> results
+              <p className="text-sm text-space-light/70">
+                Showing <span className="font-medium text-space">
+                  {((currentPage - 1) * ITEMS_PER_PAGE) + 1}
+                </span> to{' '}
+                <span className="font-medium text-space">
+                  {Math.min(currentPage * ITEMS_PER_PAGE, totalQuestions)}
+                </span> of{' '}
+                <span className="font-medium text-space">
+                  {totalQuestions}
+                </span> results
               </p>
             </div>
             <div>
-              <nav className="isolate inline-flex -space-x-px" aria-label="Pagination">
+              <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm bg-space-darkBlue/30 border border-space/20" aria-label="Pagination">
                 <Button
                   onClick={() => onPageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                   variant="outline"
-                  className="rounded-l-md tron-button p-2"
+                  className="rounded-l-md holo-button border-0 p-2"
                   size="icon"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -206,7 +216,7 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
                         key={pageNum}
                         onClick={() => onPageChange(pageNum)}
                         variant={currentPage === pageNum ? "default" : "outline"}
-                        className={`tron-button ${currentPage === pageNum ? 'bg-tron hover:bg-tron/90' : ''}`}
+                        className={`holo-button border-0 ${currentPage === pageNum ? 'bg-space hover:bg-space/90 text-space-dark' : ''}`}
                       >
                         {pageNum}
                       </Button>
@@ -219,7 +229,7 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
                   onClick={() => onPageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                   variant="outline"
-                  className="rounded-r-md tron-button p-2"
+                  className="rounded-r-md holo-button border-0 p-2"
                   size="icon"
                 >
                   <ChevronRight className="h-4 w-4" />
