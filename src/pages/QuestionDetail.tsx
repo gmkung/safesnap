@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
-import { ArrowLeft, Info, FileText, Clock, Database } from 'lucide-react';
+import { ArrowLeft, Info, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProposalModal from '@/components/ProposalModal';
 import SubmitAnswerButton from '@/components/SubmitAnswer';
@@ -104,21 +104,23 @@ export default function QuestionDetail() {
             </div>
 
             <h1 className="text-3xl font-bold mb-6 ethereal-text text-glow">
-                <QuestionTitle question={question} />
+                <QuestionTitle question={question} onViewProposal={handleViewProposal} />
             </h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <QuestionDetails 
-                    question={question} 
-                    onArbitrationRequested={loadQuestionDetails}
-                    onViewProposal={handleViewProposal}
-                />
+            <div className="flex flex-col gap-6 mb-8">
+                <div className="w-full">
+                    <QuestionDetails 
+                        question={question} 
+                        onArbitrationRequested={loadQuestionDetails}
+                        onViewProposal={handleViewProposal}
+                    />
+                </div>
                 
-                <div className="flex flex-col gap-4">
+                <div className="w-full">
                     <Card>
                         <CardContent className="pt-6">
                             <div className="mb-4 flex justify-between">
-                                <div className="text-xl font-semibold ethereal-text">Answer Status</div>
+                                <div className="text-xl font-semibold ethereal-text">Answer History</div>
                                 <SubmitAnswerButton
                                     question={question}
                                     onAnswerSubmitted={loadQuestionDetails}
@@ -127,56 +129,56 @@ export default function QuestionDetail() {
                             <ResponseHistory question={question} />
                         </CardContent>
                     </Card>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="steel" className="w-full">
+                                <Info className="mr-2 h-4 w-4" />
+                                Additional Question Details
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="glass-panel max-h-[80vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle className="text-xl ethereal-text">Additional Details</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-6 mt-4">
+                                {question.description && (
+                                    <div>
+                                        <h3 className="text-lg font-medium text-space-light/70 mb-2">Description</h3>
+                                        <div className="glass-panel p-4">{question.description}</div>
+                                    </div>
+                                )}
+                                {question.data && (
+                                    <div>
+                                        <h3 className="text-lg font-medium text-space-light/70 mb-2">Raw Data</h3>
+                                        <pre className="glass-panel p-4 overflow-x-auto text-sm whitespace-pre-wrap">
+                                            {question.data}
+                                        </pre>
+                                    </div>
+                                )}
+                                <TemplateInfo question={question} />
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                     
-                    <div className="grid grid-cols-1 gap-4">
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="steel" className="w-full">
-                                    <Info className="mr-2 h-4 w-4" />
-                                    Additional Question Details
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="glass-panel max-h-[80vh] overflow-y-auto">
-                                <DialogHeader>
-                                    <DialogTitle className="text-xl ethereal-text">Additional Details</DialogTitle>
-                                </DialogHeader>
-                                <div className="space-y-6 mt-4">
-                                    {question.description && (
-                                        <div>
-                                            <h3 className="text-lg font-medium text-space-light/70 mb-2">Description</h3>
-                                            <div className="glass-panel p-4">{question.description}</div>
-                                        </div>
-                                    )}
-                                    {question.data && (
-                                        <div>
-                                            <h3 className="text-lg font-medium text-space-light/70 mb-2">Raw Data</h3>
-                                            <pre className="glass-panel p-4 overflow-x-auto text-sm whitespace-pre-wrap">
-                                                {question.data}
-                                            </pre>
-                                        </div>
-                                    )}
-                                    <TemplateInfo question={question} />
-                                </div>
-                            </DialogContent>
-                        </Dialog>
-                        
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="steel" className="w-full">
-                                    <Database className="mr-2 h-4 w-4" />
-                                    Oracle Contract Info
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="glass-panel max-h-[80vh] overflow-y-auto">
-                                <DialogHeader>
-                                    <DialogTitle className="text-xl ethereal-text">Oracle Contract Information</DialogTitle>
-                                </DialogHeader>
-                                <div className="mt-4">
-                                    <ContractInfo question={question} />
-                                </div>
-                            </DialogContent>
-                        </Dialog>
-                    </div>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="steel" className="w-full">
+                                <Database className="mr-2 h-4 w-4" />
+                                Oracle Contract Info
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="glass-panel max-h-[80vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle className="text-xl ethereal-text">Oracle Contract Information</DialogTitle>
+                            </DialogHeader>
+                            <div className="mt-4">
+                                <ContractInfo question={question} />
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
 

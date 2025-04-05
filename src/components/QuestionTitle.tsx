@@ -2,18 +2,21 @@
 import { Question } from 'reality-kleros-subgraph';
 import { Info } from 'lucide-react';
 import { parseQuestionData } from '@/utils/questionUtils';
+import { Button } from './ui/button';
+import { ExternalLink } from 'lucide-react';
 
 interface QuestionTitleProps {
     question: Question;
+    onViewProposal?: (proposalId: string) => void;
 }
 
-export default function QuestionTitle({ question }: QuestionTitleProps) {
+export default function QuestionTitle({ question, onViewProposal }: QuestionTitleProps) {
     const parsedData = parseQuestionData(question);
     
     if (!parsedData) return <h1 className="text-3xl font-bold mb-6 text-space text-glow">{question.title}</h1>;
 
     return (
-        <div className="space-y-2">
+        <div className="space-y-4">
             {parsedData.dao && (
                 <div className="text-space text-xl font-medium flex items-center gap-2">
                     DAO: <span className="ethereal-text">{parsedData.dao}</span>
@@ -40,6 +43,20 @@ export default function QuestionTitle({ question }: QuestionTitleProps) {
                     </code>
                 </div>
             </div>
+            
+            {parsedData.proposalId && onViewProposal && (
+                <div className="pt-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-space flex items-center gap-2 glass-panel"
+                        onClick={() => onViewProposal(parsedData.proposalId || '')}
+                    >
+                        <ExternalLink className="h-4 w-4" />
+                        View Proposal
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }

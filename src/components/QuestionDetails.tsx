@@ -1,9 +1,7 @@
 
 import { Question } from 'reality-kleros-subgraph';
-import { Button } from '@/components/ui/button';
-import { ExternalLink } from 'lucide-react';
 import RequestArbitrationButton from './RequestArbitration';
-import { formatBond, formatDate, getHumanReadableAnswer, getProposalId, getStatusBadgeClass } from '@/utils/questionUtils';
+import { formatBond, formatDate, getHumanReadableAnswer, getStatusBadgeClass } from '@/utils/questionUtils';
 
 interface QuestionDetailsProps {
     question: Question;
@@ -80,22 +78,6 @@ export default function QuestionDetails({
                     <div>
                         <dt className="font-medium text-space-light/70">Arbitration Requested By</dt>
                         <dd className="mt-1 text-foreground font-mono">{question.arbitrationRequestedBy}</dd>
-                    </div>
-                )}
-                {getProposalId(question.data) && (
-                    <div className="pt-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="border-space flex items-center gap-2 glass-panel"
-                            onClick={() => {
-                                const proposalId = getProposalId(question.data);
-                                if (proposalId) onViewProposal(proposalId);
-                            }}
-                        >
-                            <ExternalLink className="h-4 w-4" />
-                            View Proposal
-                        </Button>
                     </div>
                 )}
             </dl>
