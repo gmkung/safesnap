@@ -3,8 +3,15 @@ import { useState } from 'react';
 import { Question } from 'reality-kleros-subgraph';
 import { useToast } from "../hooks/use-toast";
 import { Info, AlertCircle } from 'lucide-react';
-import { formatUnits, parseUnits, createWalletClient, http, parseEther, encodeFunctionData } from 'viem';
+import { formatUnits, parseUnits, http, parseEther, encodeFunctionData } from 'viem';
 import { RealityEthV3Abi__factory } from '../types/contracts';
+
+// Add type declaration for window.ethereum
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
 
 // Constants for special answers
 const ANSWERED_TOO_SOON = "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe";
@@ -75,14 +82,11 @@ export default function SubmitAnswer({ question }: SubmitAnswerProps) {
         return;
       }
 
-      // Create wallet client
-      const walletClient = createWalletClient({
-        transport: http(),
-        chain: {
-          id: Number(question.contract?.chainId || 1),
-        }
-      });
+      // Extract chain ID from contract config (fix the type error)
+      const chainId = Number(question.contract?.config?.chain_id || '1');
 
+      // Skip creating wallet client as we'll use window.ethereum directly
+      
       // Request accounts
       const [address] = await window.ethereum.request({ 
         method: 'eth_requestAccounts' 
@@ -120,10 +124,13 @@ export default function SubmitAnswer({ question }: SubmitAnswerProps) {
       const abi = RealityEthV3Abi__factory.abi;
       
       // Encode the function call
+      // Get question ID from the right property (it's question.id, not question.questionId)
+      const questionId = question.id;
+      
       const data = encodeFunctionData({
         abi,
         functionName: 'submitAnswer',
-        args: [question.questionId as `0x${string}`, formattedAnswer as `0x${string}`, BigInt(0)]
+        args: [questionId as `0x${string}`, formattedAnswer as `0x${string}`, BigInt(0)]
       });
 
       // Submit transaction
