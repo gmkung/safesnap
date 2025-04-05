@@ -260,6 +260,7 @@ export default function QuestionDetail() {
                                     expectedHash={parseQuestionData(question)?.transactionHash || ''}
                                     transactionHashes={hashVerification.transactionHashes}
                                     match={hashVerification.match}
+                                    proposalData={proposalData}
                                 />
                             )}
 
