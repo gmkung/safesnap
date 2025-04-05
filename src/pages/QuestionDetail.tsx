@@ -2,9 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
-import { ArrowLeft, Info, Database } from 'lucide-react';
+import { ArrowLeft, Info, Database, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import ProposalModal from '@/components/ProposalModal';
 import SubmitAnswerButton from '@/components/SubmitAnswer';
 import QuestionTitle from '@/components/QuestionTitle';
 import QuestionDetails from '@/components/QuestionDetails';
@@ -13,6 +12,13 @@ import ResponseHistory from '@/components/ResponseHistory';
 import ContractInfo from '@/components/ContractInfo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
+import { getProposalDetails } from '@/lib/snapshotQuery';
+import { useToast } from '@/hooks/use-toast';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import rehypeSanitize from 'rehype-sanitize';
+import { parseQuestionData } from '@/utils/questionUtils';
 
 export default function QuestionDetail() {
     const { id } = useParams<{ id: string }>();
@@ -21,8 +27,9 @@ export default function QuestionDetail() {
     const [question, setQuestion] = useState<Question | null>(location.state?.question || null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
-    const [proposalId, setProposalId] = useState<string | null>(null);
+    const [proposalData, setProposalData] = useState<any>(null);
+    const [proposalLoading, setProposalLoading] = useState(false);
+    const { toast } = useToast();
 
     const loadQuestionDetails = async () => {
         try {
@@ -41,13 +48,38 @@ export default function QuestionDetail() {
         loadQuestionDetails();
     }, [question]);
 
+    useEffect(() => {
+        if (question) {
+            const parsedData = parseQuestionData(question);
+            if (parsedData?.proposalId) {
+                fetchProposalData(parsedData.proposalId);
+            }
+        }
+    }, [question]);
+
+    const fetchProposalData = async (proposalId: string) => {
+        try {
+            setProposalLoading(true);
+            const data = await getProposalDetails(proposalId);
+            setProposalData(data);
+        } catch (error) {
+            console.error('Failed to fetch proposal:', error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to load proposal details. Please try again."
+            });
+        } finally {
+            setProposalLoading(false);
+        }
+    };
+
     const handleBack = () => {
         navigate(-1);
     };
 
-    const handleViewProposal = (id: string) => {
-        setProposalId(id);
-        setIsProposalModalOpen(true);
+    const formatDate = (timestamp: number) => {
+        return new Date(timestamp * 1000).toLocaleString();
     };
 
     if (loading && !question) {
@@ -104,15 +136,269 @@ export default function QuestionDetail() {
             </div>
 
             <h1 className="text-3xl font-bold mb-6 ethereal-text text-glow">
-                <QuestionTitle question={question} onViewProposal={handleViewProposal} />
+                <QuestionTitle question={question} />
             </h1>
 
             <div className="flex flex-col gap-6 mb-8">
+                {proposalLoading ? (
+                    <div className="w-full steel-panel p-6 flex items-center justify-center">
+                        <Loader2 className="h-8 w-8 animate-spin text-space" />
+                        <span className="ml-2">Loading proposal details...</span>
+                    </div>
+                ) : proposalData ? (
+                    <div className="w-full steel-panel">
+                        <h2 className="text-xl font-semibold ethereal-text p-4 border-b border-space-dark/30">Proposal Details</h2>
+                        <div className="p-4 space-y-4">
+                            <div className="text-xl font-bold text-space">
+                                {proposalData.title}
+                            </div>
+                            <div className="text-sm text-space-light/70">
+                                Space: {proposalData.space.name}
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span className="font-medium text-space-light/70">Author:</span>
+                                    <code className="ml-2 bg-space-dark/30 px-2 py-1 rounded">
+                                        {`${proposalData.author.slice(0, 6)}...${proposalData.author.slice(-4)}`}
+                                    </code>
+                                </div>
+                                <div>
+                                    <span className="font-medium text-space-light/70">State:</span>
+                                    <span className="ml-2 capitalize">{proposalData.state}</span>
+                                </div>
+                                <div>
+                                    <span className="font-medium text-space-light/70">Start:</span>
+                                    <span className="ml-2">{formatDate(proposalData.start)}</span>
+                                </div>
+                                <div>
+                                    <span className="font-medium text-space-light/70">End:</span>
+                                    <span className="ml-2">{formatDate(proposalData.end)}</span>
+                                </div>
+                                <div>
+                                    <span className="font-medium text-space-light/70">Created:</span>
+                                    <span className="ml-2">{formatDate(proposalData.created)}</span>
+                                </div>
+                                <div>
+                                    <span className="font-medium text-space-light/70">Snapshot:</span>
+                                    <span className="ml-2">{proposalData.snapshot}</span>
+                                </div>
+                                <div>
+                                    <span className="font-medium text-space-light/70">Network:</span>
+                                    <span className="ml-2">{proposalData.network}</span>
+                                </div>
+                                <div>
+                                    <span className="font-medium text-space-light/70">Type:</span>
+                                    <span className="ml-2 capitalize">{proposalData.type}</span>
+                                </div>
+                                {proposalData.quorum && (
+                                    <div>
+                                        <span className="font-medium text-space-light/70">Quorum:</span>
+                                        <span className="ml-2">{proposalData.quorum} {proposalData.symbol}</span>
+                                    </div>
+                                )}
+                                <div>
+                                    <span className="font-medium text-space-light/70">Privacy:</span>
+                                    <span className="ml-2 capitalize">{proposalData.privacy}</span>
+                                </div>
+                                <div>
+                                    <span className="font-medium text-space-light/70">Total Votes:</span>
+                                    <span className="ml-2">{proposalData.votes}</span>
+                                </div>
+                                {proposalData.scores_total !== undefined && (
+                                    <div>
+                                        <span className="font-medium text-space-light/70">Score:</span>
+                                        <span className="ml-2">{proposalData.scores_total.toFixed(2)}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {proposalData.labels && proposalData.labels.length > 0 && (
+                                <div className="mt-4">
+                                    <h3 className="font-medium text-space-light/70 mb-2">Labels:</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {proposalData.labels.map((label, index) => (
+                                            <span key={index} className="px-2 py-1 bg-space-dark/30 rounded text-sm">
+                                                {label}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {proposalData.choices && proposalData.choices.length > 0 && (
+                                <div className="mt-4">
+                                    <h3 className="font-medium text-space-light/70 mb-2">Choices:</h3>
+                                    <ul className="list-disc list-inside space-y-1">
+                                        {proposalData.choices.map((choice, index) => (
+                                            <li key={index}>
+                                                {choice}
+                                                {proposalData.scores && proposalData.scores[index] !== undefined && (
+                                                    <span className="ml-2 text-space-light/70">
+                                                        ({proposalData.scores[index].toFixed(2)} {proposalData.symbol})
+                                                    </span>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {proposalData.strategies && proposalData.strategies.length > 0 && (
+                                <div className="mt-4">
+                                    <h3 className="font-medium text-space-light/70 mb-2">Voting Strategies:</h3>
+                                    <ul className="list-disc list-inside space-y-1">
+                                        {proposalData.strategies.map((strategy, index) => (
+                                            <li key={index}>
+                                                {strategy.name} ({strategy.network})
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {proposalData.plugins?.safeSnap && (
+                                <div className="mt-6">
+                                    <h3 className="font-medium text-space-light/70 mb-2">SafeSnap Transactions:</h3>
+                                    <div className="space-y-4">
+                                        {proposalData.plugins.safeSnap.safes.map((safe, safeIndex) => (
+                                            <div key={safeIndex} className="bg-space-dark/30 p-4 rounded">
+                                                <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+                                                    <div>
+                                                        <span className="font-medium text-space-light/70">Network:</span>
+                                                        <span className="ml-2">{safe.network}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-medium text-space-light/70">Reality Address:</span>
+                                                        <code className="ml-2 bg-space-dark/50 px-2 py-1 rounded">
+                                                            {`${safe.realityAddress.slice(0, 6)}...${safe.realityAddress.slice(-4)}`}
+                                                        </code>
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-medium text-space-light/70">MultiSend Address:</span>
+                                                        <code className="ml-2 bg-space-dark/50 px-2 py-1 rounded">
+                                                            {`${safe.multiSendAddress.slice(0, 6)}...${safe.multiSendAddress.slice(-4)}`}
+                                                        </code>
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-medium text-space-light/70">Safe Hash:</span>
+                                                        <code className="ml-2 bg-space-dark/50 px-2 py-1 rounded">
+                                                            {`${safe.hash.slice(0, 6)}...${safe.hash.slice(-4)}`}
+                                                        </code>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-3">
+                                                    {safe.txs.map((tx, txIndex) => (
+                                                        <div key={txIndex} className="bg-space-dark/50 p-3 rounded">
+                                                            <div className="grid grid-cols-2 gap-2 text-sm mb-2">
+                                                                <div>
+                                                                    <span className="font-medium text-space-light/70">Transaction Hash:</span>
+                                                                    <code className="ml-2 bg-space-dark/70 px-2 py-1 rounded">
+                                                                        {`${tx.hash.slice(0, 6)}...${tx.hash.slice(-4)}`}
+                                                                    </code>
+                                                                </div>
+                                                                <div>
+                                                                    <span className="font-medium text-space-light/70">Nonce:</span>
+                                                                    <span className="ml-2">{tx.nonce}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="space-y-2">
+                                                                {tx.transactions.map((subTx, subTxIndex) => (
+                                                                    <div key={subTxIndex} className="bg-space-dark/70 p-2 rounded text-xs">
+                                                                        <div className="grid grid-cols-2 gap-1">
+                                                                            <div>
+                                                                                <span className="font-medium text-space-light/70">To:</span>
+                                                                                <code className="ml-2">
+                                                                                    {`${subTx.to.slice(0, 6)}...${subTx.to.slice(-4)}`}
+                                                                                </code>
+                                                                            </div>
+                                                                            <div>
+                                                                                <span className="font-medium text-space-light/70">Value:</span>
+                                                                                <span className="ml-2">{subTx.value}</span>
+                                                                            </div>
+                                                                            <div>
+                                                                                <span className="font-medium text-space-light/70">Operation:</span>
+                                                                                <span className="ml-2">{subTx.operation}</span>
+                                                                            </div>
+                                                                            <div>
+                                                                                <span className="font-medium text-space-light/70">Nonce:</span>
+                                                                                <span className="ml-2">{subTx.nonce}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="mt-1">
+                                                                            <span className="font-medium text-space-light/70">Data:</span>
+                                                                            <code className="ml-2 break-all">
+                                                                                {subTx.data}
+                                                                            </code>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {proposalData.body && (
+                                <div className="mt-6">
+                                    <h3 className="font-medium text-space-light/70 mb-2">Description:</h3>
+                                    <div className="prose prose-invert max-w-none prose-headings:text-space prose-a:text-space hover:prose-a:text-space-light prose-strong:text-space-light prose-code:bg-space-dark/30 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-space-light prose-pre:bg-space-dark/30 prose-pre:text-space-light prose-pre:border prose-pre:border-space-dark/30">
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
+                                            rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                                            components={{
+                                                a: ({ node, ...props }) => (
+                                                    <a {...props} target="_blank" rel="noopener noreferrer" className="hover:underline" />
+                                                ),
+                                                img: ({ node, ...props }) => (
+                                                    <img {...props} className="rounded-lg border border-space-dark/30" />
+                                                ),
+                                            }}
+                                        >
+                                            {proposalData.body}
+                                        </ReactMarkdown>
+                                    </div>
+                                </div>
+                            )}
+
+                            {proposalData.discussion && (
+                                <div className="mt-4">
+                                    <h3 className="font-medium text-space-light/70 mb-2">Discussion:</h3>
+                                    <a 
+                                        href={proposalData.discussion}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-space hover:underline"
+                                    >
+                                        View Discussion →
+                                    </a>
+                                </div>
+                            )}
+
+                            {proposalData.flagged && (
+                                <div className="mt-4 text-amber-500">
+                                    ⚠️ This proposal has been flagged
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="steel-panel p-6 text-center text-space-light/70">
+                        No proposal data available
+                    </div>
+                )}
+                
                 <div className="w-full">
                     <QuestionDetails 
                         question={question} 
                         onArbitrationRequested={loadQuestionDetails}
-                        onViewProposal={handleViewProposal}
+                        onViewProposal={() => {}} // Empty function as we don't need modal anymore
                     />
                 </div>
                 
@@ -181,14 +467,6 @@ export default function QuestionDetail() {
                     </Dialog>
                 </div>
             </div>
-
-            {proposalId && (
-                <ProposalModal
-                    proposalId={proposalId}
-                    isOpen={isProposalModalOpen}
-                    onClose={() => setIsProposalModalOpen(false)}
-                />
-            )}
         </div>
     );
 }
