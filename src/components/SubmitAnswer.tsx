@@ -2,8 +2,10 @@
 import { useState } from 'react';
 import { Question } from 'reality-kleros-subgraph';
 import { useToast } from "../hooks/use-toast";
-import { Info, AlertCircle } from 'lucide-react';
+import { Info, AlertCircle, Loader2 } from 'lucide-react';
 import { formatUnits, parseUnits } from 'viem';
+import { ethers } from 'ethers';
+import { RealityEthV3Abi } from '../types/contracts/RealityEthV3Abi';
 
 interface SubmitAnswerProps {
   question: Question;
@@ -12,6 +14,7 @@ interface SubmitAnswerProps {
 export default function SubmitAnswer({ question }: SubmitAnswerProps) {
   const [answer, setAnswer] = useState('');
   const [bond, setBond] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
   // Calculate minimum required bond (typically 2x the current bond)
@@ -49,11 +52,59 @@ export default function SubmitAnswer({ question }: SubmitAnswerProps) {
         return;
       }
 
-      // Here you would connect to the contract and call submitAnswer
-      // This is a placeholder for the actual contract interaction
+      setIsSubmitting(true);
+
+      // Get provider and signer
+      if (!window.ethereum) {
+        throw new Error("No Ethereum wallet detected. Please install MetaMask or another wallet.");
+      }
+      
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      
+      if (!question.contract?.address) {
+        throw new Error("Contract address not found for this question");
+      }
+
+      // Initialize contract with signer
+      const contract = new ethers.Contract(
+        question.contract.address,
+        RealityEthV3Abi.fragments, // Use the ABI from the generated TypeScript file
+        signer
+      ) as unknown as RealityEthV3Abi;
+
+      // Format answer according to question type
+      let formattedAnswer = answer;
+      
+      // For boolean questions, the answer should already be in the correct format (0x0...0 or 0x0...1)
+      // For uint questions, we need to convert to hex
+      if (question.qType === 'uint' && !answer.startsWith('0x')) {
+        try {
+          const answerBigInt = BigInt(answer);
+          formattedAnswer = ethers.toBeHex(answerBigInt);
+        } catch (error) {
+          throw new Error("Invalid number format for uint question type");
+        }
+      }
+
+      // Call the contract with value equal to the bond
+      const tx = await contract.submitAnswer(
+        question.id,
+        formattedAnswer,
+        0, // max_previous (we'll use 0 as a placeholder)
+        { 
+          value: bondAmount 
+        }
+      );
+
+      // Wait for the transaction to be mined
+      const receipt = await tx.wait();
+      
+      console.log("Transaction successful:", receipt);
+      
       toast({
-        title: "Not Implemented",
-        description: "Contract interaction is not implemented in this demo",
+        title: "Answer submitted",
+        description: "Your answer has been successfully submitted to the blockchain",
       });
       
       // Reset form after submission
@@ -67,6 +118,8 @@ export default function SubmitAnswer({ question }: SubmitAnswerProps) {
         description: error instanceof Error ? error.message : "Failed to submit answer",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -101,6 +154,7 @@ export default function SubmitAnswer({ question }: SubmitAnswerProps) {
                   <li>• You'll receive rewards only if your answer becomes the final answer.</li>
                   <li>• Once submitted, your answer cannot be changed.</li>
                   <li>• Anyone can replace your answer by doubling your bond.</li>
+                  <li>• You need a compatible wallet (e.g., MetaMask) connected to submit.</li>
                 </ul>
               </div>
             </div>
@@ -175,10 +229,23 @@ export default function SubmitAnswer({ question }: SubmitAnswerProps) {
           {/* Submit Button */}
           <button
             type="submit"
-            className="tron-button w-full"
+            disabled={isSubmitting}
+            className="tron-button w-full flex items-center justify-center"
           >
-            Submit Answer
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              'Submit Answer'
+            )}
           </button>
+          
+          {/* Wallet Connect Warning */}
+          <p className="text-xs text-tron-light/70 text-center mt-2">
+            You'll need to approve this transaction in your wallet. Make sure you are connected to the correct network.
+          </p>
         </form>
       )}
     </div>
