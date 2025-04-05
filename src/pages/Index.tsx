@@ -2,13 +2,12 @@
 import { useEffect, useState } from 'react';
 import { retrieveQuestions, Question, QuestionProgress } from 'reality-kleros-subgraph';
 import { namehash, normalize } from 'viem/ens';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 import { QuestionList } from '../components/QuestionList';
 import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
-import { questionBelongsToDao } from '@/utils/daoUtils';
 
 // ENS Resolver contract address
 const ENS_RESOLVER_ADDRESS = '0x231b0ee14048e9dccd1d247744d114a4eb5e8e63';
@@ -31,24 +30,19 @@ export default function Home() {
     failed: 0
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
 
-  // Get params from URL using named route parameters
-  const params = useParams();
-  const location = useLocation();
-  const daoEns = params.daoEns;
-  const ensName = params.ensName;
-  
-  // Log when ENS or DAO is detected
+  // Get ENS name from URL path
+  const { '*': ensPath } = useParams();
+  const ensName = ensPath || null;
+
+  // Log when ENS is detected
   useEffect(() => {
-    if (daoEns) {
-      console.log('🔍 DAO ENS detected in URL:', daoEns);
-    } else if (ensName) {
+    if (ensName) {
       console.log('🔍 ENS name detected in URL:', ensName);
     } else {
       console.log('📄 No ENS name in URL - showing all questions');
     }
-  }, [ensName, daoEns]);
+  }, [ensName]);
 
   useEffect(() => {
     const loadQuestions = async () => {
@@ -60,7 +54,7 @@ export default function Home() {
         let userFilter: string | undefined;
 
         // If we have an ENS name, get the SafeSnap text record
-        if (ensName && !daoEns) {
+        if (ensName) {
           try {
             // Calculate namehash
             const normalizedName = normalize(ensName);
@@ -121,30 +115,12 @@ export default function Home() {
     };
 
     loadQuestions();
-  }, [ensName, daoEns]);
+  }, [ensName]);
 
-  // Filter questions by DAO ENS if needed
-  useEffect(() => {
-    if (daoEns) {
-      // Normalize the DAO ENS for comparison (lowercase)
-      const normalizedDaoEns = daoEns.toLowerCase();
-      
-      // Filter questions that mention the DAO in their title or data
-      const filtered = questions.filter(question => 
-        questionBelongsToDao(question, normalizedDaoEns)
-      );
-      
-      setFilteredQuestions(filtered);
-      console.log(`Filtered ${filtered.length} questions for DAO: ${daoEns}`);
-    } else {
-      setFilteredQuestions(questions);
-    }
-  }, [questions, daoEns]);
-
-  // Calculate paginated questions from the filtered list
+  // Calculate paginated questions
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedQuestions = filteredQuestions.slice(startIndex, endIndex);
+  const paginatedQuestions = questions.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -161,7 +137,6 @@ export default function Home() {
       <h1 className="text-2xl font-bold mb-4">
         RealityETH Questions
         {ensName && <span className="text-gray-600 ml-2">for {ensName}</span>}
-        {daoEns && <span className="text-gray-600 ml-2">for DAO: {daoEns}</span>}
       </h1>
 
       {error ? (
@@ -172,7 +147,7 @@ export default function Home() {
           currentPage={currentPage}
           onPageChange={handlePageChange}
           isLoading={isLoading}
-          totalQuestions={filteredQuestions.length}
+          totalQuestions={questions.length}
         />
       )}
 
