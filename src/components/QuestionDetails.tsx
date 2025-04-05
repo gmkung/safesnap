@@ -216,7 +216,7 @@ export default function QuestionDetails({
                                                         onClick={onViewHashDetails}
                                                     >
                                                         <StatusIcon className="h-3 w-3" />
-                                                        <span>{hashVerification.match ? "Valid" : "Invalid"}</span>
+                                                        <span>{hashVerification.match ? "Match" : "Invalid"}</span>
                                                     </Badge>
                                                 </TooltipTrigger>
                                                 <TooltipContent className="max-w-xs">
@@ -229,22 +229,10 @@ export default function QuestionDetails({
                                         </TooltipProvider>
                                     )}
                                 </dt>
-                                <dd className="mt-1 flex items-center gap-2">
+                                <dd className="mt-1">
                                     <code className="bg-space-dark/30 px-2 py-1 rounded text-xs font-mono break-all flex-grow">
                                         {parsedData.transactionHash}
                                     </code>
-                                    
-                                    {hashVerification && (
-                                        <Button 
-                                            variant="ghost" 
-                                            size="sm" 
-                                            className="text-xs px-2 py-1 h-auto"
-                                            onClick={onViewHashDetails}
-                                        >
-                                            <Calculator className="h-3 w-3 mr-1" />
-                                            View Details
-                                        </Button>
-                                    )}
                                 </dd>
                             </div>
                         )}
