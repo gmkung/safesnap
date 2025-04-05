@@ -1,5 +1,7 @@
+
 import { formatDate } from '@/utils/questionUtils';
 import { Loader2 } from 'lucide-react';
+import CopyButton from './CopyButton';
 
 interface SnapshotProposalSummaryProps {
   proposalLoading: boolean;
@@ -44,9 +46,12 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData 
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="font-medium text-space-light/70">Author:</span>
-            <code className="ml-2 bg-space-dark/30 px-2 py-1 rounded">
-              {`${proposalData.author.slice(0, 6)}...${proposalData.author.slice(-4)}`}
-            </code>
+            <div className="flex items-center ml-2 inline-flex">
+              <code className="bg-space-dark/30 px-2 py-1 rounded">
+                {`${proposalData.author.slice(0, 6)}...${proposalData.author.slice(-4)}`}
+              </code>
+              <CopyButton textToCopy={proposalData.author} size="xs" className="ml-1" />
+            </div>
           </div>
           <div>
             <span className="font-medium text-space-light/70">State:</span>
@@ -138,21 +143,30 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData 
                     </div>
                     <div>
                       <span className="font-medium text-space-light/70">Reality Address:</span>
-                      <code className="ml-2 bg-space-dark/50 px-2 py-1 rounded">
-                        {`${safe.realityAddress.slice(0, 6)}...${safe.realityAddress.slice(-4)}`}
-                      </code>
+                      <div className="flex items-center ml-2 inline-flex">
+                        <code className="bg-space-dark/50 px-2 py-1 rounded">
+                          {`${safe.realityAddress.slice(0, 6)}...${safe.realityAddress.slice(-4)}`}
+                        </code>
+                        <CopyButton textToCopy={safe.realityAddress} size="xs" className="ml-1" />
+                      </div>
                     </div>
                     <div>
                       <span className="font-medium text-space-light/70">MultiSend Address:</span>
-                      <code className="ml-2 bg-space-dark/50 px-2 py-1 rounded">
-                        {`${safe.multiSendAddress.slice(0, 6)}...${safe.multiSendAddress.slice(-4)}`}
-                      </code>
+                      <div className="flex items-center ml-2 inline-flex">
+                        <code className="bg-space-dark/50 px-2 py-1 rounded">
+                          {`${safe.multiSendAddress.slice(0, 6)}...${safe.multiSendAddress.slice(-4)}`}
+                        </code>
+                        <CopyButton textToCopy={safe.multiSendAddress} size="xs" className="ml-1" />
+                      </div>
                     </div>
                     <div>
                       <span className="font-medium text-space-light/70">Safe Hash:</span>
-                      <code className="ml-2 bg-space-dark/50 px-2 py-1 rounded">
-                        {`${safe.hash.slice(0, 6)}...${safe.hash.slice(-4)}`}
-                      </code>
+                      <div className="flex items-center ml-2 inline-flex">
+                        <code className="bg-space-dark/50 px-2 py-1 rounded">
+                          {`${safe.hash.slice(0, 6)}...${safe.hash.slice(-4)}`}
+                        </code>
+                        <CopyButton textToCopy={safe.hash} size="xs" className="ml-1" />
+                      </div>
                     </div>
                   </div>
 
@@ -162,9 +176,12 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData 
                         <div className="grid grid-cols-2 gap-2 text-sm mb-2">
                           <div>
                             <span className="font-medium text-space-light/70">Transaction Hash:</span>
-                            <code className="ml-2 bg-space-dark/70 px-2 py-1 rounded">
-                              {`${tx.hash.slice(0, 6)}...${tx.hash.slice(-4)}`}
-                            </code>
+                            <div className="flex items-center ml-2 inline-flex">
+                              <code className="bg-space-dark/70 px-2 py-1 rounded">
+                                {`${tx.hash.slice(0, 6)}...${tx.hash.slice(-4)}`}
+                              </code>
+                              <CopyButton textToCopy={tx.hash} size="xs" className="ml-1" />
+                            </div>
                           </div>
                           <div>
                             <span className="font-medium text-space-light/70">Nonce:</span>
@@ -178,9 +195,12 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData 
                               <div className="grid grid-cols-2 gap-1">
                                 <div>
                                   <span className="font-medium text-space-light/70">To:</span>
-                                  <code className="ml-2">
-                                    {`${subTx.to.slice(0, 6)}...${subTx.to.slice(-4)}`}
-                                  </code>
+                                  <div className="flex items-center ml-2 inline-flex">
+                                    <code>
+                                      {`${subTx.to.slice(0, 6)}...${subTx.to.slice(-4)}`}
+                                    </code>
+                                    <CopyButton textToCopy={subTx.to} size="xs" className="ml-1" />
+                                  </div>
                                 </div>
                                 <div>
                                   <span className="font-medium text-space-light/70">Value:</span>
@@ -197,9 +217,14 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData 
                               </div>
                               <div className="mt-1">
                                 <span className="font-medium text-space-light/70">Data:</span>
-                                <code className="ml-2 break-all">
-                                  {subTx.data}
-                                </code>
+                                <div className="flex items-center gap-1">
+                                  <code className="ml-2 break-all">
+                                    {subTx.data}
+                                  </code>
+                                  {subTx.data && subTx.data.startsWith('0x') && (
+                                    <CopyButton textToCopy={subTx.data} size="xs" />
+                                  )}
+                                </div>
                               </div>
                             </div>
                           ))}

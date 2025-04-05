@@ -11,6 +11,7 @@ import { Badge } from './ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { cn } from '@/lib/utils';
 import { QuestionDetailsSkeleton } from './ui/skeleton';
+import CopyButton from './CopyButton';
 
 interface QuestionDetailsProps {
     question: Question;
@@ -115,7 +116,12 @@ export default function QuestionDetails({
                 {question.arbitrationRequestedBy && (
                     <div>
                         <dt className="font-medium text-space-light/70">Arbitration Requested By</dt>
-                        <dd className="mt-1 text-foreground font-mono">{question.arbitrationRequestedBy}</dd>
+                        <dd className="mt-1 text-foreground font-mono flex items-center">
+                            {question.arbitrationRequestedBy}
+                            {question.arbitrationRequestedBy.startsWith('0x') && (
+                                <CopyButton textToCopy={question.arbitrationRequestedBy} className="ml-1" />
+                            )}
+                        </dd>
                     </div>
                 )}
                 
@@ -199,8 +205,13 @@ export default function QuestionDetails({
                                         </a>
                                     )}
                                 </dt>
-                                <dd className="mt-1 text-foreground font-mono text-sm break-all">
-                                    {parsedData.proposalId}
+                                <dd className="mt-1 flex items-center">
+                                    <code className="text-foreground font-mono text-sm break-all">
+                                        {parsedData.proposalId}
+                                    </code>
+                                    {parsedData.proposalId.startsWith('0x') && (
+                                        <CopyButton textToCopy={parsedData.proposalId} className="ml-1" />
+                                    )}
                                 </dd>
                             </div>
                         )}
@@ -237,10 +248,11 @@ export default function QuestionDetails({
                                         </TooltipProvider>
                                     )}
                                 </dt>
-                                <dd className="mt-1">
+                                <dd className="mt-1 flex items-center">
                                     <code className="bg-space-dark/30 px-2 py-1 rounded text-xs font-mono break-all flex-grow">
                                         {parsedData.transactionHash}
                                     </code>
+                                    <CopyButton textToCopy={parsedData.transactionHash} className="ml-1" />
                                 </dd>
                             </div>
                         )}

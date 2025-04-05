@@ -1,5 +1,6 @@
 
 import { Question } from 'reality-kleros-subgraph';
+import CopyButton from './CopyButton';
 
 interface ContractInfoProps {
     question: Question;
@@ -13,7 +14,12 @@ export default function ContractInfo({ question }: ContractInfoProps) {
             <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <dt className="font-medium text-space-light/70">Contract Address</dt>
-                    <dd className="mt-1 text-foreground font-mono text-sm break-all">{question.contract.address}</dd>
+                    <dd className="mt-1 flex items-center">
+                        <span className="text-foreground font-mono text-sm break-all">
+                            {question.contract.address}
+                        </span>
+                        <CopyButton textToCopy={question.contract.address} className="ml-1" />
+                    </dd>
                 </div>
                 <div>
                     <dt className="font-medium text-space-light/70">Contract Name</dt>
@@ -40,7 +46,10 @@ export default function ContractInfo({ question }: ContractInfoProps) {
                         <dt className="font-medium text-space-light/70">Arbitrators</dt>
                         <dd className="mt-1 space-y-1">
                             {question.contract.config.arbitrators.map((arbitrator, index) => (
-                                <div key={index} className="text-foreground font-mono text-sm break-all">{arbitrator}</div>
+                                <div key={index} className="flex items-center">
+                                    <span className="text-foreground font-mono text-sm break-all">{arbitrator}</span>
+                                    <CopyButton textToCopy={arbitrator} className="ml-1" />
+                                </div>
                             ))}
                         </dd>
                     </div>
