@@ -63,15 +63,15 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Spaceship UI Colors
+				// Steel and Glass UI Colors
 				space: {
-					DEFAULT: '#5B88F6', // bright blue
-					dark: '#112240',
-					light: '#A8C0FB',
-					accent: '#F657B3', // neon pink
-					darkBlue: '#0D1A30',
-					black: '#060E1B',
-					gray: '#2A3A53',
+					DEFAULT: '#33C3F0', // bright blue
+					dark: '#1E2328',
+					light: '#C8C8C9',
+					accent: '#9F9EA1', // silver accent
+					darkBlue: '#221F26',
+					black: '#0D0D0E',
+					gray: '#403E43',
 				}
 			},
 			borderRadius: {
@@ -80,16 +80,20 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			boxShadow: {
-				'holo': '0 0 15px theme("colors.space.DEFAULT"), 0 0 30px rgba(91, 136, 246, 0.5)',
-				'holo-lg': '0 0 20px theme("colors.space.DEFAULT"), 0 0 40px rgba(91, 136, 246, 0.7)',
-				'holo-pink': '0 0 15px theme("colors.space.accent"), 0 0 30px rgba(246, 87, 179, 0.5)',
+				'holo': '0 0 15px theme("colors.space.DEFAULT"), 0 0 30px rgba(51, 195, 240, 0.4)',
+				'holo-lg': '0 0 20px theme("colors.space.DEFAULT"), 0 0 40px rgba(51, 195, 240, 0.6)',
+				'holo-pink': '0 0 15px theme("colors.space.accent"), 0 0 30px rgba(159, 158, 161, 0.4)',
+				'glass': '0 4px 6px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.1)',
+				'steel': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.1), 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
 			},
 			backgroundImage: {
-				'space-grid': 'linear-gradient(rgba(91, 136, 246, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(91, 136, 246, 0.1) 1px, transparent 1px)',
-				'space-glow': 'radial-gradient(circle at center, rgba(91, 136, 246, 0.15) 0%, transparent 70%)',
-				'space-gradient': 'linear-gradient(135deg, rgba(17, 34, 64, 0.8) 0%, rgba(91, 136, 246, 0.4) 100%)',
-				'holographic': 'linear-gradient(135deg, rgba(91, 136, 246, 0.2) 0%, rgba(246, 87, 179, 0.2) 50%, rgba(91, 136, 246, 0.2) 100%)',
-				'ethereal-gradient': 'linear-gradient(to right, rgba(91, 136, 246, 0.7), rgba(246, 87, 179, 0.7))',
+				'space-grid': 'linear-gradient(rgba(51, 195, 240, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(51, 195, 240, 0.1) 1px, transparent 1px)',
+				'space-glow': 'radial-gradient(circle at center, rgba(51, 195, 240, 0.12) 0%, transparent 70%)',
+				'space-gradient': 'linear-gradient(135deg, rgba(30, 35, 40, 0.95) 0%, rgba(51, 195, 240, 0.2) 100%)',
+				'holographic': 'linear-gradient(135deg, rgba(200, 200, 201, 0.2) 0%, rgba(159, 158, 161, 0.2) 50%, rgba(51, 195, 240, 0.2) 100%)',
+				'ethereal-gradient': 'linear-gradient(to right, rgba(51, 195, 240, 0.7), rgba(159, 158, 161, 0.7))',
+				'glass-shine': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%)',
+				'steel-texture': 'linear-gradient(45deg, rgba(64, 62, 67, 0.8) 0%, rgba(30, 35, 40, 0.8) 100%)',
 			},
 			keyframes: {
 				'accordion-down': {
@@ -110,10 +114,10 @@ export default {
 				},
 				'holo-glow': {
 					'0%, 100%': { 
-						boxShadow: '0 0 10px theme("colors.space.DEFAULT"), 0 0 20px rgba(91, 136, 246, 0.4)' 
+						boxShadow: '0 0 10px theme("colors.space.DEFAULT"), 0 0 20px rgba(51, 195, 240, 0.3)' 
 					},
 					'50%': { 
-						boxShadow: '0 0 15px theme("colors.space.DEFAULT"), 0 0 30px rgba(91, 136, 246, 0.7)' 
+						boxShadow: '0 0 15px theme("colors.space.DEFAULT"), 0 0 30px rgba(51, 195, 240, 0.5)' 
 					},
 				},
 				'ethereal-fade': {
@@ -138,7 +142,15 @@ export default {
 				'float': {
 					'0%, 100%': { transform: 'translateY(0)' },
 					'50%': { transform: 'translateY(-10px)' },
-				}
+				},
+				'light-reflect': {
+					'0%': { 
+						backgroundPosition: '-100% 0%' 
+					},
+					'100%': { 
+						backgroundPosition: '200% 0%' 
+					},
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -147,6 +159,7 @@ export default {
 				'ethereal-fade': 'ethereal-fade 3s infinite',
 				'holo-scan': 'holo-scan 15s linear infinite',
 				'float': 'float 5s ease-in-out infinite',
+				'light-reflect': 'light-reflect 4s ease-in-out infinite',
 			}
 		}
 	},

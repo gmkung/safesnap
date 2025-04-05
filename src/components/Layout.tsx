@@ -64,15 +64,15 @@ function ConnectWallet() {
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button
-                        variant="outline"
-                        className="border-space holo-button glass-morphism"
+                        variant="steel"
+                        className="border-space-light/20"
                     >
                         <code className="text-sm">{`${address?.slice(0, 6)}...${address?.slice(-4)}`}</code>
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="minimal-chrome backdrop-blur-lg">
+                <DropdownMenuContent align="end" className="glass-panel backdrop-blur-lg border border-space-light/10">
                     <DropdownMenuItem
-                        className="text-red-500 cursor-pointer hover:bg-space-dark/50"
+                        className="text-red-500 cursor-pointer hover:bg-space-dark/30"
                         onClick={handleDisconnect}
                     >
                         <LogOut className="mr-2 h-4 w-4" />
@@ -86,8 +86,8 @@ function ConnectWallet() {
     return (
         <Button
             onClick={handleConnect}
-            variant="outline"
-            className="border-space holo-button holographic-element"
+            variant="glass"
+            className="border-space-light/20"
             disabled={isConnecting}
         >
             {isConnecting ? "Connecting..." : "Connect Wallet"}
@@ -99,7 +99,7 @@ export default function Layout() {
     return (
         <div className="min-h-screen bg-background flex flex-col">
             {/* Header */}
-            <header className="border-b border-space-dark/30 backdrop-blur-md z-10">
+            <header className="border-b border-space-gray/30 backdrop-blur-md z-10 shadow-steel">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="h-16 flex items-center justify-between">
                         <div className="flex items-center">
