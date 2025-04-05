@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { retrieveQuestions, Question, QuestionProgress } from 'reality-kleros-subgraph';
 import { namehash, normalize } from 'viem/ens';
@@ -10,6 +11,12 @@ import { Progress } from '@/components/ui/progress';
 const ENS_RESOLVER_ADDRESS = '0x231b0ee14048e9dccd1d247744d114a4eb5e8e63';
 
 const ITEMS_PER_PAGE = 20;
+
+// Create a public client for ENS resolution
+const publicClient = createPublicClient({
+  chain: mainnet,
+  transport: http()
+});
 
 export default function Home() {
   const [questions, setQuestions] = useState<Question[]>([]);
