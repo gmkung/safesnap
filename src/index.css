@@ -1,86 +1,52 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 220 10% 8%;
-    --foreground: 0 0% 98%;
-
-    --card: 217 25% 12%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 217 25% 10%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 195 91% 57%;
-    --primary-foreground: 220 10% 8%;
-
-    --secondary: 215 10% 25%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 215 10% 25%;
-    --muted-foreground: 215 10% 65%;
-
-    --accent: 220 5% 63%;
-    --accent-foreground: 220 10% 8%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 5% 25%;
-    --input: 215 10% 25%;
-    --ring: 195 91% 57%;
-
-    --radius: 0.25rem;
-
-    --sidebar-background: 217 25% 12%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 195 91% 57%;
-    --sidebar-primary-foreground: 220 10% 8%;
-    --sidebar-accent: 215 10% 25%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 5% 25%;
-    --sidebar-ring: 195 91% 57%;
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
   }
 
   .dark {
-    --background: 220 10% 8%;
-    --foreground: 0 0% 98%;
-
-    --card: 217 25% 12%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 217 25% 10%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 195 91% 57%;
-    --primary-foreground: 220 10% 8%;
-
-    --secondary: 215 10% 25%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 215 10% 25%;
-    --muted-foreground: 215 10% 65%;
-
-    --accent: 220 5% 63%;
-    --accent-foreground: 220 10% 8%;
-
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 5% 25%;
-    --input: 215 10% 25%;
-    --ring: 195 91% 57%;
-
-    --sidebar-background: 217 25% 12%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 195 91% 57%;
-    --sidebar-primary-foreground: 220 10% 8%;
-    --sidebar-accent: 215 10% 25%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 5% 25%;
-    --sidebar-ring: 195 91% 57%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 224.3 76.3% 48%;
   }
 }
 
@@ -90,238 +56,23 @@
   }
 
   body {
-    @apply bg-background text-foreground tron-grid;
-    background-image: 
-      radial-gradient(circle at 50% 50%, rgba(51, 195, 240, 0.05) 0%, transparent 70%),
-      linear-gradient(rgba(51, 195, 240, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(51, 195, 240, 0.02) 1px, transparent 1px);
-    background-size: 100% 100%, 20px 20px, 20px 20px;
-    background-position: 0 0, 0 0, 0 0;
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-@layer components {
-  .holo-card {
-    @apply bg-card/80 border border-space/20 rounded-lg overflow-hidden relative backdrop-blur-sm;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.05);
+/* Basic animations */
+@keyframes light-reflect {
+  0% { 
+    transform: translateX(-100%); 
   }
-  
-  .holo-card::before {
-    content: '';
-    @apply absolute inset-0 rounded-lg opacity-30;
-    background: linear-gradient(135deg, transparent 0%, rgba(51, 195, 240, 0.05) 100%);
-    z-index: 0;
-  }
-  
-  .holo-card::after {
-    content: '';
-    @apply absolute top-0 left-0 right-0 h-[1px] bg-space/30;
-  }
-  
-  .holo-card > * {
-    @apply relative z-10;
-  }
-  
-  .holo-button {
-    @apply relative overflow-hidden bg-space-dark/80 text-white border border-space/30 rounded-md px-4 py-2 
-           transition-all duration-300 hover:bg-space/20 hover:shadow-glass;
-  }
-  
-  .holo-button::before {
-    content: '';
-    @apply absolute inset-0 bg-glass-shine opacity-0 transition-opacity duration-300;
-    background-size: 200% 100%;
-    animation: light-reflect 3s linear infinite paused;
-  }
-  
-  .holo-button:hover::before {
-    @apply opacity-100;
-    animation-play-state: running;
-  }
-  
-  .holo-input {
-    @apply bg-secondary/90 border border-space-dark/50 rounded-md px-3 py-2 focus:border-space/70 
-           focus:shadow-glass transition-all duration-300;
-  }
-  
-  .holo-table {
-    @apply divide-y divide-space-dark/30;
-  }
-  
-  .holo-table th {
-    @apply bg-space-dark/50 text-space-light border-b border-space/20 px-4 py-3 text-left;
-  }
-  
-  .holo-table tr {
-    @apply transition-colors duration-200 hover:bg-space/5;
-  }
-  
-  .holo-table td {
-    @apply px-4 py-3 border-b border-space-dark/30;
-  }
-  
-  .holo-glow {
-    @apply relative;
-  }
-  
-  .holo-glow::after {
-    content: '';
-    @apply absolute inset-0 rounded-lg;
-    box-shadow: 0 0 15px rgba(51, 195, 240, 0.3);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  .holo-glow:hover::after {
-    opacity: 1;
-  }
-  
-  .holo-badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-space-dark text-space
-           border border-space/30 shadow-glass;
-  }
-  
-  .holo-progress-container {
-    @apply h-2 rounded-full bg-secondary overflow-hidden;
-  }
-  
-  .holo-progress-bar {
-    @apply h-full bg-gradient-to-r from-space-dark to-space rounded-full animate-holo-glow;
-  }
-
-  .holographic-element {
-    @apply relative overflow-hidden;
-  }
-
-  .holographic-element::before {
-    content: '';
-    @apply absolute inset-0 bg-holographic opacity-50 animate-holo-scan;
-    background-size: 200% 100%;
-  }
-
-  .ethereal-text {
-    @apply bg-clip-text text-transparent bg-ethereal-gradient animate-ethereal-fade;
-    background-image: linear-gradient(to right, rgba(51, 195, 240, 1), rgba(159, 158, 161, 0.8));
-  }
-
-  .floating-element {
-    @apply animate-float;
-  }
-  
-  /* Glass and steel specific components */
-  .glass-panel {
-    @apply backdrop-blur-md bg-black/30 border border-space/10 rounded-lg shadow-glass;
-  }
-  
-  .steel-panel {
-    @apply bg-steel-texture border border-space/20 rounded-md shadow-steel;
-  }
-  
-  .glass-button {
-    @apply backdrop-blur-md bg-black/20 border border-space/20 rounded-md px-4 py-2
-           transition-all duration-300 hover:bg-space/10 hover:shadow-glass;
-  }
-  
-  .steel-button {
-    @apply bg-space-dark/80 border border-space/20 rounded-sm px-4 py-2
-           transition-all duration-300 hover:bg-space/10 shadow-steel;
-  }
-  
-  .glass-input {
-    @apply backdrop-blur-md bg-black/20 border border-space/20 rounded-md px-3 py-2 
-           focus:border-space/50 focus:shadow-glass transition-all duration-300;
-  }
-
-  /* Animations for Tron-like UI elements */
-  .tron-border {
-    @apply relative;
-  }
-
-  .tron-border::before {
-    content: '';
-    @apply absolute -inset-px rounded-md;
-    background: linear-gradient(90deg, rgba(51, 195, 240, 0.2), rgba(51, 195, 240, 0.6), rgba(51, 195, 240, 0.2));
-    -webkit-mask: 
-      linear-gradient(#fff 0 0) content-box, 
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-
-  .tron-grid {
-    position: relative;
-    background-size: 20px 20px;
-    background-position: center;
-    background-image: 
-      linear-gradient(rgba(51, 195, 240, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(51, 195, 240, 0.03) 1px, transparent 1px);
-  }
-
-  .tron-scanner {
-    @apply relative overflow-hidden;
-  }
-  
-  .tron-scanner::after {
-    content: '';
-    @apply absolute inset-0 pointer-events-none;
-    background: linear-gradient(to bottom, 
-      transparent 0%, 
-      rgba(51, 195, 240, 0.15) 50%, 
-      transparent 100%);
-    animation: scanner-line 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-    height: 200%;
-    transform: translateY(-100%);
+  100% { 
+    transform: translateX(200%); 
   }
 }
 
 @layer utilities {
-  .text-glow {
-    text-shadow: 0 0 10px rgba(51, 195, 240, 0.5);
-  }
-  
-  .text-glow-sm {
-    text-shadow: 0 0 5px rgba(51, 195, 240, 0.3);
-  }
-  
-  .border-glow {
-    box-shadow: 0 0 5px rgba(51, 195, 240, 0.3), inset 0 0 5px rgba(51, 195, 240, 0.2);
-  }
-
-  .glass-morphism {
-    @apply backdrop-blur-md bg-space-black/30 border border-space/10;
-  }
-  
-  .holo-animate-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  .minimal-chrome {
-    @apply border border-space/10 bg-space-dark/70 backdrop-blur-sm rounded-md;
-  }
-
-  .touch-highlight {
-    @apply transition-all duration-300;
-  }
-  
-  .touch-highlight:active {
-    @apply shadow-holo-lg scale-95;
-  }
-  
-  .steel-highlight {
-    @apply transition-all duration-300;
-  }
-  
-  .steel-highlight:active {
-    @apply shadow-steel scale-95;
-  }
-  
-  .glass-reflection {
-    @apply relative overflow-hidden;
-  }
-  
-  .glass-reflection::before {
-    content: '';
-    @apply absolute -inset-[400%] w-[600%] rotate-45 bg-white/10 animate-light-reflect;
+  .animate-light-reflect {
+    animation: light-reflect 3s ease-out infinite;
   }
 }

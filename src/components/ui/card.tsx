@@ -9,8 +9,8 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border glass-panel backdrop-blur-md text-card-foreground shadow-sm relative overflow-hidden tron-grid",
-      glowing && "animate-holo-glow",
+      "rounded-lg border border-gray-200 bg-white text-gray-900 shadow-sm",
+      glowing && "shadow-md",
       className
     )}
     {...props}
@@ -25,8 +25,7 @@ const CardHeader = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "flex flex-col space-y-1.5 p-6 border-b border-space-dark/20 relative",
-      "after:absolute after:bottom-0 after:left-[5%] after:right-[5%] after:h-[1px] after:bg-gradient-to-r after:from-transparent after:via-space/40 after:to-transparent",
+      "flex flex-col space-y-1.5 p-6 border-b border-gray-200",
       className
     )}
     {...props}
@@ -41,7 +40,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-2xl font-semibold leading-none tracking-tight ethereal-text",
+      "text-2xl font-semibold leading-none tracking-tight text-gray-900",
       className
     )}
     {...props}
@@ -55,7 +54,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm text-gray-500", className)}
     {...props}
   />
 ))
@@ -67,7 +66,7 @@ const CardContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div 
     ref={ref} 
-    className={cn("p-6 pt-0 relative z-10", className)} 
+    className={cn("p-6 pt-0", className)} 
     {...props} 
   />
 ))
@@ -80,8 +79,7 @@ const CardFooter = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "flex items-center p-6 pt-0 relative",
-      "before:absolute before:top-0 before:left-[10%] before:right-[10%] before:h-[1px] before:bg-gradient-to-r before:from-transparent before:via-space/20 before:to-transparent",
+      "flex items-center p-6 pt-0",
       className
     )}
     {...props}

@@ -61,20 +61,20 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
     return (
       <div className="space-y-2">
         {parsedData.dao && (
-          <div className="text-tron text-sm font-medium">
+          <div className="text-blue-600 text-sm font-medium">
             DAO: {parsedData.dao}
           </div>
         )}
         <div className="space-y-1">
           <div className="text-sm">
-            <span className="text-tron-light/70">Proposal ID:</span>
-            <code className="ml-2 bg-tron-dark/30 px-2 py-1 rounded text-xs">
+            <span className="text-gray-600">Proposal ID:</span>
+            <code className="ml-2 bg-gray-100 px-2 py-1 rounded text-xs">
               {parsedData.proposalId}
             </code>
           </div>
           <div className="text-sm">
-            <span className="text-tron-light/70">Transaction Array Hash:</span>
-            <code className="ml-2 bg-tron-dark/30 px-2 py-1 rounded text-xs">
+            <span className="text-gray-600">Transaction Array Hash:</span>
+            <code className="ml-2 bg-gray-100 px-2 py-1 rounded text-xs">
               {parsedData.transactionHash}
             </code>
           </div>
@@ -90,7 +90,7 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
   // Show skeletons while loading
   if (isLoading && questions.length === 0) {
     return (
-      <Card className="tron-card max-w-5xl mx-auto">
+      <Card className="max-w-5xl mx-auto shadow-md">
         <div className="p-4">
           <div className="space-y-3">
             {Array(5).fill(0).map((_, i) => (
@@ -103,7 +103,7 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
   }
 
   return (
-    <Card className="tron-card max-w-5xl mx-auto">
+    <Card className="max-w-5xl mx-auto shadow-md">
       <div className="p-4 space-y-4">
         {/* Questions List */}
         <div className="space-y-3">
@@ -111,29 +111,29 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
             <div 
               key={question.id}
               onClick={() => handleQuestionClick(question)}
-              className="rounded-lg border border-tron-dark/30 bg-tron-black/20 shadow-holo transition-all duration-300 hover:shadow-holo-lg hover:bg-tron-dark/20 cursor-pointer p-4"
+              className="rounded-lg border bg-white shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer p-4"
             >
               <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
                 <div className="flex-1 text-left">
-                  <div className="font-medium text-tron-light">
+                  <div className="font-medium text-gray-900">
                     {formatTitle(question)}
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-3 items-center justify-between md:justify-end">
                   <Badge 
                     className={`${
-                      question.phase === 'OPEN' ? 'bg-tron/20 text-tron border-tron/30' : 
-                      question.phase === 'PENDING_ARBITRATION' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' :
-                      question.phase === 'FINALIZED' ? 'bg-tron-blue/20 text-tron-blue border-tron-blue/30' :
-                      'bg-tron-gray/20 text-tron-light/70 border-tron-light/20'
+                      question.phase === 'OPEN' ? 'bg-green-100 text-green-800 border-green-300' : 
+                      question.phase === 'PENDING_ARBITRATION' ? 'bg-amber-100 text-amber-800 border-amber-300' :
+                      question.phase === 'FINALIZED' ? 'bg-blue-100 text-blue-800 border-blue-300' :
+                      'bg-gray-100 text-gray-800 border-gray-300'
                     }`}
                   >
                     {question.phase}
                   </Badge>
-                  <div className="text-tron-light/70 whitespace-nowrap">
+                  <div className="text-gray-600 whitespace-nowrap">
                     {formatDate(question.createdTimestamp)}
                   </div>
-                  <div className="text-tron-light/70 whitespace-nowrap">
+                  <div className="text-gray-600 whitespace-nowrap">
                     {formatBond(question.currentBond, question)}
                   </div>
                 </div>
@@ -143,13 +143,12 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between border-t border-tron-dark/30 px-4 py-3">
+        <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3">
           <div className="flex flex-1 justify-between sm:hidden">
             <Button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
               variant="outline"
-              className="tron-button"
             >
               <ChevronLeft className="h-4 w-4" />
               Previous
@@ -158,7 +157,6 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
               variant="outline"
-              className="tron-button"
             >
               Next
               <ChevronRight className="h-4 w-4" />
@@ -166,10 +164,10 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
           </div>
           <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm text-tron-light/70">
-                Showing <span className="font-medium text-tron-light">{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> to{' '}
-                <span className="font-medium text-tron-light">{Math.min(currentPage * ITEMS_PER_PAGE, totalQuestions)}</span> of{' '}
-                <span className="font-medium text-tron-light">{totalQuestions}</span> results
+              <p className="text-sm text-gray-700">
+                Showing <span className="font-medium">({(currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> to{' '}
+                <span className="font-medium">{Math.min(currentPage * ITEMS_PER_PAGE, totalQuestions)}</span> of{' '}
+                <span className="font-medium">{totalQuestions}</span> results
               </p>
             </div>
             <div>
@@ -178,7 +176,7 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
                   onClick={() => onPageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                   variant="outline"
-                  className="rounded-l-md tron-button p-2"
+                  className="rounded-l-md p-2"
                   size="icon"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -204,7 +202,6 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
                         key={pageNum}
                         onClick={() => onPageChange(pageNum)}
                         variant={currentPage === pageNum ? "default" : "outline"}
-                        className={`tron-button ${currentPage === pageNum ? 'bg-tron hover:bg-tron/90' : ''}`}
                       >
                         {pageNum}
                       </Button>
@@ -217,7 +214,7 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
                   onClick={() => onPageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                   variant="outline"
-                  className="rounded-r-md tron-button p-2"
+                  className="rounded-r-md p-2"
                   size="icon"
                 >
                   <ChevronRight className="h-4 w-4" />

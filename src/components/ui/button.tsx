@@ -6,22 +6,16 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 steel-highlight relative overflow-hidden",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-steel before:bg-space/10 before:absolute before:inset-0 before:w-full before:h-full before:translate-x-[-100%] hover:before:animate-light-reflect",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-steel",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground shadow-steel",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-steel",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-        glass: "glass-button text-white hover:shadow-glass before:bg-white/5 before:absolute before:inset-0 before:w-full before:h-full before:translate-x-[-100%] hover:before:animate-light-reflect",
-        steel: "steel-button text-white hover:shadow-steel before:bg-space/10 before:absolute before:inset-0 before:w-full before:h-full before:translate-x-[-100%] hover:before:animate-light-reflect",
-        tron: "relative bg-transparent text-space border border-space/40 hover:border-space/70 hover:text-space before:absolute before:inset-0 before:bg-space/5 before:opacity-0 hover:before:opacity-100 before:transition-opacity duration-300",
+        default: "bg-blue-600 text-white hover:bg-blue-700",
+        destructive: "bg-red-600 text-white hover:bg-red-700",
+        outline: "border border-gray-300 bg-transparent hover:bg-gray-100 text-gray-900",
+        secondary: "bg-gray-200 text-gray-900 hover:bg-gray-300",
+        ghost: "hover:bg-gray-100 text-gray-900",
+        link: "text-blue-600 underline-offset-4 hover:underline"
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -31,7 +25,7 @@ const buttonVariants = cva(
       },
       glow: {
         default: "",
-        true: "animate-slow-pulse",
+        true: "shadow-md",
       }
     },
     defaultVariants: {

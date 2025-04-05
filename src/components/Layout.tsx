@@ -64,15 +64,15 @@ function ConnectWallet() {
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button
-                        variant="steel"
-                        className="border-space-light/20"
+                        variant="outline"
+                        className="border-gray-300"
                     >
                         <code className="text-sm">{`${address?.slice(0, 6)}...${address?.slice(-4)}`}</code>
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="glass-panel backdrop-blur-lg border border-space-light/10">
+                <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-md">
                     <DropdownMenuItem
-                        className="text-red-500 cursor-pointer hover:bg-space-dark/30"
+                        className="text-red-500 cursor-pointer hover:bg-gray-100"
                         onClick={handleDisconnect}
                     >
                         <LogOut className="mr-2 h-4 w-4" />
@@ -86,8 +86,8 @@ function ConnectWallet() {
     return (
         <Button
             onClick={handleConnect}
-            variant="glass"
-            className="border-space-light/20"
+            variant="outline"
+            className="border-gray-300"
             disabled={isConnecting}
         >
             {isConnecting ? "Connecting..." : "Connect Wallet"}
@@ -97,13 +97,13 @@ function ConnectWallet() {
 
 export default function Layout() {
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col bg-gray-50">
             {/* Header */}
-            <header className="border-b border-space-gray/30 backdrop-blur-md z-10 shadow-steel">
+            <header className="border-b border-gray-200 bg-white shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="h-16 flex items-center justify-between">
                         <div className="flex items-center">
-                            <a href="/" className="ethereal-text text-xl font-bold">
+                            <a href="/" className="text-xl font-bold text-blue-600">
                                 Reality.eth
                             </a>
                         </div>
