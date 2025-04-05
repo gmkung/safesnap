@@ -2,16 +2,17 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Info, FileText, Clock, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ProposalModal from '@/components/ProposalModal';
 import SubmitAnswerButton from '@/components/SubmitAnswer';
 import QuestionTitle from '@/components/QuestionTitle';
 import QuestionDetails from '@/components/QuestionDetails';
 import TemplateInfo from '@/components/TemplateInfo';
-import AnswerHistory from '@/components/AnswerHistory';
 import ResponseHistory from '@/components/ResponseHistory';
 import ContractInfo from '@/components/ContractInfo';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function QuestionDetail() {
     const { id } = useParams<{ id: string }>();
@@ -52,8 +53,8 @@ export default function QuestionDetail() {
     if (loading && !question) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-circuit-flow h-12 w-12 rounded-full border-2 border-tron relative">
-                    <div className="absolute inset-0 rounded-full shadow-tron"></div>
+                <div className="animate-circuit-flow h-12 w-12 rounded-full border-2 border-space relative">
+                    <div className="absolute inset-0 rounded-full shadow-steel"></div>
                 </div>
             </div>
         );
@@ -62,10 +63,10 @@ export default function QuestionDetail() {
     if (error) {
         return (
             <div className="p-4 text-red-500 max-w-4xl mx-auto">
-                <div className="tron-card p-6">
-                    <h2 className="text-xl font-semibold mb-4 text-tron">Error</h2>
+                <div className="steel-panel p-6">
+                    <h2 className="text-xl font-semibold mb-4 ethereal-text">Error</h2>
                     <p>{error}</p>
-                    <button onClick={handleBack} className="tron-button mt-4">
+                    <button onClick={handleBack} className="steel-button mt-4">
                         <ArrowLeft className="w-4 h-4 mr-2" />
                         Back to Questions
                     </button>
@@ -77,11 +78,11 @@ export default function QuestionDetail() {
     if (!question) {
         return (
             <div className="p-6 max-w-4xl mx-auto">
-                <div className="tron-card p-6">
-                    <h2 className="text-xl font-semibold mb-4 text-tron">Question Not Found</h2>
+                <div className="steel-panel p-6">
+                    <h2 className="text-xl font-semibold mb-4 ethereal-text">Question Not Found</h2>
                     <p className="mb-4">This might happen if you accessed this page directly.
                         Please go back to the questions list and click on a question to view its details.</p>
-                    <button onClick={handleBack} className="tron-button">
+                    <button onClick={handleBack} className="steel-button">
                         <ArrowLeft className="w-4 h-4 mr-2" />
                         Back to Questions
                     </button>
@@ -95,34 +96,89 @@ export default function QuestionDetail() {
             <div className="flex justify-between items-center mb-6">
                 <button
                     onClick={handleBack}
-                    className="tron-button inline-flex items-center"
+                    className="steel-button inline-flex items-center"
                 >
                     <ArrowLeft className="w-5 h-5 mr-2" />
                     Back to Questions
                 </button>
             </div>
 
-            <h1 className="text-3xl font-bold mb-6 text-tron text-glow">
+            <h1 className="text-3xl font-bold mb-6 ethereal-text text-glow">
                 <QuestionTitle question={question} />
             </h1>
 
-            <QuestionDetails 
-                question={question} 
-                onArbitrationRequested={loadQuestionDetails}
-                onViewProposal={handleViewProposal}
-            />
-
-            <div className="flex justify-end mb-6">
-                <SubmitAnswerButton
-                    question={question}
-                    onAnswerSubmitted={loadQuestionDetails}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <QuestionDetails 
+                    question={question} 
+                    onArbitrationRequested={loadQuestionDetails}
+                    onViewProposal={handleViewProposal}
                 />
+                
+                <div className="flex flex-col gap-4">
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="mb-4 flex justify-between">
+                                <div className="text-xl font-semibold ethereal-text">Answer Status</div>
+                                <SubmitAnswerButton
+                                    question={question}
+                                    onAnswerSubmitted={loadQuestionDetails}
+                                />
+                            </div>
+                            <ResponseHistory question={question} />
+                        </CardContent>
+                    </Card>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="steel" className="w-full">
+                                    <Info className="mr-2 h-4 w-4" />
+                                    Additional Question Details
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="glass-panel max-h-[80vh] overflow-y-auto">
+                                <DialogHeader>
+                                    <DialogTitle className="text-xl ethereal-text">Additional Details</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-6 mt-4">
+                                    {question.description && (
+                                        <div>
+                                            <h3 className="text-lg font-medium text-space-light/70 mb-2">Description</h3>
+                                            <div className="glass-panel p-4">{question.description}</div>
+                                        </div>
+                                    )}
+                                    {question.data && (
+                                        <div>
+                                            <h3 className="text-lg font-medium text-space-light/70 mb-2">Raw Data</h3>
+                                            <pre className="glass-panel p-4 overflow-x-auto text-sm whitespace-pre-wrap">
+                                                {question.data}
+                                            </pre>
+                                        </div>
+                                    )}
+                                    <TemplateInfo question={question} />
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                        
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="steel" className="w-full">
+                                    <Database className="mr-2 h-4 w-4" />
+                                    Oracle Contract Info
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="glass-panel max-h-[80vh] overflow-y-auto">
+                                <DialogHeader>
+                                    <DialogTitle className="text-xl ethereal-text">Oracle Contract Information</DialogTitle>
+                                </DialogHeader>
+                                <div className="mt-4">
+                                    <ContractInfo question={question} />
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+                </div>
             </div>
-
-            <TemplateInfo question={question} />
-            <AnswerHistory question={question} />
-            <ResponseHistory question={question} />
-            <ContractInfo question={question} />
 
             {proposalId && (
                 <ProposalModal
