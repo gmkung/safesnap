@@ -1,8 +1,7 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
-import { ArrowLeft, Info, Database, Loader2, ExternalLink, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Info, Database, Loader2, ExternalLink, CheckCircle, XCircle, AlertTriangle, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SubmitAnswerButton from '@/components/SubmitAnswer';
 import QuestionTitle from '@/components/QuestionTitle';
@@ -10,6 +9,7 @@ import QuestionDetails from '@/components/QuestionDetails';
 import TemplateInfo from '@/components/TemplateInfo';
 import ResponseHistory from '@/components/ResponseHistory';
 import ContractInfo from '@/components/ContractInfo';
+import TransactionHashModal from '@/components/TransactionHashModal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { getProposalDetails, calculateTransactionArrayHash, compareTransactionHashes } from '@/lib/snapshotQuery';
@@ -33,6 +33,7 @@ export default function QuestionDetail() {
         matchClass: string;
         transactionHashes: string[];
     } | null>(null);
+    const [hashModalOpen, setHashModalOpen] = useState(false);
     const { toast } = useToast();
 
     const loadQuestionDetails = async () => {
@@ -215,6 +216,16 @@ export default function QuestionDetail() {
                                         <span className={cn("text-lg font-medium", hashVerification.matchClass)}>
                                             {hashVerification.matchText}
                                         </span>
+                                        
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm" 
+                                            className="ml-auto"
+                                            onClick={() => setHashModalOpen(true)}
+                                        >
+                                            <Calculator className="h-4 w-4 mr-2" />
+                                            View Calculation Details
+                                        </Button>
                                     </div>
                                     
                                     {hashVerification.calculatedHash && (
@@ -238,6 +249,18 @@ export default function QuestionDetail() {
                                         </div>
                                     )}
                                 </div>
+                            )}
+
+                            {/* Add Transaction Hash Calculation Modal */}
+                            {hashVerification && (
+                                <TransactionHashModal 
+                                    open={hashModalOpen} 
+                                    onOpenChange={setHashModalOpen}
+                                    calculatedHash={hashVerification.calculatedHash}
+                                    expectedHash={parseQuestionData(question)?.transactionHash || ''}
+                                    transactionHashes={hashVerification.transactionHashes}
+                                    match={hashVerification.match}
+                                />
                             )}
 
                             <div className="text-sm text-space-light/70">
