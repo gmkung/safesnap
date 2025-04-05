@@ -3,14 +3,13 @@ import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
 import { ArrowLeft } from 'lucide-react';
-import QuestionTitle from '@/components/QuestionTitle';
 import TransactionHashModal from '@/components/TransactionHashModal';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { getProposalDetails, calculateTransactionArrayHash, compareTransactionHashes } from '@/lib/snapshotQuery';
 import { useToast } from '@/hooks/use-toast';
 import { parseQuestionData } from '@/utils/questionUtils';
 
-// Import our new components
+// Import our components
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ErrorDisplay from '@/components/ErrorDisplay';
 import NotFoundDisplay from '@/components/NotFoundDisplay';
@@ -127,10 +126,6 @@ export default function QuestionDetail() {
                     Back to Questions
                 </button>
             </div>
-
-            <h1 className="text-3xl font-bold mb-6 ethereal-text text-glow">
-                <QuestionTitle question={question} />
-            </h1>
 
             <ResizablePanelGroup direction="horizontal" className="min-h-[600px]">
                 {/* Left Column: Question Details & Answer History */}
