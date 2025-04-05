@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RealityEthV3Abi__factory } from '@/types/contracts/factories/RealityEthV3Abi__factory';
 import { useToast } from '@/hooks/use-toast';
-import { formatUnits, parseUnits, isAddress } from 'viem';
-import { useAccount, useNetwork, useWalletClient } from 'wagmi';
+import { formatUnits, parseUnits, isAddress, createWalletClient, custom, getAccount, switchChain, getChainId } from 'viem';
+import { mainnet } from 'viem/chains';
+import { useAccount } from 'wagmi';
 
 // Constants for special answers
 const ANSWERED_TOO_SOON = "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe";
@@ -39,8 +40,6 @@ export default function SubmitAnswer({
   
   const { toast } = useToast();
   const { address, isConnected } = useAccount();
-  const { chain } = useNetwork();
-  const { data: walletClient } = useWalletClient();
 
   // Calculate min bond for UI (needs to be higher than current bond)
   const minBondValue = BigInt(currentBond) > BigInt(minBond) 
@@ -58,8 +57,8 @@ export default function SubmitAnswer({
         throw new Error("Please connect your wallet first");
       }
       
-      if (!walletClient) {
-        throw new Error("Wallet client not available");
+      if (!window.ethereum) {
+        throw new Error("No Ethereum provider found. Please install MetaMask or another wallet");
       }
 
       if (!bond || parseFloat(bond) <= 0) {
@@ -73,22 +72,22 @@ export default function SubmitAnswer({
       }
 
       // Get the answer bytes
-      let answerBytes: string;
+      let answerBytes: `0x${string}`;
       if (answer === "yes") {
         answerBytes = "0x0000000000000000000000000000000000000000000000000000000000000000";
       } else if (answer === "no") {
         answerBytes = "0x0000000000000000000000000000000000000000000000000000000000000001";
       } else if (answer === "too_soon") {
-        answerBytes = ANSWERED_TOO_SOON;
+        answerBytes = ANSWERED_TOO_SOON as `0x${string}`;
       } else if (answer === "invalid") {
-        answerBytes = INVALID_ANSWER;
+        answerBytes = INVALID_ANSWER as `0x${string}`;
       } else if (answer === "custom" && customAnswer) {
         // For numeric answers, we need to convert to hex and pad
         const numValue = parseInt(customAnswer);
         if (isNaN(numValue)) {
           throw new Error("Custom answer must be a valid number");
         }
-        answerBytes = `0x${numValue.toString(16).padStart(64, '0')}`;
+        answerBytes = `0x${numValue.toString(16).padStart(64, '0')}` as `0x${string}`;
       } else {
         throw new Error("Please select a valid answer");
       }
@@ -97,7 +96,16 @@ export default function SubmitAnswer({
         throw new Error("Invalid contract address");
       }
 
-      // Prepare contract instance
+      // Create a wallet client using viem
+      const walletClient = createWalletClient({
+        chain: mainnet,
+        transport: custom(window.ethereum)
+      });
+
+      // Get current chain id
+      const chainId = await getChainId(walletClient);
+      
+      // Create contract instance for calling
       const contract = {
         address: contractAddress as `0x${string}`,
         abi: RealityEthV3Abi__factory.abi
@@ -107,7 +115,7 @@ export default function SubmitAnswer({
       const hash = await walletClient.writeContract({
         ...contract,
         functionName: 'submitAnswer',
-        args: [questionId, answerBytes, 0], // max_previous is set to 0 for simplicity
+        args: [questionId as `0x${string}`, answerBytes, 0n], // max_previous is set to 0 for simplicity
         value: bondBigInt
       });
 
