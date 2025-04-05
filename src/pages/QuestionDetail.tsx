@@ -257,6 +257,8 @@ export default function QuestionDetail() {
                                 </div>
                             )}
 
+                            {/* Body/Description section removed as requested */}
+
                             {proposalData.plugins?.safeSnap && (
                                 <div className="mt-6">
                                     <h3 className="font-medium text-space-light/70 mb-2">SafeSnap Transactions:</h3>
@@ -341,28 +343,6 @@ export default function QuestionDetail() {
                                                 </div>
                                             </div>
                                         ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {proposalData.body && (
-                                <div className="mt-6">
-                                    <h3 className="font-medium text-space-light/70 mb-2">Description:</h3>
-                                    <div className="prose prose-invert max-w-none prose-headings:text-space prose-a:text-space hover:prose-a:text-space-light prose-strong:text-space-light prose-code:bg-space-dark/30 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-space-light prose-pre:bg-space-dark/30 prose-pre:text-space-light prose-pre:border prose-pre:border-space-dark/30">
-                                        <ReactMarkdown
-                                            remarkPlugins={[remarkGfm]}
-                                            rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                                            components={{
-                                                a: ({ node, ...props }) => (
-                                                    <a {...props} target="_blank" rel="noopener noreferrer" className="hover:underline" />
-                                                ),
-                                                img: ({ node, ...props }) => (
-                                                    <img {...props} className="rounded-lg border border-space-dark/30" />
-                                                ),
-                                            }}
-                                        >
-                                            {proposalData.body}
-                                        </ReactMarkdown>
                                     </div>
                                 </div>
                             )}
