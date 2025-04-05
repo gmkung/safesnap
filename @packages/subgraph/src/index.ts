@@ -5,6 +5,7 @@ import {
   Chain,
   Contract,
   ContractConfig,
+  QuestionGenerator,
 } from "./types/questions";
 
 // Constants
@@ -69,17 +70,16 @@ export function getChainInfo(chainId: number): ChainInfo {
   return info;
 }
 
-export async function retrieveQuestions(
+export async function* retrieveQuestions(
   chainId: number,
   filters: QuestionFilters = {},
   onProgress?: (progress: QuestionProgress) => void
-): Promise<Question[]> {
+): QuestionGenerator {
   const chainInfo = getChainInfo(chainId);
   if (!chainInfo.graphURL) {
     throw new Error(`No subgraph URL found for chain ${chainId}`);
   }
 
-  const processedQuestions: Question[] = [];
   let lastTimestamp: number | undefined = filters.lastCreatedTimestamp;
   let hasMore = true;
   let totalProcessed = 0;
@@ -156,11 +156,13 @@ export async function retrieveQuestions(
         }
       });
 
-      // Wait for the current batch to complete
+      // Wait for the current batch to complete and yield results
       const batchResults = await Promise.all(batchPromises);
-      processedQuestions.push(
-        ...(batchResults.filter((q) => q !== null) as Question[])
-      );
+      for (const result of batchResults) {
+        if (result !== null) {
+          yield result;
+        }
+      }
     }
 
     // Update lastTimestamp for next batch
@@ -171,8 +173,6 @@ export async function retrieveQuestions(
       hasMore = false;
     }
   }
-
-  return processedQuestions;
 }
 
 function buildQuery(filters: QuestionFilters & { batchSize?: number }): string {

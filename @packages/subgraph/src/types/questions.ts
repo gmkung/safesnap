@@ -69,3 +69,12 @@ export enum QuestionPhase {
   PENDING_ARBITRATION = "PENDING_ARBITRATION",
   FINALIZED = "FINALIZED",
 }
+
+export interface QuestionProgress {
+  total: number;
+  processed: number;
+  failed: number;
+  lastTimestamp?: number;
+}
+
+export type QuestionGenerator = AsyncGenerator<Question, void, unknown>;

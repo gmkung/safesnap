@@ -3832,10 +3832,10 @@ reality-kleros-subgraph@^1.0.0:
     ethers "^5.8.0"
     reality-kleros-subgraph "^1.0.0"
 
-reality-kleros-subgraph@^1.2.3:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/reality-kleros-subgraph/-/reality-kleros-subgraph-1.2.3.tgz#356cdcfce2bd34ff9afe309e0921a0e8f72c127d"
-  integrity sha512-ffYFYjpAh9CP0xS8oktX51QR3tegOD/nnr5lW/OMMHba8OV6inPZDj8uCw14KjqH0/c7YFzcYw+xDEaIRysBtA==
+reality-kleros-subgraph@^1.2.5:
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/reality-kleros-subgraph/-/reality-kleros-subgraph-1.2.5.tgz#ecda370cff1e0313ca2820c006dd937faf91ce60"
+  integrity sha512-sGBmvgBQHPkP1+LedocvtfWo1MpNTTC7xEWv+xIejdb/yfVvqa3yc+atr7mBfAOFLnm6Gj9CGB2xJVRoBvWmPg==
   dependencies:
     "@reality.eth/contracts" "^3.2.2"
     ethers "^5.8.0"
@@ -3978,6 +3978,7 @@ string-format@^2.0.0:
   integrity sha512-bbEs3scLeYNXLecRRuk6uJxdXUSj6le/8rNPHChIJTn2V79aXVTR1EH2OH5zLKKoz0V02fOUKZZcw01pLUShZA==
 
 "string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0:
+  name string-width-cjs
   version "4.2.3"
   resolved "https://registry.npmjs.org/string-width/-/string-width-4.2.3.tgz"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
@@ -3996,6 +3997,7 @@ string-width@^5.0.1, string-width@^5.1.2:
     strip-ansi "^7.0.1"
 
 "strip-ansi-cjs@npm:strip-ansi@^6.0.1", strip-ansi@^6.0.0, strip-ansi@^6.0.1:
+  name strip-ansi-cjs
   version "6.0.1"
   resolved "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz"
   integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
