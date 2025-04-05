@@ -29,13 +29,13 @@ export default function QuestionTitle({ question }: QuestionTitleProps) {
             <div className="space-y-2">
                 <div className="text-lg">
                     <span className="text-space-light/70">Proposal ID:</span>
-                    <code className="ml-2 bg-space-dark/30 px-2 py-1 rounded text-base holographic-element">
+                    <code className="ml-2 bg-space-dark/30 px-2 py-1 rounded text-base font-mono text-space-light">
                         {parsedData.proposalId}
                     </code>
                 </div>
                 <div className="text-lg">
                     <span className="text-space-light/70">Transaction Array Hash:</span>
-                    <code className="ml-2 bg-space-dark/30 px-2 py-1 rounded text-base holographic-element">
+                    <code className="ml-2 bg-space-dark/30 px-2 py-1 rounded text-base font-mono text-space-light">
                         {parsedData.transactionHash}
                     </code>
                 </div>
