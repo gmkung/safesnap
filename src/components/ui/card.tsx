@@ -9,7 +9,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border glass-panel backdrop-blur-md text-card-foreground shadow-sm relative overflow-hidden tron-grid",
+      "rounded-lg border glass-panel text-card-foreground shadow-sm relative overflow-hidden tron-grid",
       glowing && "animate-holo-glow",
       className
     )}

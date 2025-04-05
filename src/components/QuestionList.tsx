@@ -90,7 +90,7 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
   // Show skeletons while loading
   if (isLoading && questions.length === 0) {
     return (
-      <Card className="tron-card max-w-5xl mx-auto">
+      <Card className="tron-card max-w-5xl mx-auto bg-transparent">
         <div className="p-4">
           <div className="space-y-6">
             {Array(5).fill(0).map((_, i) => (
@@ -103,7 +103,7 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
   }
 
   return (
-    <Card className="tron-card max-w-5xl mx-auto">
+    <Card className="tron-card max-w-5xl mx-auto bg-transparent backdrop-blur-sm">
       <div className="p-4 space-y-4">
         {/* Questions List */}
         <div className="space-y-6">

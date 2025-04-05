@@ -153,7 +153,7 @@ export default function Home() {
 
       {/* Loading state with Tron-styled Progress */}
       {isLoading && (
-        <Card className="mt-6 max-w-3xl mx-auto p-4 shadow-holo">
+        <Card className="mt-6 max-w-3xl mx-auto p-4 shadow-holo bg-transparent backdrop-blur-sm">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-tron">Loading questions: {progress.processed} / {progress.total}</span>

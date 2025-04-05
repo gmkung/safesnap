@@ -210,7 +210,7 @@
   
   /* Glass and steel specific components */
   .glass-panel {
-    @apply backdrop-blur-md bg-black/30 border border-space/10 rounded-lg shadow-glass;
+    @apply backdrop-blur-sm bg-black/10 border border-space/10 rounded-lg shadow-glass;
   }
   
   .steel-panel {
