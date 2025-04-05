@@ -3,13 +3,15 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
 import { formatUnits, parseUnits } from 'viem';
 import { ArrowLeft, Plus } from 'lucide-react';
-import { useAccount, useChains, useWalletClient, useConnect } from 'wagmi';
+import { useAccount, useChains, useWalletClient, useConnect, usePublicClient } from 'wagmi';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { RealityEthV3Abi__factory } from '@/types/contracts/factories/RealityEthV3Abi__factory';
+import { RealityEthV21Witharbitratorappeals__factory } from '@/types/contracts/factories/RealityEthV21Witharbitratorappeals__factory';
 import { injected } from 'wagmi/connectors';
 
 interface ContractConfig {
@@ -28,8 +30,6 @@ interface SubmitAnswerButtonProps {
 }
 
 // Answer constants
-const YES = "0x0000000000000000000000000000000000000000000000000000000000000001";
-const NO = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const ANSWERED_TOO_SOON = "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe";
 const INVALID_ANSWER = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
@@ -92,10 +92,14 @@ function SubmitAnswerButton({ question, onAnswerSubmitted }: SubmitAnswerButtonP
     const chain = chains[0];
     const { data: walletClient } = useWalletClient();
 
-    // Only show button for open questions
-    if (question.phase !== 'OPEN') {
+    const getDisabledReason = () => {
+        if (question.phase === 'PENDING_ARBITRATION') return 'Question is under arbitration';
+        if (question.phase === 'FINALIZED') return 'Question is already finalized';
+        if (question.timeToOpen && question.timeToOpen > 0) return 'Question is not open for answers yet';
         return null;
-    }
+    };
+
+    const disabledReason = getDisabledReason();
 
     const getAnswerBytes = (selectedOption: string): `0x${string}` => {
         // Handle special cases
@@ -185,62 +189,201 @@ function SubmitAnswerButton({ question, onAnswerSubmitted }: SubmitAnswerButtonP
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Button className="fixed bottom-6 right-6 z-50 flex items-center gap-2">
-                    <Plus className="w-4 h-4" />
-                    Submit Answer
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Submit Answer</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                        <label htmlFor="answer" className="text-sm font-medium">
-                            Answer
-                        </label>
-                        <Select value={answer} onValueChange={setAnswer}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select an answer" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {/* Show question options if they exist */}
-                                {question.options?.map((option, index) => (
-                                    <SelectItem key={index} value={option}>
-                                        {option}
-                                    </SelectItem>
-                                ))}
-                                {/* Always show special options */}
-                                <SelectItem value="invalid">Invalid</SelectItem>
-                                <SelectItem value="too soon">Answered too Soon</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="grid gap-2">
-                        <label htmlFor="bond" className="text-sm font-medium">
-                            Bond Amount ({question.contract.config.token_ticker})
-                        </label>
-                        <Input
-                            id="bond"
-                            type="number"
-                            placeholder={`Minimum: ${formatUnits(BigInt(question.minimumBond), 18)}`}
-                            value={bond}
-                            onChange={(e) => setBond(e.target.value)}
-                        />
-                    </div>
-                </div>
-                <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => setIsOpen(false)}>
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSubmit} disabled={isSubmitting}>
-                        {isSubmitting ? 'Submitting...' : 'Submit Answer'}
-                    </Button>
-                </div>
-            </DialogContent>
-        </Dialog>
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <span>
+                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                            <DialogTrigger asChild>
+                                <Button 
+                                    className="flex items-center gap-2"
+                                    disabled={!!disabledReason}
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Submit Answer
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle>Submit Answer</DialogTitle>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                    <div className="grid gap-2">
+                                        <label htmlFor="answer" className="text-sm font-medium">
+                                            Answer
+                                        </label>
+                                        <Select value={answer} onValueChange={setAnswer}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select an answer" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {/* Show question options if they exist */}
+                                                {question.options?.map((option, index) => (
+                                                    <SelectItem key={index} value={option}>
+                                                        {option}
+                                                    </SelectItem>
+                                                ))}
+                                                {/* Always show special options */}
+                                                <SelectItem value="invalid">Invalid</SelectItem>
+                                                <SelectItem value="too soon">Answered too Soon</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <label htmlFor="bond" className="text-sm font-medium">
+                                            Bond Amount ({question.contract.config.token_ticker})
+                                        </label>
+                                        <Input
+                                            id="bond"
+                                            type="number"
+                                            placeholder={`Minimum: ${formatUnits(BigInt(question.minimumBond), 18)}`}
+                                            value={bond}
+                                            onChange={(e) => setBond(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex justify-end gap-2">
+                                    <Button variant="outline" onClick={() => setIsOpen(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button onClick={handleSubmit} disabled={isSubmitting}>
+                                        {isSubmitting ? 'Submitting...' : 'Submit Answer'}
+                                    </Button>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    </span>
+                </TooltipTrigger>
+                {disabledReason && (
+                    <TooltipContent>
+                        <p>{disabledReason}</p>
+                    </TooltipContent>
+                )}
+            </Tooltip>
+        </TooltipProvider>
+    );
+}
+
+function RequestArbitrationButton({ question, onArbitrationRequested }: { question: Question; onArbitrationRequested: () => void }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { address, isConnected } = useAccount();
+    const chains = useChains();
+    const chain = chains[0];
+    const { data: walletClient } = useWalletClient();
+    const publicClient = usePublicClient();
+    const { toast } = useToast();
+
+    const getDisabledReason = () => {
+        if (question.phase === 'PENDING_ARBITRATION') return 'Arbitration already requested';
+        if (question.phase === 'FINALIZED') return 'Question is already finalized';
+        if (!question.currentAnswer) return 'No answer to dispute yet';
+        return null;
+    };
+
+    const disabledReason = getDisabledReason();
+
+    const handleRequestArbitration = async () => {
+        try {
+            setIsSubmitting(true);
+
+            if (!isConnected || !address) {
+                throw new Error('Please connect your wallet first');
+            }
+
+            if (!walletClient) {
+                throw new Error('Wallet client not available');
+            }
+
+            const questionIdBytes = `0x${question.id.replace('0x', '').padStart(64, '0')}` as `0x${string}`;
+
+            // Get arbitration fee using public client
+            const arbitrationFee = await publicClient.readContract({
+                address: question.arbitrator as `0x${string}`,
+                abi: RealityEthV21Witharbitratorappeals__factory.abi,
+                functionName: 'getDisputeFee',
+                args: [questionIdBytes]
+            });
+
+            // Request arbitration using wallet client
+            const { request } = await publicClient.simulateContract({
+                address: question.arbitrator as `0x${string}`,
+                abi: RealityEthV21Witharbitratorappeals__factory.abi,
+                functionName: 'requestArbitration',
+                args: [questionIdBytes, 0n],
+                value: arbitrationFee
+            });
+
+            const hash = await walletClient.writeContract(request);
+            await publicClient.waitForTransactionReceipt({ hash });
+
+            toast({
+                title: 'Arbitration requested',
+                description: 'Your arbitration request has been submitted successfully.',
+            });
+
+            setIsOpen(false);
+            onArbitrationRequested();
+        } catch (error) {
+            console.error('Error requesting arbitration:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: error instanceof Error ? error.message : 'Failed to request arbitration',
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <span>
+                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                            <DialogTrigger asChild>
+                                <Button 
+                                    variant="outline" 
+                                    className={disabledReason ? "border-gray-500 text-gray-500" : "border-yellow-500 text-yellow-500"}
+                                    disabled={!!disabledReason}
+                                >
+                                    Request Arbitration
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle>Request Arbitration</DialogTitle>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                    <p>
+                                        Are you sure you want to request arbitration for this question? This will:
+                                    </p>
+                                    <ul className="list-disc list-inside space-y-2">
+                                        <li>Freeze the current answer</li>
+                                        <li>Require payment of the arbitration fee</li>
+                                        <li>Submit the dispute to the arbitrator at {question.arbitrator}</li>
+                                    </ul>
+                                </div>
+                                <div className="flex justify-end gap-2">
+                                    <Button variant="outline" onClick={() => setIsOpen(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button onClick={handleRequestArbitration} disabled={isSubmitting}>
+                                        {isSubmitting ? 'Requesting...' : 'Confirm Request'}
+                                    </Button>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    </span>
+                </TooltipTrigger>
+                {disabledReason && (
+                    <TooltipContent>
+                        <p>{disabledReason}</p>
+                    </TooltipContent>
+                )}
+            </Tooltip>
+        </TooltipProvider>
     );
 }
 
@@ -365,7 +508,6 @@ export default function QuestionDetail() {
 
     return (
         <div className="max-w-4xl mx-auto p-6">
-            {/* Add ConnectWallet at the top */}
             <div className="flex justify-between items-center mb-6">
                 <button
                     onClick={handleBack}
@@ -374,7 +516,6 @@ export default function QuestionDetail() {
                     <ArrowLeft className="w-5 h-5 mr-2" />
                     Back to Questions
                 </button>
-                <ConnectWallet />
             </div>
 
             <h1 className="text-3xl font-bold mb-6 text-tron text-glow">{question.title}</h1>
@@ -389,10 +530,14 @@ export default function QuestionDetail() {
                     </div>
                     <div>
                         <dt className="font-medium text-tron-light/70">Status</dt>
-                        <dd className="mt-1">
+                        <dd className="mt-1 flex items-center gap-4">
                             <span className={`px-3 py-1 text-sm font-medium rounded-full border ${getStatusBadgeClass(question.phase)}`}>
                                 {question.phase}
                             </span>
+                            <RequestArbitrationButton 
+                                question={question} 
+                                onArbitrationRequested={() => loadQuestionDetails()} 
+                            />
                         </dd>
                     </div>
                     {question.options && question.options.length > 0 && (
@@ -412,6 +557,10 @@ export default function QuestionDetail() {
                         <dd className="mt-1 text-foreground">{question.qType}</dd>
                     </div>
                     <div>
+                        <dt className="font-medium text-tron-light/70">Arbitrator</dt>
+                        <dd className="mt-1 text-foreground font-mono">{question.arbitrator}</dd>
+                    </div>
+                    <div>
                         <dt className="font-medium text-tron-light/70">Raw Data</dt>
                         <dd className="mt-1">
                             <pre className="bg-tron-black/30 p-4 rounded-md overflow-x-auto text-sm border border-tron-dark/30">
@@ -421,7 +570,11 @@ export default function QuestionDetail() {
                     </div>
                     <div>
                         <dt className="font-medium text-tron-light/70">Current Answer</dt>
-                        <dd className="mt-1 text-foreground">{question.currentAnswer ? getHumanReadableAnswer(question.currentAnswer) : 'No answer yet'}</dd>
+                        <dd className="mt-1 flex items-center gap-4">
+                            <span className="text-foreground">
+                                {question.currentAnswer ? getHumanReadableAnswer(question.currentAnswer) : 'No answer yet'}
+                            </span>
+                        </dd>
                     </div>
                     <div>
                         <dt className="font-medium text-tron-light/70">Current Bond</dt>
@@ -454,6 +607,13 @@ export default function QuestionDetail() {
                         </div>
                     )}
                 </dl>
+            </div>
+
+            <div className="flex justify-end mb-6">
+                <SubmitAnswerButton 
+                    question={question} 
+                    onAnswerSubmitted={() => loadQuestionDetails()} 
+                />
             </div>
 
             {/* Template Information */}
@@ -583,10 +743,6 @@ export default function QuestionDetail() {
                     </dl>
                 </div>
             )}
-            <SubmitAnswerButton question={question} onAnswerSubmitted={() => {
-                // Refresh question data
-                loadQuestionDetails();
-            }} />
         </div>
     );
 }
