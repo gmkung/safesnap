@@ -2,7 +2,7 @@
 import { Question } from 'reality-kleros-subgraph';
 import RequestArbitrationButton from './RequestArbitration';
 import { formatBond, formatDate, getHumanReadableAnswer, getStatusBadgeClass, parseQuestionData } from '@/utils/questionUtils';
-import { ExternalLink, Info, Database, Calculator, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { ExternalLink, Info, Calculator, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import TemplateInfo from './TemplateInfo';
@@ -149,23 +149,11 @@ export default function QuestionDetails({
                                         <p className="text-foreground">{question.qType}</p>
                                     </div>
                                 </div>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
-                    
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button variant="steel" size="sm">
-                                <Database className="mr-2 h-4 w-4" />
-                                Oracle Contract Info
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="glass-panel max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                                <DialogTitle className="text-xl ethereal-text">Oracle Contract Information</DialogTitle>
-                            </DialogHeader>
-                            <div className="mt-4">
-                                <ContractInfo question={question} />
+
+                                <div>
+                                    <h3 className="text-lg font-medium text-space-light/70 mb-2">Oracle Contract Information</h3>
+                                    <ContractInfo question={question} />
+                                </div>
                             </div>
                         </DialogContent>
                     </Dialog>
