@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { retrieveQuestions, Question, QuestionProgress } from 'reality-kleros-subgraph';
 import { namehash, normalize } from 'viem/ens';
@@ -5,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 import { QuestionList } from '../components/QuestionList';
+import { Progress } from '@/components/ui/progress';
 
 // ENS Resolver contract address
 const ENS_RESOLVER_ADDRESS = '0x231b0ee14048e9dccd1d247744d114a4eb5e8e63';
@@ -123,6 +125,11 @@ export default function Home() {
     window.scrollTo(0, 0);
   };
 
+  // Calculate progress percentage
+  const progressPercentage = progress.total > 0 
+    ? Math.round((progress.processed / progress.total) * 100) 
+    : 0;
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">
@@ -142,28 +149,22 @@ export default function Home() {
         />
       )}
 
-      {/* Loading state */}
-      {isLoading && questions.length === 0 && (
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading questions...</p>
-        </div>
-      )}
-
-      {/* Progress indicator */}
-      {progress.total > 0 && (
-        <div className="mt-4 p-2 bg-gray-100 rounded">
-          <div className="text-sm text-gray-600">
-            <div>Loading questions: {progress.processed} / {progress.total}</div>
-            {progress.failed > 0 && (
-              <div className="text-yellow-500">Failed to process: {progress.failed}</div>
-            )}
-            {progress.lastTimestamp && (
-              <div className="text-gray-400">
-                Last update: {new Date(progress.lastTimestamp * 1000).toLocaleString()}
-              </div>
-            )}
+      {/* Loading state with Tron-styled Progress */}
+      {isLoading && (
+        <div className="mt-6 max-w-3xl mx-auto space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-tron">Loading questions: {progress.processed} / {progress.total}</span>
+            <span className="text-sm text-tron">{progressPercentage}%</span>
           </div>
+          <Progress value={progressPercentage} className="h-2" />
+          {progress.failed > 0 && (
+            <div className="text-yellow-500 text-sm mt-1">Failed to process: {progress.failed}</div>
+          )}
+          {progress.lastTimestamp && (
+            <div className="text-tron/60 text-xs">
+              Last update: {new Date(progress.lastTimestamp * 1000).toLocaleString()}
+            </div>
+          )}
         </div>
       )}
     </div>
