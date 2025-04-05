@@ -8,6 +8,7 @@ import { mainnet } from 'viem/chains';
 import { QuestionList } from '../components/QuestionList';
 import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
+import { questionBelongsToDao } from '@/utils/daoUtils';
 
 // ENS Resolver contract address
 const ENS_RESOLVER_ADDRESS = '0x231b0ee14048e9dccd1d247744d114a4eb5e8e63';
@@ -32,24 +33,22 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
 
-  // Get path from URL
-  const { '*': path } = useParams();
+  // Get params from URL using named route parameters
+  const params = useParams();
   const location = useLocation();
-  const pathSegments = location.pathname.split('/');
-  const isDao = pathSegments[1] === 'dao';
-  const ensName = path || null;
-  const daoEns = isDao ? ensName : null;
-
+  const daoEns = params.daoEns;
+  const ensName = params.ensName;
+  
   // Log when ENS or DAO is detected
   useEffect(() => {
     if (daoEns) {
       console.log('🔍 DAO ENS detected in URL:', daoEns);
-    } else if (ensName && !isDao) {
+    } else if (ensName) {
       console.log('🔍 ENS name detected in URL:', ensName);
     } else {
       console.log('📄 No ENS name in URL - showing all questions');
     }
-  }, [ensName, daoEns, isDao]);
+  }, [ensName, daoEns]);
 
   useEffect(() => {
     const loadQuestions = async () => {
@@ -61,7 +60,7 @@ export default function Home() {
         let userFilter: string | undefined;
 
         // If we have an ENS name, get the SafeSnap text record
-        if (ensName && !isDao) {
+        if (ensName && !daoEns) {
           try {
             // Calculate namehash
             const normalizedName = normalize(ensName);
@@ -122,7 +121,7 @@ export default function Home() {
     };
 
     loadQuestions();
-  }, [ensName, isDao]);
+  }, [ensName, daoEns]);
 
   // Filter questions by DAO ENS if needed
   useEffect(() => {
@@ -131,14 +130,9 @@ export default function Home() {
       const normalizedDaoEns = daoEns.toLowerCase();
       
       // Filter questions that mention the DAO in their title or data
-      const filtered = questions.filter(question => {
-        // Extract DAO name from the title - it's usually in the format "Did the Snapshot proposal ... in the {dao}.eth space pass ..."
-        const daoMatch = question.title.match(/in the ([a-zA-Z0-9]+\.eth) space/i);
-        const mentionedDao = daoMatch ? daoMatch[1].toLowerCase() : null;
-        
-        // Check if the mentioned DAO matches our filter
-        return mentionedDao === normalizedDaoEns;
-      });
+      const filtered = questions.filter(question => 
+        questionBelongsToDao(question, normalizedDaoEns)
+      );
       
       setFilteredQuestions(filtered);
       console.log(`Filtered ${filtered.length} questions for DAO: ${daoEns}`);
@@ -166,7 +160,7 @@ export default function Home() {
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">
         RealityETH Questions
-        {ensName && !isDao && <span className="text-gray-600 ml-2">for {ensName}</span>}
+        {ensName && <span className="text-gray-600 ml-2">for {ensName}</span>}
         {daoEns && <span className="text-gray-600 ml-2">for DAO: {daoEns}</span>}
       </h1>
 
