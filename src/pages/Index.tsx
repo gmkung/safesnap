@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { retrieveQuestions, Question, QuestionProgress } from 'reality-kleros-subgraph';
 import { namehash, normalize } from 'viem/ens';
@@ -5,6 +6,9 @@ import { useParams } from 'react-router-dom';
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 import { QuestionList } from '../components/QuestionList';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Loader, AlertCircle } from 'lucide-react';
 
 // ENS Resolver contract address
 const ENS_RESOLVER_ADDRESS = '0x231b0ee14048e9dccd1d247744d114a4eb5e8e63';
@@ -132,14 +136,29 @@ export default function Home() {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">
-        RealityETH Questions
-        {ensName && <span className="text-gray-600 ml-2">for {ensName}</span>}
-      </h1>
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2 text-tron text-glow">
+          RealityETH Questions
+          {ensName && <span className="text-tron-light/70 ml-2 text-xl">for {ensName}</span>}
+        </h1>
+        <p className="text-tron-light/60">
+          Browse and interact with questions on the RealityETH platform
+        </p>
+      </div>
 
       {error ? (
-        <div className="text-red-500">{error}</div>
+        <Card className="tron-card border-red-500/30 mb-6">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center text-red-400">
+              <AlertCircle className="mr-2 h-5 w-5" />
+              Error
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-400">{error}</p>
+          </CardContent>
+        </Card>
       ) : (
         <QuestionList
           questions={paginatedQuestions}
@@ -152,27 +171,47 @@ export default function Home() {
 
       {/* Loading state */}
       {isLoading && questions.length === 0 && (
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading questions...</p>
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-14 w-14 border-2 border-tron border-t-transparent mx-auto mb-4 shadow-tron"></div>
+          <p className="text-tron animate-pulse">Loading questions...</p>
         </div>
       )}
 
       {/* Progress indicator */}
       {progress.total > 0 && (
-        <div className="mt-4 p-2 bg-gray-100 rounded">
-          <div className="text-sm text-gray-600">
-            <div>Loading questions: {progress.processed} / {progress.total}</div>
-            {progress.failed > 0 && (
-              <div className="text-yellow-500">Failed to process: {progress.failed}</div>
-            )}
-            {progress.lastTimestamp && (
-              <div className="text-gray-400">
-                Last update: {new Date(progress.lastTimestamp * 1000).toLocaleString()}
+        <Card className="tron-card mt-6 max-w-md mx-auto">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center">
+              <Loader className="mr-2 h-4 w-4 animate-spin" />
+              Loading Progress
+            </CardTitle>
+            <CardDescription className="text-xs">
+              {progress.processed} of {progress.total} questions loaded
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Progress 
+              value={(progress.processed / progress.total) * 100} 
+              className="h-2 tron-progress-container"
+            />
+            
+            <div className="mt-3 text-xs text-tron-light/60 grid grid-cols-2 gap-2">
+              <div>
+                Processed: <span className="text-tron">{progress.processed}</span>
               </div>
-            )}
-          </div>
-        </div>
+              {progress.failed > 0 && (
+                <div className="text-amber-400">
+                  Failed: {progress.failed}
+                </div>
+              )}
+              {progress.lastTimestamp && (
+                <div className="col-span-2">
+                  Last update: {new Date(progress.lastTimestamp * 1000).toLocaleTimeString()}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
