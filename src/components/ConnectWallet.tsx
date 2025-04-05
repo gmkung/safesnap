@@ -46,6 +46,7 @@ export default function ConnectWallet() {
             variant="outline"
             className="border-tron"
             disabled={isConnecting}
+            title={isConnecting ? "Connecting to wallet..." : "Connect your wallet"}
         >
             {isConnecting ? "Connecting..." : "Connect Wallet"}
         </Button>

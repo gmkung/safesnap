@@ -5,12 +5,6 @@ import { useAccount, useChains, useWalletClient, usePublicClient } from 'wagmi';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { RealityEthV21Witharbitratorappeals__factory } from '@/types/contracts/factories/RealityEthV21Witharbitratorappeals__factory';
 
 interface RequestArbitrationButtonProps {
@@ -88,52 +82,40 @@ export default function RequestArbitrationButton({ question, onArbitrationReques
     };
 
     return (
-        <TooltipProvider>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <span>
-                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                            <DialogTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className={disabledReason ? "border-gray-500 text-gray-500" : "border-yellow-500 text-yellow-500"}
-                                    disabled={!!disabledReason}
-                                >
-                                    Request Arbitration
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                                <DialogHeader>
-                                    <DialogTitle>Request Arbitration</DialogTitle>
-                                </DialogHeader>
-                                <div className="grid gap-4 py-4">
-                                    <p>
-                                        Are you sure you want to request arbitration for this question? This will:
-                                    </p>
-                                    <ul className="list-disc list-inside space-y-2">
-                                        <li>Freeze the current answer</li>
-                                        <li>Require payment of the arbitration fee</li>
-                                        <li>Submit the dispute to the arbitrator at {question.arbitrator}</li>
-                                    </ul>
-                                </div>
-                                <div className="flex justify-end gap-2">
-                                    <Button variant="outline" onClick={() => setIsOpen(false)}>
-                                        Cancel
-                                    </Button>
-                                    <Button onClick={handleRequestArbitration} disabled={isSubmitting}>
-                                        {isSubmitting ? 'Requesting...' : 'Confirm Request'}
-                                    </Button>
-                                </div>
-                            </DialogContent>
-                        </Dialog>
-                    </span>
-                </TooltipTrigger>
-                {disabledReason && (
-                    <TooltipContent>
-                        <p>{disabledReason}</p>
-                    </TooltipContent>
-                )}
-            </Tooltip>
-        </TooltipProvider>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                <Button
+                    variant="outline"
+                    className={disabledReason ? "border-gray-500 text-gray-500" : "border-yellow-500 text-yellow-500"}
+                    disabled={!!disabledReason}
+                    title={disabledReason || "Request arbitration for this question"}
+                >
+                    Request Arbitration
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Request Arbitration</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <p>
+                        Are you sure you want to request arbitration for this question? This will:
+                    </p>
+                    <ul className="list-disc list-inside space-y-2">
+                        <li>Freeze the current answer</li>
+                        <li>Require payment of the arbitration fee</li>
+                        <li>Submit the dispute to the arbitrator at {question.arbitrator}</li>
+                    </ul>
+                </div>
+                <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setIsOpen(false)}>
+                        Cancel
+                    </Button>
+                    <Button onClick={handleRequestArbitration} disabled={isSubmitting}>
+                        {isSubmitting ? 'Requesting...' : 'Confirm Request'}
+                    </Button>
+                </div>
+            </DialogContent>
+        </Dialog>
     );
 }

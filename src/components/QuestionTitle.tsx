@@ -1,12 +1,6 @@
 
 import { Question } from 'reality-kleros-subgraph';
 import { Info } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { parseQuestionData } from '@/utils/questionUtils';
 
 interface QuestionTitleProps {
@@ -23,16 +17,7 @@ export default function QuestionTitle({ question }: QuestionTitleProps) {
             {parsedData.dao && (
                 <div className="text-tron text-xl font-medium flex items-center gap-2">
                     DAO: {parsedData.dao}
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger>
-                                <Info className="h-4 w-4 text-tron-light/70" />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p className="max-w-md text-sm">{question.title}</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+                    <Info className="h-4 w-4 text-tron-light/70" title={question.title} />
                 </div>
             )}
             <div className="space-y-2">

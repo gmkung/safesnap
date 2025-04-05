@@ -1,13 +1,7 @@
 
 import { Question } from 'reality-kleros-subgraph';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Info } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { ExternalLink } from 'lucide-react';
 import RequestArbitrationButton from './RequestArbitration';
 import { formatBond, formatDate, getHumanReadableAnswer, getProposalId, getStatusBadgeClass, parseQuestionData } from '@/utils/questionUtils';
 
