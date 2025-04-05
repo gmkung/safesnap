@@ -4,7 +4,6 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
 import { ArrowLeft, Info, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useQuery } from '@tanstack/react-query';
 import ProposalModal from '@/components/ProposalModal';
 import SubmitAnswerButton from '@/components/SubmitAnswer';
 import QuestionTitle from '@/components/QuestionTitle';
@@ -14,8 +13,6 @@ import ResponseHistory from '@/components/ResponseHistory';
 import ContractInfo from '@/components/ContractInfo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
-import { getProposalDetails } from '@/lib/snapshotQuery';
-import { parseQuestionData } from '@/utils/questionUtils';
 
 export default function QuestionDetail() {
     const { id } = useParams<{ id: string }>();
@@ -26,23 +23,6 @@ export default function QuestionDetail() {
     const [error, setError] = useState<string | null>(null);
     const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
     const [proposalId, setProposalId] = useState<string | null>(null);
-
-    // Extract proposal ID from question data if available
-    useEffect(() => {
-        if (question) {
-            const parsedData = parseQuestionData(question);
-            if (parsedData?.proposalId) {
-                setProposalId(parsedData.proposalId);
-            }
-        }
-    }, [question]);
-
-    // Fetch proposal details directly in the main view
-    const { data: proposalData, isLoading: proposalLoading } = useQuery({
-        queryKey: ['proposal', proposalId],
-        queryFn: () => proposalId ? getProposalDetails(proposalId) : Promise.resolve(null),
-        enabled: !!proposalId,
-    });
 
     const loadQuestionDetails = async () => {
         try {
@@ -124,12 +104,7 @@ export default function QuestionDetail() {
             </div>
 
             <h1 className="text-3xl font-bold mb-6 ethereal-text text-glow">
-                <QuestionTitle 
-                    question={question} 
-                    onViewProposal={handleViewProposal}
-                    proposalData={proposalData}
-                    isProposalLoading={proposalLoading}
-                />
+                <QuestionTitle question={question} onViewProposal={handleViewProposal} />
             </h1>
 
             <div className="flex flex-col gap-6 mb-8">
@@ -138,7 +113,6 @@ export default function QuestionDetail() {
                         question={question} 
                         onArbitrationRequested={loadQuestionDetails}
                         onViewProposal={handleViewProposal}
-                        proposalData={proposalData}
                     />
                 </div>
                 
