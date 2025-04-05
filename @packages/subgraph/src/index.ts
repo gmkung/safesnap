@@ -53,6 +53,7 @@ export interface QuestionFilters {
   arbitrationRequestedBy?: string;
   user?: string;
   templateId?: string;
+  qTitle?: string;
 }
 
 export interface QuestionProgress {
@@ -188,6 +189,10 @@ function buildQuery(filters: QuestionFilters & { batchSize?: number }): string {
     whereConditions.push(`arbitrator: "${filters.arbitrator.toLowerCase()}"`);
   }
 
+  if (filters.qTitle) {
+    whereConditions.push(`qTitle_contains_nocase: "${filters.qTitle}"`);
+  }
+
   if (filters.questionId) {
     whereConditions.push(`questionId: "${filters.questionId}"`);
   }
@@ -281,6 +286,7 @@ function buildQuery(filters: QuestionFilters & { batchSize?: number }): string {
         createdTimestamp
         timeout
         qType
+        qTitle
         bounty
         currentAnswer
         currentAnswerBond

@@ -1,22 +1,8 @@
-
 import { useEffect, useState } from 'react';
 import { retrieveQuestions, Question, QuestionProgress } from 'reality-kleros-subgraph';
-import { namehash, normalize } from 'viem/ens';
 import { useParams } from 'react-router-dom';
-import { createPublicClient, http } from 'viem';
-import { mainnet } from 'viem/chains';
 import { QuestionList } from '../components/QuestionList';
 import { Progress } from '@/components/ui/progress';
-import { Card } from '@/components/ui/card';
-
-// ENS Resolver contract address
-const ENS_RESOLVER_ADDRESS = '0x231b0ee14048e9dccd1d247744d114a4eb5e8e63';
-
-// Create Viem public client
-const publicClient = createPublicClient({
-  chain: mainnet,
-  transport: http()
-});
 
 const ITEMS_PER_PAGE = 20;
 
@@ -38,9 +24,9 @@ export default function Home() {
   // Log when ENS is detected
   useEffect(() => {
     if (ensName) {
-      console.log('🔍 ENS name detected in URL:', ensName);
+      console.log('🔍 DAO name detected in URL:', ensName);
     } else {
-      console.log('📄 No ENS name in URL - showing all questions');
+      console.log('📄 No DAO name in URL - showing all questions');
     }
   }, [ensName]);
 
@@ -51,51 +37,12 @@ export default function Home() {
         setQuestions([]);
         setProgress({ total: 0, processed: 0, failed: 0 });
 
-        let userFilter: string | undefined;
-
-        // If we have an ENS name, get the SafeSnap text record
-        if (ensName) {
-          try {
-            // Calculate namehash
-            const normalizedName = normalize(ensName);
-            const node = namehash(normalizedName);
-            console.log(`Namehash for ${ensName}:`, node);
-
-            // Call ENS resolver contract
-            const textRecord = await publicClient.readContract({
-              address: ENS_RESOLVER_ADDRESS,
-              abi: [{
-                name: 'text',
-                type: 'function',
-                inputs: [
-                  { name: 'node', type: 'bytes32' },
-                  { name: 'key', type: 'string' }
-                ],
-                outputs: [{ type: 'string' }],
-                stateMutability: 'view'
-              }],
-              functionName: 'text',
-              args: [node, 'SafeSnap']
-            });
-
-            console.log('SafeSnap text record:', textRecord);
-            if (textRecord) {
-              userFilter = textRecord.toLowerCase();
-              console.log('Using user filter:', userFilter);
-            }
-          } catch (err) {
-            console.error('Error fetching ENS text record:', err);
-            setError(`Failed to fetch ENS data for ${ensName}`);
-            return;
-          }
-        }
-
         // Process questions as they come in
         for await (const question of retrieveQuestions(
           1, // Ethereum mainnet
           {
             batchSize: 100,
-            ...(userFilter && { user: userFilter }),
+            ...(ensName && { qTitle: ensName }),
             arbitrator: '0xf72cfd1b34a91a64f9a98537fe63fbab7530adca'
           },
           (progress) => {
@@ -153,23 +100,21 @@ export default function Home() {
 
       {/* Loading state with Tron-styled Progress */}
       {isLoading && (
-        <Card className="mt-6 max-w-3xl mx-auto p-4 shadow-holo bg-transparent backdrop-blur-sm">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-tron">Loading questions: {progress.processed} / {progress.total}</span>
-              <span className="text-sm text-tron">{progressPercentage}%</span>
-            </div>
-            <Progress value={progressPercentage} className="h-2" />
-            {progress.failed > 0 && (
-              <div className="text-yellow-500 text-sm mt-1">Failed to process: {progress.failed}</div>
-            )}
-            {progress.lastTimestamp && (
-              <div className="text-tron/60 text-xs">
-                Last update: {new Date(progress.lastTimestamp * 1000).toLocaleString()}
-              </div>
-            )}
+        <div className="mt-6 max-w-3xl mx-auto space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-tron">Loading questions: {progress.processed} / {progress.total}</span>
+            <span className="text-sm text-tron">{progressPercentage}%</span>
           </div>
-        </Card>
+          <Progress value={progressPercentage} className="h-2" />
+          {progress.failed > 0 && (
+            <div className="text-yellow-500 text-sm mt-1">Failed to process: {progress.failed}</div>
+          )}
+          {progress.lastTimestamp && (
+            <div className="text-tron/60 text-xs">
+              Last update: {new Date(progress.lastTimestamp * 1000).toLocaleString()}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
