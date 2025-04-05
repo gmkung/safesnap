@@ -17,7 +17,13 @@ export default function QuestionTitle({ question }: QuestionTitleProps) {
             {parsedData.dao && (
                 <div className="text-tron text-xl font-medium flex items-center gap-2">
                     DAO: {parsedData.dao}
-                    <Info className="h-4 w-4 text-tron-light/70" title={question.title} />
+                    <div className="relative inline-flex items-center">
+                        <Info className="h-4 w-4 text-tron-light/70" />
+                        <span className="sr-only">{question.title}</span>
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 -translate-y-1 hidden group-hover:block bg-black/80 text-xs text-white p-1 rounded whitespace-nowrap">
+                            {question.title}
+                        </div>
+                    </div>
                 </div>
             )}
             <div className="space-y-2">
