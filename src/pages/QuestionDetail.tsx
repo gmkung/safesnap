@@ -1,7 +1,13 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
 import { formatUnits } from 'viem';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ContractConfig {
     address: string;
@@ -60,252 +66,285 @@ export default function QuestionDetail() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+            <div className="container mx-auto px-4 py-8 max-w-4xl">
+                <div className="animate-spin rounded-full h-14 w-14 border-2 border-tron border-t-transparent mx-auto mb-4 shadow-tron"></div>
+                <p className="text-tron animate-pulse text-center">Loading question details...</p>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="p-4 text-red-500">
-                Error: {error}
-            </div>
+            <Card className="tron-card border-red-500/30 max-w-4xl mx-auto mt-8">
+                <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center text-red-400">
+                        Error
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-red-400">{error}</p>
+                </CardContent>
+            </Card>
         );
     }
 
     if (!question) {
         return (
-            <div className="p-4">
-                Question not found. This might happen if you accessed this page directly.
-                Please go back to the questions list and click on a question to view its details.
-            </div>
+            <Card className="tron-card max-w-4xl mx-auto mt-8">
+                <CardHeader>
+                    <CardTitle>Question Not Found</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-tron-light/70">
+                        This might happen if you accessed this page directly.
+                        Please go back to the questions list and click on a question to view its details.
+                    </p>
+                    <Button onClick={handleBack} className="tron-button mt-4">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Questions
+                    </Button>
+                </CardContent>
+            </Card>
         );
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
             {/* Back button */}
-            <button
+            <Button
                 onClick={handleBack}
-                className="mb-6 inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                variant="outline"
+                className="tron-button mb-6"
             >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Questions
-            </button>
+            </Button>
 
-            <h1 className="text-3xl font-bold mb-6">{question.title}</h1>
-
-            {/* Basic Question Details */}
-            <div className="bg-white shadow rounded-lg p-6 mb-6">
-                <h2 className="text-xl font-semibold mb-4">Question Details</h2>
-                <dl className="grid grid-cols-1 gap-4">
-                    <div>
-                        <dt className="font-medium text-gray-500">Description</dt>
-                        <dd className="mt-1 text-gray-900">{question.description}</dd>
-                    </div>
-                    <div>
-                        <dt className="font-medium text-gray-500">Status</dt>
-                        <dd className="mt-1">
-                            <span className={`px-2 py-1 text-sm font-semibold rounded-full 
-                ${question.phase === 'OPEN' ? 'bg-green-100 text-green-800' :
-                                    question.phase === 'PENDING_ARBITRATION' ? 'bg-yellow-100 text-yellow-800' :
-                                        question.phase === 'FINALIZED' ? 'bg-blue-100 text-blue-800' :
-                                            'bg-gray-100 text-gray-800'}`}>
-                                {question.phase}
-                            </span>
-                        </dd>
-                    </div>
-                    {question.options && question.options.length > 0 && (
+            <Card className="tron-card mb-6">
+                <CardHeader>
+                    <Badge className={`${
+                        question.phase === 'OPEN' ? 'bg-tron/20 text-tron border-tron/30' : 
+                        question.phase === 'PENDING_ARBITRATION' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' :
+                        question.phase === 'FINALIZED' ? 'bg-tron-blue/20 text-tron-blue border-tron-blue/30' :
+                        'bg-tron-gray/20 text-tron-light/70 border-tron-light/20'
+                    } mb-2 self-start`}>
+                        {question.phase}
+                    </Badge>
+                    <CardTitle className="text-2xl text-tron text-glow">{question.title}</CardTitle>
+                    <CardDescription>
+                        Created: {formatDate(question.createdTimestamp * 1000)}
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-6">
                         <div>
-                            <dt className="font-medium text-gray-500">Options</dt>
-                            <dd className="mt-1 space-y-1">
-                                {question.options.map((option, index) => (
-                                    <div key={index} className="text-gray-900">
-                                        {index + 1}. {option}
-                                    </div>
-                                ))}
-                            </dd>
+                            <h3 className="text-tron-light mb-2 font-medium">Description</h3>
+                            <p className="text-tron-light/80">{question.description}</p>
                         </div>
-                    )}
-                    <div>
-                        <dt className="font-medium text-gray-500">Question Type</dt>
-                        <dd className="mt-1 text-gray-900">{question.qType}</dd>
-                    </div>
-                    <div>
-                        <dt className="font-medium text-gray-500">Raw Data</dt>
-                        <dd className="mt-1">
-                            <pre className="bg-gray-50 p-4 rounded-md overflow-x-auto text-sm">
+
+                        {question.options && question.options.length > 0 && (
+                            <div>
+                                <h3 className="text-tron-light mb-2 font-medium">Options</h3>
+                                <div className="space-y-1 bg-tron-black/30 p-3 rounded-md">
+                                    {question.options.map((option, index) => (
+                                        <div key={index} className="text-tron-light/80">
+                                            {index + 1}. {option}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h3 className="text-tron-light mb-2 font-medium">Question Type</h3>
+                                <p className="text-tron-light/80">{question.qType}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-tron-light mb-2 font-medium">Current Answer</h3>
+                                <p className="text-tron-light/80">{question.currentAnswer || 'No answer yet'}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-tron-light mb-2 font-medium">Current Bond</h3>
+                                <p className="text-tron-light/80">{formatBond(question.currentBond)}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-tron-light mb-2 font-medium">Minimum Bond</h3>
+                                <p className="text-tron-light/80">{formatBond(question.minimumBond)}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-tron-light mb-2 font-medium">Time Remaining</h3>
+                                <p className="text-tron-light/80">{question.timeRemaining ? `${Math.floor(question.timeRemaining / 1000)} seconds` : 'No time remaining'}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-tron-light mb-2 font-medium">Time to Open</h3>
+                                <p className="text-tron-light/80">{question.timeToOpen ? `${Math.floor(question.timeToOpen / 1000)} seconds` : 'Already open'}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-tron-light mb-2 font-medium">Opening Time</h3>
+                                <p className="text-tron-light/80">{formatDate(question.openingTimestamp * 1000)}</p>
+                            </div>
+                            {question.arbitrationRequestedBy && (
+                                <div>
+                                    <h3 className="text-tron-light mb-2 font-medium">Arbitration Requested By</h3>
+                                    <p className="text-tron-light/80">{question.arbitrationRequestedBy}</p>
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div>
+                            <h3 className="text-tron-light mb-2 font-medium">Raw Data</h3>
+                            <pre className="bg-tron-black/40 text-tron-light/70 p-4 rounded-md overflow-x-auto text-sm border border-tron-dark/50">
                                 {question.data}
                             </pre>
-                        </dd>
-                    </div>
-                    <div>
-                        <dt className="font-medium text-gray-500">Current Answer</dt>
-                        <dd className="mt-1 text-gray-900">{question.currentAnswer || 'No answer yet'}</dd>
-                    </div>
-                    <div>
-                        <dt className="font-medium text-gray-500">Current Bond</dt>
-                        <dd className="mt-1 text-gray-900">{formatBond(question.currentBond)}</dd>
-                    </div>
-                    <div>
-                        <dt className="font-medium text-gray-500">Minimum Bond</dt>
-                        <dd className="mt-1 text-gray-900">{formatBond(question.minimumBond)}</dd>
-                    </div>
-                    <div>
-                        <dt className="font-medium text-gray-500">Time Remaining</dt>
-                        <dd className="mt-1 text-gray-900">{question.timeRemaining ? `${Math.floor(question.timeRemaining / 1000)} seconds` : 'No time remaining'}</dd>
-                    </div>
-                    <div>
-                        <dt className="font-medium text-gray-500">Time to Open</dt>
-                        <dd className="mt-1 text-gray-900">{question.timeToOpen ? `${Math.floor(question.timeToOpen / 1000)} seconds` : 'Already open'}</dd>
-                    </div>
-                    <div>
-                        <dt className="font-medium text-gray-500">Created</dt>
-                        <dd className="mt-1 text-gray-900">{formatDate(question.createdTimestamp * 1000)}</dd>
-                    </div>
-                    <div>
-                        <dt className="font-medium text-gray-500">Opening Time</dt>
-                        <dd className="mt-1 text-gray-900">{formatDate(question.openingTimestamp * 1000)}</dd>
-                    </div>
-                    {question.arbitrationRequestedBy && (
-                        <div>
-                            <dt className="font-medium text-gray-500">Arbitration Requested By</dt>
-                            <dd className="mt-1 text-gray-900">{question.arbitrationRequestedBy}</dd>
                         </div>
-                    )}
-                </dl>
-            </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Template Information */}
             {question.template && (
-                <div className="bg-white shadow rounded-lg p-6 mb-6">
-                    <h2 className="text-xl font-semibold mb-4">Template Information</h2>
-                    <dl className="grid grid-cols-1 gap-4">
-                        <div>
-                            <dt className="font-medium text-gray-500">Template ID</dt>
-                            <dd className="mt-1 text-gray-900">{question.template.templateId}</dd>
-                        </div>
-                        <div>
-                            <dt className="font-medium text-gray-500">Question Text</dt>
-                            <dd className="mt-1 text-gray-900">{question.template.questionText}</dd>
-                        </div>
-                        {question.template.creator && (
+                <Card className="tron-card mb-6">
+                    <CardHeader>
+                        <CardTitle className="text-tron">Template Information</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <dt className="font-medium text-gray-500">Creator</dt>
-                                <dd className="mt-1 text-gray-900">{question.template.creator}</dd>
+                                <h3 className="text-tron-light mb-2 font-medium">Template ID</h3>
+                                <p className="text-tron-light/80">{question.template.templateId}</p>
                             </div>
-                        )}
-                        {question.template.creationTimestamp && (
                             <div>
-                                <dt className="font-medium text-gray-500">Created</dt>
-                                <dd className="mt-1 text-gray-900">{formatDate(question.template.creationTimestamp * 1000)}</dd>
+                                <h3 className="text-tron-light mb-2 font-medium">Question Text</h3>
+                                <p className="text-tron-light/80">{question.template.questionText}</p>
                             </div>
-                        )}
-                    </dl>
-                </div>
+                            {question.template.creator && (
+                                <div>
+                                    <h3 className="text-tron-light mb-2 font-medium">Creator</h3>
+                                    <p className="text-tron-light/80">{question.template.creator}</p>
+                                </div>
+                            )}
+                            {question.template.creationTimestamp && (
+                                <div>
+                                    <h3 className="text-tron-light mb-2 font-medium">Created</h3>
+                                    <p className="text-tron-light/80">{formatDate(question.template.creationTimestamp * 1000)}</p>
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
             )}
 
             {/* Answers History */}
             {question.answers && question.answers.length > 0 && (
-                <div className="bg-white shadow rounded-lg p-6 mb-6">
-                    <h2 className="text-xl font-semibold mb-4">Answer History</h2>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Answer</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bond</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {question.answers.map((answer, index) => (
-                                    <tr key={index}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{answer.value}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatBond(answer.bond)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(answer.timestamp)}</td>
+                <Card className="tron-card mb-6">
+                    <CardHeader>
+                        <CardTitle className="text-tron">Answer History</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="overflow-x-auto">
+                            <table className="tron-table min-w-full divide-y divide-tron-dark/30">
+                                <thead>
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-tron uppercase tracking-wider">Answer</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-tron uppercase tracking-wider">Bond</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-tron uppercase tracking-wider">Time</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                </thead>
+                                <tbody className="divide-y divide-tron-dark/30 bg-tron-black/20">
+                                    {question.answers.map((answer, index) => (
+                                        <tr key={index} className="hover:bg-tron-dark/20">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-tron-light">{answer.value}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-tron-light">{formatBond(answer.bond)}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-tron-light/70">{formatDate(answer.timestamp)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                </Card>
             )}
 
             {/* Responses */}
             {question.responses && question.responses.length > 0 && (
-                <div className="bg-white shadow rounded-lg p-6 mb-6">
-                    <h2 className="text-xl font-semibold mb-4">Responses</h2>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Response</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bond</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {question.responses.map((response, index) => (
-                                    <tr key={index}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{response.user}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{response.value}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatBond(response.bond)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(response.timestamp)}</td>
+                <Card className="tron-card mb-6">
+                    <CardHeader>
+                        <CardTitle className="text-tron">Responses</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="overflow-x-auto">
+                            <table className="tron-table min-w-full divide-y divide-tron-dark/30">
+                                <thead>
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-tron uppercase tracking-wider">User</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-tron uppercase tracking-wider">Response</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-tron uppercase tracking-wider">Bond</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-tron uppercase tracking-wider">Time</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                </thead>
+                                <tbody className="divide-y divide-tron-dark/30 bg-tron-black/20">
+                                    {question.responses.map((response, index) => (
+                                        <tr key={index} className="hover:bg-tron-dark/20">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-tron-light">{response.user}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-tron-light">{response.value}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-tron-light">{formatBond(response.bond)}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-tron-light/70">{formatDate(response.timestamp)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                </Card>
             )}
 
             {/* Contract Information */}
             {question.contract && (
-                <div className="bg-white shadow rounded-lg p-6">
-                    <h2 className="text-xl font-semibold mb-4">Contract Information</h2>
-                    <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <dt className="font-medium text-gray-500">Contract Address</dt>
-                            <dd className="mt-1 text-gray-900 font-mono">{question.contract.address}</dd>
-                        </div>
-                        <div>
-                            <dt className="font-medium text-gray-500">Contract Name</dt>
-                            <dd className="mt-1 text-gray-900">{question.contract.config?.contract_name}</dd>
-                        </div>
-                        <div>
-                            <dt className="font-medium text-gray-500">Contract Version</dt>
-                            <dd className="mt-1 text-gray-900">{question.contract.config?.contract_version}</dd>
-                        </div>
-                        <div>
-                            <dt className="font-medium text-gray-500">Version Number</dt>
-                            <dd className="mt-1 text-gray-900">{question.contract.config?.version_number}</dd>
-                        </div>
-                        <div>
-                            <dt className="font-medium text-gray-500">Chain ID</dt>
-                            <dd className="mt-1 text-gray-900">{question.contract.config?.chain_id}</dd>
-                        </div>
-                        <div>
-                            <dt className="font-medium text-gray-500">Token Ticker</dt>
-                            <dd className="mt-1 text-gray-900">{question.contract.config?.token_ticker}</dd>
-                        </div>
-                        {question.contract.config?.arbitrators && question.contract.config.arbitrators.length > 0 && (
-                            <div className="md:col-span-2">
-                                <dt className="font-medium text-gray-500">Arbitrators</dt>
-                                <dd className="mt-1 space-y-1">
-                                    {question.contract.config.arbitrators.map((arbitrator, index) => (
-                                        <div key={index} className="text-gray-900 font-mono">{arbitrator}</div>
-                                    ))}
-                                </dd>
+                <Card className="tron-card">
+                    <CardHeader>
+                        <CardTitle className="text-tron">Contract Information</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h3 className="text-tron-light mb-2 font-medium">Contract Address</h3>
+                                <p className="text-tron-light/80 font-mono text-sm truncate">{question.contract.address}</p>
                             </div>
-                        )}
-                    </dl>
-                </div>
+                            <div>
+                                <h3 className="text-tron-light mb-2 font-medium">Contract Name</h3>
+                                <p className="text-tron-light/80">{question.contract.config?.contract_name}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-tron-light mb-2 font-medium">Contract Version</h3>
+                                <p className="text-tron-light/80">{question.contract.config?.contract_version}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-tron-light mb-2 font-medium">Version Number</h3>
+                                <p className="text-tron-light/80">{question.contract.config?.version_number}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-tron-light mb-2 font-medium">Chain ID</h3>
+                                <p className="text-tron-light/80">{question.contract.config?.chain_id}</p>
+                            </div>
+                            <div>
+                                <h3 className="text-tron-light mb-2 font-medium">Token Ticker</h3>
+                                <p className="text-tron-light/80">{question.contract.config?.token_ticker}</p>
+                            </div>
+                            {question.contract.config?.arbitrators && question.contract.config.arbitrators.length > 0 && (
+                                <div className="md:col-span-2">
+                                    <h3 className="text-tron-light mb-2 font-medium">Arbitrators</h3>
+                                    <div className="space-y-1 bg-tron-black/30 p-3 rounded-md">
+                                        {question.contract.config.arbitrators.map((arbitrator, index) => (
+                                            <div key={index} className="text-tron-light/80 font-mono text-sm truncate">{arbitrator}</div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
             )}
         </div>
     );
-} 
+}
