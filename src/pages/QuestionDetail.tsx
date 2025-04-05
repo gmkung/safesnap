@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
-import { ArrowLeft, Info, Database, Loader2, ExternalLink, CheckCircle, XCircle, AlertTriangle, Calculator } from 'lucide-react';
+import { ArrowLeft, Info, Database, Loader2, CheckCircle, XCircle, AlertTriangle, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SubmitAnswerButton from '@/components/SubmitAnswer';
 import QuestionTitle from '@/components/QuestionTitle';
@@ -39,8 +39,6 @@ export default function QuestionDetail() {
     const loadQuestionDetails = async () => {
         try {
             setLoading(true);
-            // Here you would normally fetch the question details from an API
-            // Since we're using the state from location, we're just setting loading to false
         } catch (err) {
             console.error('Error loading question details:', err);
             setError(err instanceof Error ? err.message : 'Failed to load question details');
@@ -171,6 +169,15 @@ export default function QuestionDetail() {
             </h1>
 
             <div className="flex flex-col gap-6 mb-8">
+                <div className="w-full">
+                    <QuestionDetails 
+                        question={question} 
+                        onArbitrationRequested={loadQuestionDetails}
+                        onViewProposal={() => {}} 
+                        proposalData={proposalData}
+                    />
+                </div>
+                
                 {proposalLoading ? (
                     <div className="w-full steel-panel p-6 flex items-center justify-center">
                         <Loader2 className="h-8 w-8 animate-spin text-space" />
@@ -184,18 +191,8 @@ export default function QuestionDetail() {
                                 <div className="text-xl font-bold text-space">
                                     {proposalData.title}
                                 </div>
-                                <a 
-                                    href={getSnapshotUrl(proposalData.space.id, proposalData.id)} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="steel-button inline-flex items-center"
-                                >
-                                    <ExternalLink className="w-4 h-4 mr-2" />
-                                    View Complete Proposal on Snapshot
-                                </a>
                             </div>
                             
-                            {/* Transaction Hash Verification Panel */}
                             {hashVerification && (
                                 <div className={cn(
                                     "p-4 rounded-md border",
@@ -239,7 +236,6 @@ export default function QuestionDetail() {
                                 </div>
                             )}
 
-                            {/* Add Transaction Hash Calculation Modal */}
                             {hashVerification && (
                                 <TransactionHashModal 
                                     open={hashModalOpen} 
@@ -471,14 +467,6 @@ export default function QuestionDetail() {
                         No proposal data available
                     </div>
                 )}
-                
-                <div className="w-full">
-                    <QuestionDetails 
-                        question={question} 
-                        onArbitrationRequested={loadQuestionDetails}
-                        onViewProposal={() => {}} // Empty function as we don't need modal anymore
-                    />
-                </div>
                 
                 <div className="w-full">
                     <Card>
