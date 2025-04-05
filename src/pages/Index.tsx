@@ -5,15 +5,9 @@ import { useParams } from 'react-router-dom';
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
 import { QuestionList } from '../components/QuestionList';
+import { Progress } from '@/components/ui/progress';
 
-// ENS Resolver contract address
 const ENS_RESOLVER_ADDRESS = '0x231b0ee14048e9dccd1d247744d114a4eb5e8e63';
-
-// Create Viem public client
-const publicClient = createPublicClient({
-  chain: mainnet,
-  transport: http()
-});
 
 const ITEMS_PER_PAGE = 20;
 
@@ -28,11 +22,9 @@ export default function Home() {
   });
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Get ENS name from URL path
   const { '*': ensPath } = useParams();
   const ensName = ensPath || null;
 
-  // Log when ENS is detected
   useEffect(() => {
     if (ensName) {
       console.log('🔍 ENS name detected in URL:', ensName);
@@ -50,15 +42,12 @@ export default function Home() {
 
         let userFilter: string | undefined;
 
-        // If we have an ENS name, get the SafeSnap text record
         if (ensName) {
           try {
-            // Calculate namehash
             const normalizedName = normalize(ensName);
             const node = namehash(normalizedName);
             console.log(`Namehash for ${ensName}:`, node);
 
-            // Call ENS resolver contract
             const textRecord = await publicClient.readContract({
               address: ENS_RESOLVER_ADDRESS,
               abi: [{
@@ -87,7 +76,6 @@ export default function Home() {
           }
         }
 
-        // Process questions as they come in
         for await (const question of retrieveQuestions(
           1, // Ethereum mainnet
           {
@@ -113,7 +101,6 @@ export default function Home() {
     loadQuestions();
   }, [ensName]);
 
-  // Calculate paginated questions
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedQuestions = questions.slice(startIndex, endIndex);
@@ -125,13 +112,20 @@ export default function Home() {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">
+      <h1 className="text-2xl font-bold mb-4 text-tron text-glow">
         RealityETH Questions
-        {ensName && <span className="text-gray-600 ml-2">for {ensName}</span>}
+        {ensName && <span className="text-muted-foreground ml-2">for {ensName}</span>}
       </h1>
 
       {error ? (
-        <div className="text-red-500">{error}</div>
+        <div className="text-red-500 tron-card p-6 text-center">
+          <div className="w-12 h-12 mx-auto bg-red-500/10 rounded-full flex items-center justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          {error}
+        </div>
       ) : (
         <QuestionList
           questions={paginatedQuestions}
@@ -142,24 +136,33 @@ export default function Home() {
         />
       )}
 
-      {/* Loading state */}
       {isLoading && questions.length === 0 && (
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading questions...</p>
+        <div className="tron-card p-8 text-center">
+          <div className="relative h-16 w-16 mx-auto mb-4">
+            <div className="absolute inset-0 rounded-full border-4 border-t-tron border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-r-tron border-t-transparent border-b-transparent border-l-transparent animate-spin animation-delay-200" style={{animationDelay: "0.2s"}}></div>
+            <div className="absolute inset-0 rounded-full border-4 border-b-tron border-t-transparent border-r-transparent border-l-transparent animate-spin animation-delay-400" style={{animationDelay: "0.4s"}}></div>
+          </div>
+          <p className="mt-4 text-tron text-glow animate-pulse">Loading questions...</p>
         </div>
       )}
 
-      {/* Progress indicator */}
       {progress.total > 0 && (
-        <div className="mt-4 p-2 bg-gray-100 rounded">
-          <div className="text-sm text-gray-600">
-            <div>Loading questions: {progress.processed} / {progress.total}</div>
+        <div className="mt-6 p-4 tron-card">
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm text-muted-foreground">
+              <span>Processing questions</span>
+              <span>{progress.processed} / {progress.total}</span>
+            </div>
+            <Progress value={(progress.processed / progress.total) * 100} />
+            
             {progress.failed > 0 && (
-              <div className="text-yellow-500">Failed to process: {progress.failed}</div>
+              <div className="text-amber-500 text-xs mt-1">
+                Failed to process: {progress.failed}
+              </div>
             )}
             {progress.lastTimestamp && (
-              <div className="text-gray-400">
+              <div className="text-muted-foreground text-xs mt-1">
                 Last update: {new Date(progress.lastTimestamp * 1000).toLocaleString()}
               </div>
             )}
