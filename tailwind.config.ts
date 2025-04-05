@@ -63,15 +63,15 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom Tron theme colors
-				tron: {
-					DEFAULT: '#0CFA60', // bright green
-					dark: '#0A8040',
-					light: '#5EFFA0',
-					blue: '#0EA5E9',
-					darkBlue: '#1E293B',
-					black: '#000B14',
-					gray: '#1E293B',
+				// Spaceship UI Colors
+				space: {
+					DEFAULT: '#5B88F6', // bright blue
+					dark: '#112240',
+					light: '#A8C0FB',
+					accent: '#F657B3', // neon pink
+					darkBlue: '#0D1A30',
+					black: '#060E1B',
+					gray: '#2A3A53',
 				}
 			},
 			borderRadius: {
@@ -80,14 +80,16 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			boxShadow: {
-				'tron': '0 0 10px theme("colors.tron.DEFAULT"), 0 0 20px theme("colors.tron.dark")',
-				'tron-lg': '0 0 15px theme("colors.tron.DEFAULT"), 0 0 30px theme("colors.tron.DEFAULT")',
-				'tron-blue': '0 0 10px theme("colors.tron.blue"), 0 0 20px theme("colors.tron.blue")',
+				'holo': '0 0 15px theme("colors.space.DEFAULT"), 0 0 30px rgba(91, 136, 246, 0.5)',
+				'holo-lg': '0 0 20px theme("colors.space.DEFAULT"), 0 0 40px rgba(91, 136, 246, 0.7)',
+				'holo-pink': '0 0 15px theme("colors.space.accent"), 0 0 30px rgba(246, 87, 179, 0.5)',
 			},
 			backgroundImage: {
-				'tron-grid': 'linear-gradient(rgba(12, 250, 96, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(12, 250, 96, 0.1) 1px, transparent 1px)',
-				'tron-glow': 'radial-gradient(circle at center, rgba(12, 250, 96, 0.15) 0%, transparent 70%)',
-				'tron-gradient': 'linear-gradient(135deg, rgba(10, 128, 64, 0.8) 0%, rgba(12, 250, 96, 0.4) 100%)',
+				'space-grid': 'linear-gradient(rgba(91, 136, 246, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(91, 136, 246, 0.1) 1px, transparent 1px)',
+				'space-glow': 'radial-gradient(circle at center, rgba(91, 136, 246, 0.15) 0%, transparent 70%)',
+				'space-gradient': 'linear-gradient(135deg, rgba(17, 34, 64, 0.8) 0%, rgba(91, 136, 246, 0.4) 100%)',
+				'holographic': 'linear-gradient(135deg, rgba(91, 136, 246, 0.2) 0%, rgba(246, 87, 179, 0.2) 50%, rgba(91, 136, 246, 0.2) 100%)',
+				'ethereal-gradient': 'linear-gradient(to right, rgba(91, 136, 246, 0.7), rgba(246, 87, 179, 0.7))',
 			},
 			keyframes: {
 				'accordion-down': {
@@ -106,15 +108,15 @@ export default {
 						height: '0'
 					}
 				},
-				'pulse-glow': {
+				'holo-glow': {
 					'0%, 100%': { 
-						boxShadow: '0 0 10px theme("colors.tron.DEFAULT"), 0 0 20px rgba(12, 250, 96, 0.4)' 
+						boxShadow: '0 0 10px theme("colors.space.DEFAULT"), 0 0 20px rgba(91, 136, 246, 0.4)' 
 					},
 					'50%': { 
-						boxShadow: '0 0 15px theme("colors.tron.DEFAULT"), 0 0 30px rgba(12, 250, 96, 0.7)' 
+						boxShadow: '0 0 15px theme("colors.space.DEFAULT"), 0 0 30px rgba(91, 136, 246, 0.7)' 
 					},
 				},
-				'glow-fade': {
+				'ethereal-fade': {
 					'0%': { 
 						opacity: '0.8' 
 					},
@@ -125,21 +127,26 @@ export default {
 						opacity: '0.8' 
 					},
 				},
-				'circuit-flow': {
+				'holo-scan': {
 					'0%': { 
 						backgroundPosition: '0% 0%' 
 					},
 					'100%': { 
 						backgroundPosition: '200% 0%' 
 					},
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' },
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'pulse-glow': 'pulse-glow 2s infinite',
-				'glow-fade': 'glow-fade 3s infinite',
-				'circuit-flow': 'circuit-flow 15s linear infinite'
+				'holo-glow': 'holo-glow 2s infinite',
+				'ethereal-fade': 'ethereal-fade 3s infinite',
+				'holo-scan': 'holo-scan 15s linear infinite',
+				'float': 'float 5s ease-in-out infinite',
 			}
 		}
 	},

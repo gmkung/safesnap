@@ -65,14 +65,14 @@ function ConnectWallet() {
                 <DropdownMenuTrigger asChild>
                     <Button
                         variant="outline"
-                        className="border-tron"
+                        className="border-space holo-button glass-morphism"
                     >
                         <code className="text-sm">{`${address?.slice(0, 6)}...${address?.slice(-4)}`}</code>
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="minimal-chrome backdrop-blur-lg">
                     <DropdownMenuItem
-                        className="text-red-500 cursor-pointer"
+                        className="text-red-500 cursor-pointer hover:bg-space-dark/50"
                         onClick={handleDisconnect}
                     >
                         <LogOut className="mr-2 h-4 w-4" />
@@ -87,7 +87,7 @@ function ConnectWallet() {
         <Button
             onClick={handleConnect}
             variant="outline"
-            className="border-tron"
+            className="border-space holo-button holographic-element"
             disabled={isConnecting}
         >
             {isConnecting ? "Connecting..." : "Connect Wallet"}
@@ -99,11 +99,11 @@ export default function Layout() {
     return (
         <div className="min-h-screen bg-background flex flex-col">
             {/* Header */}
-            <header className="border-b border-tron-dark/30">
+            <header className="border-b border-space-dark/30 backdrop-blur-md z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="h-16 flex items-center justify-between">
                         <div className="flex items-center">
-                            <a href="/" className="text-tron text-xl font-bold">
+                            <a href="/" className="ethereal-text text-xl font-bold">
                                 Reality.eth
                             </a>
                         </div>

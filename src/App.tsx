@@ -33,7 +33,7 @@ const App = () => (
           </Route>
         </Routes>
         <Toaster />
-        <Sonner />
+        <Sonner className="backdrop-blur-md" />
       </BrowserRouter>
     </QueryClientProvider>
   </WagmiProvider>
