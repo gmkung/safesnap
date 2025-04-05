@@ -13,7 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { getProposalDetails, calculateTransactionArrayHash, compareTransactionHashes } from '@/lib/snapshotQuery';
 import { useToast } from '@/hooks/use-toast';
-import { parseQuestionData } from '@/utils/questionUtils';
+import { parseQuestionData, formatDate } from '@/utils/questionUtils';
 import { cn } from '@/lib/utils';
 
 export default function QuestionDetail() {
@@ -102,10 +102,6 @@ export default function QuestionDetail() {
         navigate(-1);
     };
 
-    const formatDate = (timestamp: number) => {
-        return new Date(timestamp * 1000).toLocaleString();
-    };
-
     if (loading && !question) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -146,10 +142,6 @@ export default function QuestionDetail() {
             </div>
         );
     }
-
-    const formatDate = (timestamp: number) => {
-        return new Date(timestamp * 1000).toLocaleString();
-    };
 
     return (
         <div className="max-w-6xl mx-auto p-6">
@@ -294,15 +286,15 @@ export default function QuestionDetail() {
                                         </div>
                                         <div>
                                             <span className="font-medium text-space-light/70">Start:</span>
-                                            <span className="ml-2">{formatDate(proposalData.start)}</span>
+                                            <span className="ml-2">{formatDate(proposalData.start * 1000)}</span>
                                         </div>
                                         <div>
                                             <span className="font-medium text-space-light/70">End:</span>
-                                            <span className="ml-2">{formatDate(proposalData.end)}</span>
+                                            <span className="ml-2">{formatDate(proposalData.end * 1000)}</span>
                                         </div>
                                         <div>
                                             <span className="font-medium text-space-light/70">Created:</span>
-                                            <span className="ml-2">{formatDate(proposalData.created)}</span>
+                                            <span className="ml-2">{formatDate(proposalData.created * 1000)}</span>
                                         </div>
                                         <div>
                                             <span className="font-medium text-space-light/70">Snapshot:</span>
