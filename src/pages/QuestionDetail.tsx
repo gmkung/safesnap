@@ -1,16 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
-import { ArrowLeft, Info, Database, Loader2, CheckCircle, XCircle, AlertTriangle, Calculator } from 'lucide-react';
+import { ArrowLeft, Loader2, CheckCircle, XCircle, AlertTriangle, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SubmitAnswerButton from '@/components/SubmitAnswer';
 import QuestionTitle from '@/components/QuestionTitle';
 import QuestionDetails from '@/components/QuestionDetails';
-import TemplateInfo from '@/components/TemplateInfo';
 import ResponseHistory from '@/components/ResponseHistory';
-import ContractInfo from '@/components/ContractInfo';
 import TransactionHashModal from '@/components/TransactionHashModal';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { getProposalDetails, calculateTransactionArrayHash, compareTransactionHashes } from '@/lib/snapshotQuery';
 import { useToast } from '@/hooks/use-toast';
@@ -107,10 +104,6 @@ export default function QuestionDetail() {
         return new Date(timestamp * 1000).toLocaleString();
     };
 
-    const getSnapshotUrl = (spaceId: string, proposalId: string) => {
-        return `https://v1.snapshot.box/#/${spaceId}/proposal/${proposalId}`;
-    };
-
     if (loading && !question) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -169,6 +162,7 @@ export default function QuestionDetail() {
             </h1>
 
             <div className="flex flex-col gap-6 mb-8">
+                {/* Question Details Section */}
                 <div className="w-full">
                     <QuestionDetails 
                         question={question} 
@@ -178,6 +172,79 @@ export default function QuestionDetail() {
                     />
                 </div>
                 
+                {/* Transaction Hash Verification Section */}
+                {hashVerification && (
+                    <div className={cn(
+                        "p-4 rounded-md border",
+                        hashVerification.match 
+                            ? "border-green-500/30 bg-green-500/10" 
+                            : hashVerification.calculatedHash 
+                                ? "border-red-500/30 bg-red-500/10"
+                                : "border-yellow-500/30 bg-yellow-500/10"
+                    )}>
+                        <div className="flex items-center gap-2 mb-3">
+                            {hashVerification.match ? (
+                                <CheckCircle className="h-6 w-6 text-green-500" />
+                            ) : hashVerification.calculatedHash ? (
+                                <XCircle className="h-6 w-6 text-red-500" />
+                            ) : (
+                                <AlertTriangle className="h-6 w-6 text-yellow-500" />
+                            )}
+                            <span className={cn("text-lg font-medium", hashVerification.matchClass)}>
+                                {hashVerification.matchText}
+                            </span>
+                            
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="ml-auto"
+                                onClick={() => setHashModalOpen(true)}
+                            >
+                                <Calculator className="h-4 w-4 mr-2" />
+                                View Calculation Details
+                            </Button>
+                        </div>
+                        
+                        {hashVerification.calculatedHash && (
+                            <div className="text-sm mt-2">
+                                <span className="font-medium text-space-light/70">Calculated Hash:</span>
+                                <code className="ml-2 bg-space-dark/30 px-2 py-1 rounded text-sm font-mono break-all">
+                                    {hashVerification.calculatedHash}
+                                </code>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {hashVerification && (
+                    <TransactionHashModal 
+                        open={hashModalOpen} 
+                        onOpenChange={setHashModalOpen}
+                        calculatedHash={hashVerification.calculatedHash}
+                        expectedHash={parseQuestionData(question)?.transactionHash || ''}
+                        transactionHashes={hashVerification.transactionHashes}
+                        match={hashVerification.match}
+                        proposalData={proposalData}
+                    />
+                )}
+                
+                {/* Answer History Section */}
+                <div className="w-full">
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="mb-4 flex justify-between">
+                                <div className="text-xl font-semibold ethereal-text">Answer History</div>
+                                <SubmitAnswerButton
+                                    question={question}
+                                    onAnswerSubmitted={loadQuestionDetails}
+                                />
+                            </div>
+                            <ResponseHistory question={question} />
+                        </CardContent>
+                    </Card>
+                </div>
+                
+                {/* Proposal Details Section */}
                 {proposalLoading ? (
                     <div className="w-full steel-panel p-6 flex items-center justify-center">
                         <Loader2 className="h-8 w-8 animate-spin text-space" />
@@ -185,7 +252,7 @@ export default function QuestionDetail() {
                     </div>
                 ) : proposalData ? (
                     <div className="w-full steel-panel">
-                        <h2 className="text-xl font-semibold ethereal-text p-4 border-b border-space-dark/30">Proposal Details</h2>
+                        <h2 className="text-xl font-semibold ethereal-text p-4 border-b border-space-dark/30">Snapshot Proposal Summary</h2>
                         <div className="p-4 space-y-4">
                             <div className="flex justify-between items-center">
                                 <div className="text-xl font-bold text-space">
@@ -193,61 +260,6 @@ export default function QuestionDetail() {
                                 </div>
                             </div>
                             
-                            {hashVerification && (
-                                <div className={cn(
-                                    "p-4 rounded-md border",
-                                    hashVerification.match 
-                                        ? "border-green-500/30 bg-green-500/10" 
-                                        : hashVerification.calculatedHash 
-                                            ? "border-red-500/30 bg-red-500/10"
-                                            : "border-yellow-500/30 bg-yellow-500/10"
-                                )}>
-                                    <div className="flex items-center gap-2 mb-3">
-                                        {hashVerification.match ? (
-                                            <CheckCircle className="h-6 w-6 text-green-500" />
-                                        ) : hashVerification.calculatedHash ? (
-                                            <XCircle className="h-6 w-6 text-red-500" />
-                                        ) : (
-                                            <AlertTriangle className="h-6 w-6 text-yellow-500" />
-                                        )}
-                                        <span className={cn("text-lg font-medium", hashVerification.matchClass)}>
-                                            {hashVerification.matchText}
-                                        </span>
-                                        
-                                        <Button 
-                                            variant="outline" 
-                                            size="sm" 
-                                            className="ml-auto"
-                                            onClick={() => setHashModalOpen(true)}
-                                        >
-                                            <Calculator className="h-4 w-4 mr-2" />
-                                            View Calculation Details
-                                        </Button>
-                                    </div>
-                                    
-                                    {hashVerification.calculatedHash && (
-                                        <div className="text-sm mt-2">
-                                            <span className="font-medium text-space-light/70">Calculated Hash:</span>
-                                            <code className="ml-2 bg-space-dark/30 px-2 py-1 rounded text-sm font-mono break-all">
-                                                {hashVerification.calculatedHash}
-                                            </code>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {hashVerification && (
-                                <TransactionHashModal 
-                                    open={hashModalOpen} 
-                                    onOpenChange={setHashModalOpen}
-                                    calculatedHash={hashVerification.calculatedHash}
-                                    expectedHash={parseQuestionData(question)?.transactionHash || ''}
-                                    transactionHashes={hashVerification.transactionHashes}
-                                    match={hashVerification.match}
-                                    proposalData={proposalData}
-                                />
-                            )}
-
                             <div className="text-sm text-space-light/70">
                                 Space: {proposalData.space.name}
                             </div>
@@ -284,9 +296,15 @@ export default function QuestionDetail() {
                                     <span className="ml-2">{proposalData.network}</span>
                                 </div>
                                 <div>
-                                    <span className="font-medium text-space-light/70">Type:</span>
-                                    <span className="ml-2 capitalize">{proposalData.type}</span>
+                                    <span className="font-medium text-space-light/70">Total Votes:</span>
+                                    <span className="ml-2">{proposalData.votes}</span>
                                 </div>
+                                {proposalData.scores_total !== undefined && (
+                                    <div>
+                                        <span className="font-medium text-space-light/70">Score:</span>
+                                        <span className="ml-2">{proposalData.scores_total.toFixed(2)}</span>
+                                    </div>
+                                )}
                                 {proposalData.quorum && (
                                     <div>
                                         <span className="font-medium text-space-light/70">Quorum:</span>
@@ -297,16 +315,6 @@ export default function QuestionDetail() {
                                     <span className="font-medium text-space-light/70">Privacy:</span>
                                     <span className="ml-2 capitalize">{proposalData.privacy}</span>
                                 </div>
-                                <div>
-                                    <span className="font-medium text-space-light/70">Total Votes:</span>
-                                    <span className="ml-2">{proposalData.votes}</span>
-                                </div>
-                                {proposalData.scores_total !== undefined && (
-                                    <div>
-                                        <span className="font-medium text-space-light/70">Score:</span>
-                                        <span className="ml-2">{proposalData.scores_total.toFixed(2)}</span>
-                                    </div>
-                                )}
                             </div>
 
                             {proposalData.labels && proposalData.labels.length > 0 && (
@@ -334,19 +342,6 @@ export default function QuestionDetail() {
                                                         ({proposalData.scores[index].toFixed(2)} {proposalData.symbol})
                                                     </span>
                                                 )}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-
-                            {proposalData.strategies && proposalData.strategies.length > 0 && (
-                                <div className="mt-4">
-                                    <h3 className="font-medium text-space-light/70 mb-2">Voting Strategies:</h3>
-                                    <ul className="list-disc list-inside space-y-1">
-                                        {proposalData.strategies.map((strategy, index) => (
-                                            <li key={index}>
-                                                {strategy.name} ({strategy.network})
                                             </li>
                                         ))}
                                     </ul>
@@ -467,71 +462,6 @@ export default function QuestionDetail() {
                         No proposal data available
                     </div>
                 )}
-                
-                <div className="w-full">
-                    <Card>
-                        <CardContent className="pt-6">
-                            <div className="mb-4 flex justify-between">
-                                <div className="text-xl font-semibold ethereal-text">Answer History</div>
-                                <SubmitAnswerButton
-                                    question={question}
-                                    onAnswerSubmitted={loadQuestionDetails}
-                                />
-                            </div>
-                            <ResponseHistory question={question} />
-                        </CardContent>
-                    </Card>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button variant="steel" className="w-full">
-                                <Info className="mr-2 h-4 w-4" />
-                                Additional Question Details
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="glass-panel max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                                <DialogTitle className="text-xl ethereal-text">Additional Details</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-6 mt-4">
-                                {question.description && (
-                                    <div>
-                                        <h3 className="text-lg font-medium text-space-light/70 mb-2">Description</h3>
-                                        <div className="glass-panel p-4">{question.description}</div>
-                                    </div>
-                                )}
-                                {question.data && (
-                                    <div>
-                                        <h3 className="text-lg font-medium text-space-light/70 mb-2">Raw Data</h3>
-                                        <pre className="glass-panel p-4 overflow-x-auto text-sm whitespace-pre-wrap">
-                                            {question.data}
-                                        </pre>
-                                    </div>
-                                )}
-                                <TemplateInfo question={question} />
-                            </div>
-                        </DialogContent>
-                    </Dialog>
-                    
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button variant="steel" className="w-full">
-                                <Database className="mr-2 h-4 w-4" />
-                                Oracle Contract Info
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="glass-panel max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                                <DialogTitle className="text-xl ethereal-text">Oracle Contract Information</DialogTitle>
-                            </DialogHeader>
-                            <div className="mt-4">
-                                <ContractInfo question={question} />
-                            </div>
-                        </DialogContent>
-                    </Dialog>
-                </div>
             </div>
         </div>
     );
