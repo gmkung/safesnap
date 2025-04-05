@@ -31,7 +31,6 @@ export default function Home() {
     failed: 0
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [loadingComplete, setLoadingComplete] = useState(false);
 
   // Get ENS name from URL path
   const { '*': ensPath } = useParams();
@@ -47,19 +46,13 @@ export default function Home() {
   }, [ensName]);
 
   useEffect(() => {
-    let isMounted = true;
-    let userFilter: string | undefined;
-    let questionsCache: Question[] = [];
-    let retrievePromise: Promise<Question[]> | null = null;
-    
     const loadQuestions = async () => {
       try {
-        if (!isMounted) return;
-        
         setIsLoading(true);
         setQuestions([]);
         setProgress({ total: 0, processed: 0, failed: 0 });
-        setLoadingComplete(false);
+
+        let userFilter: string | undefined;
 
         // If we have an ENS name, get the SafeSnap text record
         if (ensName) {
@@ -94,100 +87,42 @@ export default function Home() {
           } catch (err) {
             console.error('Error fetching ENS text record:', err);
             setError(`Failed to fetch ENS data for ${ensName}`);
-            setIsLoading(false);
             return;
           }
         }
 
-        // Set up progress handler to update UI immediately as questions arrive
-        const handleProgress = (progress: QuestionProgress) => {
-          if (!isMounted) return;
-          
-          setProgress(progress);
-          
-          // This will ensure we're showing loading until all questions are processed
-          setIsLoading(progress.processed < progress.total);
-          
-          if (progress.processed === progress.total) {
-            setLoadingComplete(true);
-          }
-        };
+        // Keep track of accumulated questions
+        let accumulatedQuestions: Question[] = [];
 
-        // Start retrieving questions
-        retrievePromise = retrieveQuestions(
+        await retrieveQuestions(
           1, // Ethereum mainnet
           {
             batchSize: 100,
             ...(userFilter && { user: userFilter })
           },
-          handleProgress
-        );
-
-        // This will handle updates during the fetch process
-        const updateInterval = setInterval(async () => {
-          if (!isMounted) {
-            clearInterval(updateInterval);
-            return;
+          (progress) => {
+            setProgress(progress);
+            // Get new questions since last update
+            const newQuestions = accumulatedQuestions.slice(questions.length, progress.processed);
+            if (newQuestions.length > 0) {
+              setQuestions(prev => [...prev, ...newQuestions]);
+            }
           }
-          
-          // Display questions as they become available without waiting for all
-          if (questionsCache.length > 0 && questions.length < questionsCache.length) {
-            setQuestions([...questionsCache]);
-          }
-        }, 500);
-
-        // Set up individual question handler
-        const handleQuestionBatch = (newQuestions: Question[]) => {
-          if (!isMounted) return;
-          
-          // Update our cache with the latest questions
-          questionsCache = newQuestions;
-          
-          // Update the UI immediately with whatever we have
-          setQuestions([...newQuestions]);
-        };
-
-        // Start the retrieval process
-        retrieveQuestions(
-          1, // Ethereum mainnet
-          {
-            batchSize: 20, // Start with a smaller batch for immediate display
-            ...(userFilter && { user: userFilter })
-          },
-          handleProgress
-        ).then(handleQuestionBatch);
-        
-        // Get the full result when complete
-        retrievePromise.then(fullQuestions => {
-          if (!isMounted) return;
-          
-          clearInterval(updateInterval);
-          questionsCache = fullQuestions;
-          setQuestions(fullQuestions);
-          setIsLoading(false);
-          setLoadingComplete(true);
-        }).catch(err => {
-          if (!isMounted) return;
-          
-          console.error('Error loading questions:', err);
-          setError(err instanceof Error ? err.message : 'Failed to load questions');
-          setIsLoading(false);
+        ).then(fetchedQuestions => {
+          accumulatedQuestions = fetchedQuestions;
+          setQuestions(fetchedQuestions);
         });
 
+        setError(null);
       } catch (err) {
-        if (!isMounted) return;
-        
-        console.error('Error in question loading process:', err);
+        console.error('Error loading questions:', err);
         setError(err instanceof Error ? err.message : 'Failed to load questions');
+      } finally {
         setIsLoading(false);
       }
     };
 
     loadQuestions();
-
-    return () => {
-      isMounted = false;
-    };
   }, [ensName]);
 
   // Calculate paginated questions
@@ -225,27 +160,24 @@ export default function Home() {
           </CardContent>
         </Card>
       ) : (
-        <>
-          {/* Always show the question list - even if empty during loading */}
-          <QuestionList
-            questions={paginatedQuestions}
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
-            isLoading={isLoading && questions.length === 0}
-            totalQuestions={questions.length}
-          />
-
-          {/* Show loading spinner only when we have no questions yet */}
-          {isLoading && questions.length === 0 && (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-14 w-14 border-2 border-tron border-t-transparent mx-auto mb-4 shadow-tron"></div>
-              <p className="text-tron animate-pulse">Loading questions...</p>
-            </div>
-          )}
-        </>
+        <QuestionList
+          questions={paginatedQuestions}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          isLoading={isLoading}
+          totalQuestions={questions.length}
+        />
       )}
 
-      {/* Progress indicator - always show when loading is in progress */}
+      {/* Loading state */}
+      {isLoading && questions.length === 0 && (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-14 w-14 border-2 border-tron border-t-transparent mx-auto mb-4 shadow-tron"></div>
+          <p className="text-tron animate-pulse">Loading questions...</p>
+        </div>
+      )}
+
+      {/* Progress indicator */}
       {progress.total > 0 && (
         <Card className="tron-card mt-6 max-w-md mx-auto">
           <CardHeader className="pb-2">
@@ -255,7 +187,6 @@ export default function Home() {
             </CardTitle>
             <CardDescription className="text-xs">
               {progress.processed} of {progress.total} questions loaded
-              {loadingComplete && progress.processed > 0 && ' (completed)'}
             </CardDescription>
           </CardHeader>
           <CardContent>
