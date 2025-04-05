@@ -1,9 +1,9 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
 import { formatUnits } from 'viem';
 import { ArrowLeft } from 'lucide-react';
+import SubmitAnswer from '@/components/SubmitAnswer';
 
 interface ContractConfig {
     address: string;
@@ -231,6 +231,19 @@ export default function QuestionDetail() {
                         )}
                     </dl>
                 </div>
+            )}
+
+            {/* Add Submit Answer Component */}
+            {question.phase === 'OPEN' && (
+                <SubmitAnswer 
+                    questionId={question.id}
+                    currentBond={question.currentBond}
+                    minBond={question.minimumBond}
+                    token={question.contract?.config?.token_ticker || 'ETH'}
+                    contractAddress={question.contract?.address || ''}
+                    questionType={question.qType}
+                    options={question.options}
+                />
             )}
 
             {/* Answers History */}
