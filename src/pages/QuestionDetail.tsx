@@ -116,7 +116,7 @@ export default function QuestionDetail() {
     }
 
     return (
-        <div className="w-[70%] mx-auto p-6">
+        <div className="w-[85%] mx-auto p-6">
             <div className="flex justify-between items-center mb-6">
                 <button
                     onClick={handleBack}
@@ -129,7 +129,7 @@ export default function QuestionDetail() {
 
             <ResizablePanelGroup direction="horizontal" className="min-h-[600px]">
                 {/* Left Column: Question Details & Answer History */}
-                <ResizablePanel defaultSize={60} minSize={40}>
+                <ResizablePanel defaultSize={35} minSize={30}>
                     <QuestionDetailsPanel
                         question={question}
                         onArbitrationRequested={loadQuestionDetails}
@@ -143,7 +143,7 @@ export default function QuestionDetail() {
                 <ResizableHandle withHandle />
 
                 {/* Right Column: Snapshot Proposal Summary */}
-                <ResizablePanel defaultSize={40} minSize={30}>
+                <ResizablePanel defaultSize={65} minSize={50}>
                     <div className="pl-4">
                         <SnapshotProposalSummary
                             proposalLoading={proposalLoading}
