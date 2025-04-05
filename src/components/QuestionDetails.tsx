@@ -109,7 +109,7 @@ export default function QuestionDetails({
                                 Additional Details
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="glass-panel max-h-[80vh] overflow-y-auto">
+                        <DialogContent className="glass-panel max-h-[90vh] max-w-4xl w-[90vw] overflow-y-auto">
                             <DialogHeader>
                                 <DialogTitle className="text-xl ethereal-text">Additional Details</DialogTitle>
                             </DialogHeader>
