@@ -1,9 +1,9 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
 import { formatUnits } from 'viem';
 import { ArrowLeft } from 'lucide-react';
+import SubmitAnswer from '../components/SubmitAnswer';
 
 interface ContractConfig {
     address: string;
@@ -203,6 +203,9 @@ export default function QuestionDetail() {
                     )}
                 </dl>
             </div>
+
+            {/* Submit Answer Component */}
+            <SubmitAnswer question={question} />
 
             {/* Template Information */}
             {question.template && (
