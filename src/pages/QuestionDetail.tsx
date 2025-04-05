@@ -1,8 +1,7 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
-import { ArrowLeft, Info, Database, Loader2 } from 'lucide-react';
+import { ArrowLeft, Info, Database, Loader2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SubmitAnswerButton from '@/components/SubmitAnswer';
 import QuestionTitle from '@/components/QuestionTitle';
@@ -82,6 +81,10 @@ export default function QuestionDetail() {
         return new Date(timestamp * 1000).toLocaleString();
     };
 
+    const getSnapshotUrl = (spaceId: string, proposalId: string) => {
+        return `https://v1.snapshot.box/#/${spaceId}/proposal/${proposalId}`;
+    };
+
     if (loading && !question) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -149,8 +152,19 @@ export default function QuestionDetail() {
                     <div className="w-full steel-panel">
                         <h2 className="text-xl font-semibold ethereal-text p-4 border-b border-space-dark/30">Proposal Details</h2>
                         <div className="p-4 space-y-4">
-                            <div className="text-xl font-bold text-space">
-                                {proposalData.title}
+                            <div className="flex justify-between items-center">
+                                <div className="text-xl font-bold text-space">
+                                    {proposalData.title}
+                                </div>
+                                <a 
+                                    href={getSnapshotUrl(proposalData.space.id, proposalData.id)} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="steel-button inline-flex items-center"
+                                >
+                                    <ExternalLink className="w-4 h-4 mr-2" />
+                                    View Complete Proposal on Snapshot
+                                </a>
                             </div>
                             <div className="text-sm text-space-light/70">
                                 Space: {proposalData.space.name}
@@ -218,7 +232,7 @@ export default function QuestionDetail() {
                                     <h3 className="font-medium text-space-light/70 mb-2">Labels:</h3>
                                     <div className="flex flex-wrap gap-2">
                                         {proposalData.labels.map((label, index) => (
-                                            <span key={index} className="px-2 py-1 bg-space-dark/30 rounded text-sm">
+                                            <span key={index} className="px-2 py-1 bg-space-dark/30 rounded">
                                                 {label}
                                             </span>
                                         ))}
@@ -256,8 +270,6 @@ export default function QuestionDetail() {
                                     </ul>
                                 </div>
                             )}
-
-                            {/* Body/Description section removed as requested */}
 
                             {proposalData.plugins?.safeSnap && (
                                 <div className="mt-6">
