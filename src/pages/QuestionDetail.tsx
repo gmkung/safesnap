@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
@@ -103,7 +102,6 @@ export default function QuestionDetail() {
         navigate(-1);
     };
 
-    // Conditional rendering based on state
     if (loading && !question) {
         return <LoadingSpinner />;
     }
@@ -130,8 +128,7 @@ export default function QuestionDetail() {
 
             <TooltipProvider>
                 <ResizablePanelGroup direction="horizontal" className="min-h-[600px]">
-                    {/* Left Column: Question Details & Answer History */}
-                    <ResizablePanel defaultSize={35} minSize={30}>
+                    <ResizablePanel defaultSize={40} minSize={30}>
                         <QuestionDetailsPanel
                             question={question}
                             onArbitrationRequested={loadQuestionDetails}
@@ -141,11 +138,9 @@ export default function QuestionDetail() {
                         />
                     </ResizablePanel>
 
-                    {/* Resizable Handle */}
                     <ResizableHandle withHandle />
 
-                    {/* Right Column: Snapshot Proposal Summary */}
-                    <ResizablePanel defaultSize={65} minSize={50}>
+                    <ResizablePanel defaultSize={60} minSize={50}>
                         <div className="pl-4">
                             <SnapshotProposalSummary
                                 proposalLoading={proposalLoading}
@@ -156,7 +151,6 @@ export default function QuestionDetail() {
                 </ResizablePanelGroup>
             </TooltipProvider>
 
-            {/* Transaction Hash Modal */}
             {hashVerification && (
                 <TransactionHashModal 
                     open={hashModalOpen} 
