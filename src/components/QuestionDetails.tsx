@@ -122,7 +122,7 @@ export default function QuestionDetails({
                 <div className="flex space-x-4">
                     <Dialog>
                         <DialogTrigger asChild>
-                            <Button variant="tron" size="sm" glow="true">
+                            <Button variant="tron" size="sm" glow={true}>
                                 <Info className="mr-2 h-4 w-4" />
                                 Additional Details
                             </Button>
