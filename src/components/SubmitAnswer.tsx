@@ -3,7 +3,12 @@ import { useState } from 'react';
 import { Question } from 'reality-kleros-subgraph';
 import { useToast } from "../hooks/use-toast";
 import { Info, AlertCircle } from 'lucide-react';
-import { formatUnits, parseUnits } from 'viem';
+import { formatUnits, parseUnits, createWalletClient, http, parseEther, encodeFunctionData } from 'viem';
+import { RealityEthV3Abi__factory } from '../types/contracts';
+
+// Constants for special answers
+const ANSWERED_TOO_SOON = "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe";
+const INVALID_ANSWER = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
 interface SubmitAnswerProps {
   question: Question;
@@ -12,6 +17,7 @@ interface SubmitAnswerProps {
 export default function SubmitAnswer({ question }: SubmitAnswerProps) {
   const [answer, setAnswer] = useState('');
   const [bond, setBond] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
   // Calculate minimum required bond (typically 2x the current bond)
@@ -36,6 +42,8 @@ export default function SubmitAnswer({ question }: SubmitAnswerProps) {
     }
 
     try {
+      setIsSubmitting(true);
+      
       // Convert bond to proper format
       const bondAmount = parseUnits(bond, 18);
       
@@ -46,14 +54,92 @@ export default function SubmitAnswer({ question }: SubmitAnswerProps) {
           description: `The minimum bond required is ${formattedMinBond} ${question.contract?.config?.token_ticker || 'ETH'}`,
           variant: "destructive",
         });
+        setIsSubmitting(false);
         return;
       }
 
-      // Here you would connect to the contract and call submitAnswer
-      // This is a placeholder for the actual contract interaction
+      // Get contract address from question
+      const contractAddress = question.contract?.address;
+      if (!contractAddress) {
+        throw new Error("Contract address not found");
+      }
+
+      // Request wallet connection
+      if (!window.ethereum) {
+        toast({
+          title: "Web3 Not Available",
+          description: "Please install a Web3 wallet like MetaMask to submit answers",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Create wallet client
+      const walletClient = createWalletClient({
+        transport: http(),
+        chain: {
+          id: Number(question.contract?.chainId || 1),
+        }
+      });
+
+      // Request accounts
+      const [address] = await window.ethereum.request({ 
+        method: 'eth_requestAccounts' 
+      }) as string[];
+
+      if (!address) {
+        throw new Error("Failed to get wallet address");
+      }
+
+      // Format the answer based on the question type and selected option
+      let formattedAnswer: string;
+      
+      if (answer === 'yes') {
+        formattedAnswer = '0x0000000000000000000000000000000000000000000000000000000000000001';
+      } else if (answer === 'no') {
+        formattedAnswer = '0x0000000000000000000000000000000000000000000000000000000000000000';
+      } else if (answer === 'invalid') {
+        formattedAnswer = INVALID_ANSWER;
+      } else if (answer === 'too_soon') {
+        formattedAnswer = ANSWERED_TOO_SOON;
+      } else {
+        // For custom answers (e.g. uint)
+        if (question.qType === 'uint') {
+          const numValue = parseInt(answer, 10);
+          if (isNaN(numValue)) {
+            throw new Error("Invalid number format");
+          }
+          formattedAnswer = `0x${numValue.toString(16).padStart(64, '0')}`;
+        } else {
+          formattedAnswer = answer; // Use as-is for other types
+        }
+      }
+
+      // Get the contract interface
+      const abi = RealityEthV3Abi__factory.abi;
+      
+      // Encode the function call
+      const data = encodeFunctionData({
+        abi,
+        functionName: 'submitAnswer',
+        args: [question.questionId as `0x${string}`, formattedAnswer as `0x${string}`, BigInt(0)]
+      });
+
+      // Submit transaction
+      const hash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [{
+          from: address,
+          to: contractAddress,
+          value: bondAmount.toString(),
+          data
+        }]
+      });
+
       toast({
-        title: "Not Implemented",
-        description: "Contract interaction is not implemented in this demo",
+        title: "Answer Submitted",
+        description: `Transaction hash: ${hash}`,
       });
       
       // Reset form after submission
@@ -67,6 +153,8 @@ export default function SubmitAnswer({ question }: SubmitAnswerProps) {
         description: error instanceof Error ? error.message : "Failed to submit answer",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -115,9 +203,9 @@ export default function SubmitAnswer({ question }: SubmitAnswerProps) {
               <div className="flex gap-4">
                 <button
                   type="button"
-                  onClick={() => setAnswer('0x0000000000000000000000000000000000000000000000000000000000000001')}
+                  onClick={() => setAnswer('yes')}
                   className={`px-4 py-2 rounded-md border ${
-                    answer === '0x0000000000000000000000000000000000000000000000000000000000000001'
+                    answer === 'yes'
                       ? 'bg-tron/20 border-tron text-tron'
                       : 'border-tron-dark/30 text-tron-light/70 hover:bg-tron-dark/10'
                   }`}
@@ -126,14 +214,36 @@ export default function SubmitAnswer({ question }: SubmitAnswerProps) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setAnswer('0x0000000000000000000000000000000000000000000000000000000000000000')}
+                  onClick={() => setAnswer('no')}
                   className={`px-4 py-2 rounded-md border ${
-                    answer === '0x0000000000000000000000000000000000000000000000000000000000000000'
+                    answer === 'no'
                       ? 'bg-tron/20 border-tron text-tron'
                       : 'border-tron-dark/30 text-tron-light/70 hover:bg-tron-dark/10'
                   }`}
                 >
                   No
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAnswer('invalid')}
+                  className={`px-4 py-2 rounded-md border ${
+                    answer === 'invalid'
+                      ? 'bg-yellow-600/20 border-yellow-600 text-yellow-500'
+                      : 'border-tron-dark/30 text-tron-light/70 hover:bg-tron-dark/10'
+                  }`}
+                >
+                  Invalid
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAnswer('too_soon')}
+                  className={`px-4 py-2 rounded-md border ${
+                    answer === 'too_soon'
+                      ? 'bg-orange-600/20 border-orange-600 text-orange-500'
+                      : 'border-tron-dark/30 text-tron-light/70 hover:bg-tron-dark/10'
+                  }`}
+                >
+                  Too Soon
                 </button>
               </div>
             ) : (
@@ -175,9 +285,10 @@ export default function SubmitAnswer({ question }: SubmitAnswerProps) {
           {/* Submit Button */}
           <button
             type="submit"
-            className="tron-button w-full"
+            disabled={isSubmitting}
+            className={`tron-button w-full ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
           >
-            Submit Answer
+            {isSubmitting ? 'Submitting...' : 'Submit Answer'}
           </button>
         </form>
       )}
