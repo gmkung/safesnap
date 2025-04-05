@@ -8,6 +8,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/componen
 import { getProposalDetails, calculateTransactionArrayHash, compareTransactionHashes } from '@/lib/snapshotQuery';
 import { useToast } from '@/hooks/use-toast';
 import { parseQuestionData } from '@/utils/questionUtils';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 // Import our components
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -127,31 +128,33 @@ export default function QuestionDetail() {
                 </button>
             </div>
 
-            <ResizablePanelGroup direction="horizontal" className="min-h-[600px]">
-                {/* Left Column: Question Details & Answer History */}
-                <ResizablePanel defaultSize={35} minSize={30}>
-                    <QuestionDetailsPanel
-                        question={question}
-                        onArbitrationRequested={loadQuestionDetails}
-                        hashVerification={hashVerification}
-                        onViewHashDetails={() => setHashModalOpen(true)}
-                        proposalData={proposalData}
-                    />
-                </ResizablePanel>
-
-                {/* Resizable Handle */}
-                <ResizableHandle withHandle />
-
-                {/* Right Column: Snapshot Proposal Summary */}
-                <ResizablePanel defaultSize={65} minSize={50}>
-                    <div className="pl-4">
-                        <SnapshotProposalSummary
-                            proposalLoading={proposalLoading}
+            <TooltipProvider>
+                <ResizablePanelGroup direction="horizontal" className="min-h-[600px]">
+                    {/* Left Column: Question Details & Answer History */}
+                    <ResizablePanel defaultSize={35} minSize={30}>
+                        <QuestionDetailsPanel
+                            question={question}
+                            onArbitrationRequested={loadQuestionDetails}
+                            hashVerification={hashVerification}
+                            onViewHashDetails={() => setHashModalOpen(true)}
                             proposalData={proposalData}
                         />
-                    </div>
-                </ResizablePanel>
-            </ResizablePanelGroup>
+                    </ResizablePanel>
+
+                    {/* Resizable Handle */}
+                    <ResizableHandle withHandle />
+
+                    {/* Right Column: Snapshot Proposal Summary */}
+                    <ResizablePanel defaultSize={65} minSize={50}>
+                        <div className="pl-4">
+                            <SnapshotProposalSummary
+                                proposalLoading={proposalLoading}
+                                proposalData={proposalData}
+                            />
+                        </div>
+                    </ResizablePanel>
+                </ResizablePanelGroup>
+            </TooltipProvider>
 
             {/* Transaction Hash Modal */}
             {hashVerification && (

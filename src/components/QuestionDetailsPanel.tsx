@@ -22,6 +22,8 @@ export default function QuestionDetailsPanel({
   onViewHashDetails,
   proposalData 
 }: QuestionDetailsPanelProps) {
+  const parsedData = parseQuestionData(question);
+  
   return (
     <div className="flex flex-col gap-6 pr-4">
       {/* Question Details Section */}
@@ -34,13 +36,15 @@ export default function QuestionDetailsPanel({
         />
       </div>
       
-      {/* Transaction Hash Verification Section */}
-      {hashVerification && (
-        <HashVerificationPanel 
-          hashVerification={hashVerification}
-          onViewDetails={onViewHashDetails}
-          question={question}
-        />
+      {/* Transaction Hash Verification Section (compact version) */}
+      {hashVerification && parsedData?.transactionHash && (
+        <div className="w-full px-4">
+          <HashVerificationPanel 
+            hashVerification={hashVerification}
+            onViewDetails={onViewHashDetails}
+            question={{decodedData: parsedData}}
+          />
+        </div>
       )}
       
       {/* Answer History Section */}

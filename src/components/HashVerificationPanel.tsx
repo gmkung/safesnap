@@ -1,8 +1,9 @@
 
 import { Button } from '@/components/ui/button';
-import { Calculator } from 'lucide-react';
-import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Calculator, CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 interface HashVerificationPanelProps {
   hashVerification: {
@@ -23,46 +24,69 @@ export default function HashVerificationPanel({
 }: HashVerificationPanelProps) {
   if (!hashVerification) return null;
   
+  // Get the icon based on the verification status
+  const StatusIcon = hashVerification.match 
+    ? CheckCircle 
+    : hashVerification.calculatedHash 
+      ? XCircle 
+      : AlertTriangle;
+  
+  // Get the color based on the verification status
+  const statusColor = hashVerification.match 
+    ? "text-green-500" 
+    : hashVerification.calculatedHash 
+      ? "text-red-500" 
+      : "text-yellow-500";
+  
+  // Get the tooltip text based on the verification status
+  const tooltipText = hashVerification.match 
+    ? "Hash in question matches calculated hash from Snapshot Proposal" 
+    : hashVerification.calculatedHash 
+      ? "Hash mismatch: The expected hash does not match the calculated hash" 
+      : "Unable to verify: No transactions found in proposal to calculate hash";
+
   return (
-    <div className={cn(
-      "p-4 rounded-md border",
-      hashVerification.match 
-        ? "border-green-500/30 bg-green-500/10" 
-        : hashVerification.calculatedHash 
-          ? "border-red-500/30 bg-red-500/10"
-          : "border-yellow-500/30 bg-yellow-500/10"
-    )}>
-      <div className="flex items-center gap-2 mb-3">
-        {hashVerification.match ? (
-          <CheckCircle className="h-6 w-6 text-green-500" />
-        ) : hashVerification.calculatedHash ? (
-          <XCircle className="h-6 w-6 text-red-500" />
-        ) : (
-          <AlertTriangle className="h-6 w-6 text-yellow-500" />
-        )}
-        <span className={cn("text-lg font-medium", hashVerification.matchClass)}>
-          {hashVerification.matchText}
-        </span>
-        
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="ml-auto"
-          onClick={onViewDetails}
-        >
-          <Calculator className="h-4 w-4 mr-2" />
-          View Calculation Details
-        </Button>
-      </div>
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-space-light/70">Expected Transaction Array Hash:</span>
       
-      {hashVerification.calculatedHash && (
-        <div className="text-sm mt-2">
-          <span className="font-medium text-space-light/70">Calculated Hash:</span>
-          <code className="ml-2 bg-space-dark/30 px-2 py-1 rounded text-sm font-mono break-all">
-            {hashVerification.calculatedHash}
-          </code>
-        </div>
-      )}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge 
+              className={cn(
+                "flex items-center gap-1 cursor-pointer",
+                hashVerification.match ? "bg-green-500/20 hover:bg-green-500/30 text-green-500 border-green-500/30" :
+                hashVerification.calculatedHash ? "bg-red-500/20 hover:bg-red-500/30 text-red-500 border-red-500/30" :
+                "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-500 border-yellow-500/30"
+              )}
+              onClick={onViewDetails}
+            >
+              <StatusIcon className="h-3 w-3" />
+              <span>{hashVerification.match ? "Valid" : "Invalid"}</span>
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs">
+            <div className="flex items-start space-x-2">
+              <Info className="h-4 w-4 mt-0.5 shrink-0" />
+              <span>{tooltipText}</span>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      
+      <code className="bg-space-dark/30 px-2 py-1 rounded text-xs font-mono break-all">
+        {question.decodedData?.transactionHash || "N/A"}
+      </code>
+      
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        className="text-xs px-2 py-1 h-auto"
+        onClick={onViewDetails}
+      >
+        <Calculator className="h-3 w-3 mr-1" />
+        View Details
+      </Button>
     </div>
   );
 }
