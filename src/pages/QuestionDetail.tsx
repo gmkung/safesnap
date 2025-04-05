@@ -154,6 +154,11 @@ export default function QuestionDetail() {
         );
     }
 
+    // Extract important data
+    const parsedData = parseQuestionData(question);
+    const proposalId = parsedData?.proposalId || '';
+    const expectedHash = parsedData?.transactionHash || '';
+
     return (
         <div className="max-w-4xl mx-auto p-6">
             <div className="flex justify-between items-center mb-6">
@@ -166,11 +171,94 @@ export default function QuestionDetail() {
                 </button>
             </div>
 
+            {/* Key Information Header */}
+            <div className="steel-panel p-4 mb-6">
+                {proposalData?.space && (
+                    <div className="text-space-light/70 mb-2">
+                        DAO: <span className="text-space-light">{proposalData.space.name}</span>
+                    </div>
+                )}
+                {proposalId && (
+                    <div className="text-space-light/70 mb-2 break-all">
+                        Proposal ID: <span className="text-space-light font-mono text-sm">{proposalId}</span>
+                    </div>
+                )}
+                {expectedHash && (
+                    <div className="text-space-light/70 break-all">
+                        Expected Transaction Array Hash: <span className="text-space-light font-mono text-sm">{expectedHash}</span>
+                    </div>
+                )}
+            </div>
+
             <h1 className="text-3xl font-bold mb-6 ethereal-text text-glow">
                 <QuestionTitle question={question} />
             </h1>
 
             <div className="flex flex-col gap-6 mb-8">
+                {/* Transaction Hash Verification Card - Now at the top */}
+                {hashVerification && (
+                    <div className={cn(
+                        "steel-panel p-6 border-2",
+                        hashVerification.match 
+                            ? "border-green-500/50" 
+                            : hashVerification.calculatedHash 
+                                ? "border-red-500/50"
+                                : "border-yellow-500/50"
+                    )}>
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+                            <div className="flex items-center gap-3 mb-3 md:mb-0">
+                                {hashVerification.match ? (
+                                    <CheckCircle className="h-7 w-7 text-green-500" />
+                                ) : hashVerification.calculatedHash ? (
+                                    <XCircle className="h-7 w-7 text-red-500" />
+                                ) : (
+                                    <AlertTriangle className="h-7 w-7 text-yellow-500" />
+                                )}
+                                <span className={cn(
+                                    "text-xl font-bold", 
+                                    hashVerification.matchClass
+                                )}>
+                                    {hashVerification.matchText}
+                                </span>
+                            </div>
+                            
+                            <Button 
+                                variant="steel" 
+                                className="ml-0 md:ml-auto"
+                                onClick={() => setHashModalOpen(true)}
+                            >
+                                <Calculator className="h-4 w-4 mr-2" />
+                                View Calculation Details
+                            </Button>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <div className="text-sm">
+                                <span className="font-medium text-space-light/70">Calculated Hash:</span>
+                                <div className="mt-1">
+                                    <code className="bg-space-dark/30 px-2 py-1 rounded text-sm font-mono break-all block">
+                                        {hashVerification.calculatedHash || "No hash could be calculated"}
+                                    </code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Add Transaction Hash Calculation Modal */}
+                {hashVerification && (
+                    <TransactionHashModal 
+                        open={hashModalOpen} 
+                        onOpenChange={setHashModalOpen}
+                        calculatedHash={hashVerification.calculatedHash}
+                        expectedHash={expectedHash}
+                        transactionHashes={hashVerification.transactionHashes}
+                        match={hashVerification.match}
+                        proposalData={proposalData}
+                    />
+                )}
+
+                {/* Proposal Details - Now secondary */}
                 {proposalLoading ? (
                     <div className="w-full steel-panel p-6 flex items-center justify-center">
                         <Loader2 className="h-8 w-8 animate-spin text-space" />
@@ -188,84 +276,11 @@ export default function QuestionDetail() {
                                     href={getSnapshotUrl(proposalData.space.id, proposalData.id)} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
-                                    className="steel-button inline-flex items-center"
+                                    className="steel-button inline-flex items-center text-sm"
                                 >
                                     <ExternalLink className="w-4 h-4 mr-2" />
-                                    View Complete Proposal on Snapshot
+                                    View on Snapshot
                                 </a>
-                            </div>
-                            
-                            {/* Transaction Hash Verification Panel */}
-                            {hashVerification && (
-                                <div className={cn(
-                                    "p-4 rounded-md border",
-                                    hashVerification.match 
-                                        ? "border-green-500/30 bg-green-500/10" 
-                                        : hashVerification.calculatedHash 
-                                            ? "border-red-500/30 bg-red-500/10"
-                                            : "border-yellow-500/30 bg-yellow-500/10"
-                                )}>
-                                    <div className="flex items-center gap-2 mb-3">
-                                        {hashVerification.match ? (
-                                            <CheckCircle className="h-6 w-6 text-green-500" />
-                                        ) : hashVerification.calculatedHash ? (
-                                            <XCircle className="h-6 w-6 text-red-500" />
-                                        ) : (
-                                            <AlertTriangle className="h-6 w-6 text-yellow-500" />
-                                        )}
-                                        <span className={cn("text-lg font-medium", hashVerification.matchClass)}>
-                                            {hashVerification.matchText}
-                                        </span>
-                                        
-                                        <Button 
-                                            variant="outline" 
-                                            size="sm" 
-                                            className="ml-auto"
-                                            onClick={() => setHashModalOpen(true)}
-                                        >
-                                            <Calculator className="h-4 w-4 mr-2" />
-                                            View Calculation Details
-                                        </Button>
-                                    </div>
-                                    
-                                    {hashVerification.calculatedHash && (
-                                        <div className="space-y-2">
-                                            <div className="text-sm">
-                                                <span className="font-medium text-space-light/70">Calculated Hash:</span>
-                                                <code className="ml-2 bg-space-dark/30 px-2 py-1 rounded text-sm font-mono break-all">
-                                                    {hashVerification.calculatedHash}
-                                                </code>
-                                            </div>
-                                            <div className="text-sm">
-                                                <span className="font-medium text-space-light/70">Transaction Hashes Used:</span>
-                                                <div className="mt-1 ml-2 space-y-1">
-                                                    {hashVerification.transactionHashes.map((hash, index) => (
-                                                        <code key={index} className="block bg-space-dark/30 px-2 py-1 rounded text-xs font-mono break-all">
-                                                            {hash}
-                                                        </code>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Add Transaction Hash Calculation Modal */}
-                            {hashVerification && (
-                                <TransactionHashModal 
-                                    open={hashModalOpen} 
-                                    onOpenChange={setHashModalOpen}
-                                    calculatedHash={hashVerification.calculatedHash}
-                                    expectedHash={parseQuestionData(question)?.transactionHash || ''}
-                                    transactionHashes={hashVerification.transactionHashes}
-                                    match={hashVerification.match}
-                                    proposalData={proposalData}
-                                />
-                            )}
-
-                            <div className="text-sm text-space-light/70">
-                                Space: {proposalData.space.name}
                             </div>
                             
                             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -288,14 +303,6 @@ export default function QuestionDetail() {
                                     <span className="ml-2">{formatDate(proposalData.end)}</span>
                                 </div>
                                 <div>
-                                    <span className="font-medium text-space-light/70">Created:</span>
-                                    <span className="ml-2">{formatDate(proposalData.created)}</span>
-                                </div>
-                                <div>
-                                    <span className="font-medium text-space-light/70">Snapshot:</span>
-                                    <span className="ml-2">{proposalData.snapshot}</span>
-                                </div>
-                                <div>
                                     <span className="font-medium text-space-light/70">Network:</span>
                                     <span className="ml-2">{proposalData.network}</span>
                                 </div>
@@ -310,33 +317,10 @@ export default function QuestionDetail() {
                                     </div>
                                 )}
                                 <div>
-                                    <span className="font-medium text-space-light/70">Privacy:</span>
-                                    <span className="ml-2 capitalize">{proposalData.privacy}</span>
-                                </div>
-                                <div>
                                     <span className="font-medium text-space-light/70">Total Votes:</span>
                                     <span className="ml-2">{proposalData.votes}</span>
                                 </div>
-                                {proposalData.scores_total !== undefined && (
-                                    <div>
-                                        <span className="font-medium text-space-light/70">Score:</span>
-                                        <span className="ml-2">{proposalData.scores_total.toFixed(2)}</span>
-                                    </div>
-                                )}
                             </div>
-
-                            {proposalData.labels && proposalData.labels.length > 0 && (
-                                <div className="mt-4">
-                                    <h3 className="font-medium text-space-light/70 mb-2">Labels:</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {proposalData.labels.map((label, index) => (
-                                            <span key={index} className="px-2 py-1 bg-space-dark/30 rounded">
-                                                {label}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
 
                             {proposalData.choices && proposalData.choices.length > 0 && (
                                 <div className="mt-4">
@@ -356,97 +340,42 @@ export default function QuestionDetail() {
                                 </div>
                             )}
 
-                            {proposalData.strategies && proposalData.strategies.length > 0 && (
-                                <div className="mt-4">
-                                    <h3 className="font-medium text-space-light/70 mb-2">Voting Strategies:</h3>
-                                    <ul className="list-disc list-inside space-y-1">
-                                        {proposalData.strategies.map((strategy, index) => (
-                                            <li key={index}>
-                                                {strategy.name} ({strategy.network})
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-
+                            {/* SafeSnap Transaction section - Made more compact */}
                             {proposalData.plugins?.safeSnap && (
                                 <div className="mt-6">
                                     <h3 className="font-medium text-space-light/70 mb-2">SafeSnap Transactions:</h3>
                                     <div className="space-y-4">
                                         {proposalData.plugins.safeSnap.safes.map((safe, safeIndex) => (
-                                            <div key={safeIndex} className="bg-space-dark/30 p-4 rounded">
-                                                <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+                                            <div key={safeIndex} className="bg-space-dark/30 p-3 rounded">
+                                                <div className="grid grid-cols-2 gap-2 text-xs mb-3">
                                                     <div>
                                                         <span className="font-medium text-space-light/70">Network:</span>
                                                         <span className="ml-2">{safe.network}</span>
                                                     </div>
                                                     <div>
-                                                        <span className="font-medium text-space-light/70">Reality Address:</span>
-                                                        <code className="ml-2 bg-space-dark/50 px-2 py-1 rounded">
-                                                            {`${safe.realityAddress.slice(0, 6)}...${safe.realityAddress.slice(-4)}`}
-                                                        </code>
-                                                    </div>
-                                                    <div>
-                                                        <span className="font-medium text-space-light/70">MultiSend Address:</span>
-                                                        <code className="ml-2 bg-space-dark/50 px-2 py-1 rounded">
-                                                            {`${safe.multiSendAddress.slice(0, 6)}...${safe.multiSendAddress.slice(-4)}`}
-                                                        </code>
-                                                    </div>
-                                                    <div>
                                                         <span className="font-medium text-space-light/70">Safe Hash:</span>
-                                                        <code className="ml-2 bg-space-dark/50 px-2 py-1 rounded">
+                                                        <code className="ml-2 bg-space-dark/50 px-1 py-0.5 rounded">
                                                             {`${safe.hash.slice(0, 6)}...${safe.hash.slice(-4)}`}
                                                         </code>
                                                     </div>
                                                 </div>
 
-                                                <div className="space-y-3">
+                                                <div className="text-xs text-space-light/70 mb-2 font-medium">
+                                                    Transaction{safe.txs.length > 1 ? 's' : ''}:
+                                                </div>
+                                                <div className="space-y-2">
                                                     {safe.txs.map((tx, txIndex) => (
-                                                        <div key={txIndex} className="bg-space-dark/50 p-3 rounded">
-                                                            <div className="grid grid-cols-2 gap-2 text-sm mb-2">
-                                                                <div>
-                                                                    <span className="font-medium text-space-light/70">Transaction Hash:</span>
-                                                                    <code className="ml-2 bg-space-dark/70 px-2 py-1 rounded">
-                                                                        {`${tx.hash.slice(0, 6)}...${tx.hash.slice(-4)}`}
-                                                                    </code>
-                                                                </div>
-                                                                <div>
-                                                                    <span className="font-medium text-space-light/70">Nonce:</span>
-                                                                    <span className="ml-2">{tx.nonce}</span>
-                                                                </div>
+                                                        <div key={txIndex} className="bg-space-dark/50 p-2 rounded">
+                                                            <div className="text-xs mb-1">
+                                                                <span className="font-medium text-space-light/70">Hash:</span>
+                                                                <code className="ml-2 bg-space-dark/70 px-1 py-0.5 rounded">
+                                                                    {`${tx.hash.slice(0, 6)}...${tx.hash.slice(-4)}`}
+                                                                </code>
+                                                                <span className="ml-2 font-medium text-space-light/70">Nonce:</span>
+                                                                <span className="ml-1">{tx.nonce}</span>
                                                             </div>
-
-                                                            <div className="space-y-2">
-                                                                {tx.transactions.map((subTx, subTxIndex) => (
-                                                                    <div key={subTxIndex} className="bg-space-dark/70 p-2 rounded text-xs">
-                                                                        <div className="grid grid-cols-2 gap-1">
-                                                                            <div>
-                                                                                <span className="font-medium text-space-light/70">To:</span>
-                                                                                <code className="ml-2">
-                                                                                    {`${subTx.to.slice(0, 6)}...${subTx.to.slice(-4)}`}
-                                                                                </code>
-                                                                            </div>
-                                                                            <div>
-                                                                                <span className="font-medium text-space-light/70">Value:</span>
-                                                                                <span className="ml-2">{subTx.value}</span>
-                                                                            </div>
-                                                                            <div>
-                                                                                <span className="font-medium text-space-light/70">Operation:</span>
-                                                                                <span className="ml-2">{subTx.operation}</span>
-                                                                            </div>
-                                                                            <div>
-                                                                                <span className="font-medium text-space-light/70">Nonce:</span>
-                                                                                <span className="ml-2">{subTx.nonce}</span>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="mt-1">
-                                                                            <span className="font-medium text-space-light/70">Data:</span>
-                                                                            <code className="ml-2 break-all">
-                                                                                {subTx.data}
-                                                                            </code>
-                                                                        </div>
-                                                                    </div>
-                                                                ))}
+                                                            <div className="text-xs text-space-light/70">
+                                                                {tx.transactions.length} sub-transaction{tx.transactions.length > 1 ? 's' : ''}
                                                             </div>
                                                         </div>
                                                     ))}
@@ -454,26 +383,6 @@ export default function QuestionDetail() {
                                             </div>
                                         ))}
                                     </div>
-                                </div>
-                            )}
-
-                            {proposalData.discussion && (
-                                <div className="mt-4">
-                                    <h3 className="font-medium text-space-light/70 mb-2">Discussion:</h3>
-                                    <a 
-                                        href={proposalData.discussion}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-space hover:underline"
-                                    >
-                                        View Discussion →
-                                    </a>
-                                </div>
-                            )}
-
-                            {proposalData.flagged && (
-                                <div className="mt-4 text-amber-500">
-                                    ⚠️ This proposal has been flagged
                                 </div>
                             )}
                         </div>
@@ -484,27 +393,30 @@ export default function QuestionDetail() {
                     </div>
                 )}
                 
-                <div className="w-full">
-                    <QuestionDetails 
-                        question={question} 
-                        onArbitrationRequested={loadQuestionDetails}
-                        onViewProposal={() => {}} // Empty function as we don't need modal anymore
-                    />
-                </div>
-                
-                <div className="w-full">
-                    <Card>
-                        <CardContent className="pt-6">
-                            <div className="mb-4 flex justify-between">
-                                <div className="text-xl font-semibold ethereal-text">Answer History</div>
-                                <SubmitAnswerButton
-                                    question={question}
-                                    onAnswerSubmitted={loadQuestionDetails}
-                                />
-                            </div>
-                            <ResponseHistory question={question} />
-                        </CardContent>
-                    </Card>
+                {/* Question details and history - Now tertiary */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="w-full">
+                        <QuestionDetails 
+                            question={question} 
+                            onArbitrationRequested={loadQuestionDetails}
+                            onViewProposal={() => {}} 
+                        />
+                    </div>
+                    
+                    <div className="w-full">
+                        <Card>
+                            <CardContent className="pt-6">
+                                <div className="mb-4 flex justify-between">
+                                    <div className="text-xl font-semibold ethereal-text">Answer History</div>
+                                    <SubmitAnswerButton
+                                        question={question}
+                                        onAnswerSubmitted={loadQuestionDetails}
+                                    />
+                                </div>
+                                <ResponseHistory question={question} />
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">

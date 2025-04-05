@@ -100,6 +100,28 @@ export default function TransactionHashModal({
             </div>
           </div>
 
+          <div className="p-4 rounded-md glass-panel bg-space-dark/50">
+            <h3 className="text-lg font-semibold text-space-light mb-2">Verification Result</h3>
+            <div className={cn(
+              "p-3 rounded-md",
+              match ? "bg-green-500/20 border border-green-500/30" : 
+              calculatedHash ? "bg-red-500/20 border border-red-500/30" : 
+              "bg-yellow-500/20 border border-yellow-500/30"
+            )}>
+              <p className={cn(
+                "text-lg font-medium",
+                match ? "text-green-400" : calculatedHash ? "text-red-400" : "text-yellow-400"
+              )}>
+                {match 
+                  ? "✓ MATCH - The calculated hash matches the expected hash" 
+                  : calculatedHash 
+                    ? "✗ MISMATCH - The calculated hash does not match the expected hash" 
+                    : "⚠ INCONCLUSIVE - No transactions found to verify hash"
+                }
+              </p>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-space-light">Expected Hash (from Question)</h3>
             <div className="flex items-center">
@@ -266,28 +288,6 @@ export default function TransactionHashModal({
                 No transaction hashes to concatenate
               </div>
             )}
-          </div>
-
-          <div className="p-4 rounded-md glass-panel bg-space-dark/50">
-            <h3 className="text-lg font-semibold text-space-light mb-2">Verification Result</h3>
-            <div className={cn(
-              "p-3 rounded-md",
-              match ? "bg-green-500/20 border border-green-500/30" : 
-              calculatedHash ? "bg-red-500/20 border border-red-500/30" : 
-              "bg-yellow-500/20 border border-yellow-500/30"
-            )}>
-              <p className={cn(
-                "text-lg font-medium",
-                match ? "text-green-400" : calculatedHash ? "text-red-400" : "text-yellow-400"
-              )}>
-                {match 
-                  ? "✓ MATCH - The calculated hash matches the expected hash" 
-                  : calculatedHash 
-                    ? "✗ MISMATCH - The calculated hash does not match the expected hash" 
-                    : "⚠ INCONCLUSIVE - No transactions found to verify hash"
-                }
-              </p>
-            </div>
           </div>
         </div>
       </DialogContent>
