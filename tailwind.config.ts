@@ -80,8 +80,8 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			boxShadow: {
-				'holo': '0 0 15px theme("colors.space.DEFAULT"), 0 0 30px rgba(51, 195, 240, 0.4)',
-				'holo-lg': '0 0 20px theme("colors.space.DEFAULT"), 0 0 40px rgba(51, 195, 240, 0.6)',
+				'holo': '0 0 8px theme("colors.space.DEFAULT"), 0 0 15px rgba(51, 195, 240, 0.2)',
+				'holo-lg': '0 0 15px theme("colors.space.DEFAULT"), 0 0 30px rgba(51, 195, 240, 0.4)',
 				'holo-pink': '0 0 15px theme("colors.space.accent"), 0 0 30px rgba(159, 158, 161, 0.4)',
 				'glass': '0 4px 6px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.1)',
 				'steel': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.1), 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
@@ -114,10 +114,10 @@ export default {
 				},
 				'holo-glow': {
 					'0%, 100%': { 
-						boxShadow: '0 0 10px theme("colors.space.DEFAULT"), 0 0 20px rgba(51, 195, 240, 0.3)' 
+						boxShadow: '0 0 5px theme("colors.space.DEFAULT"), 0 0 10px rgba(51, 195, 240, 0.2)' 
 					},
 					'50%': { 
-						boxShadow: '0 0 15px theme("colors.space.DEFAULT"), 0 0 30px rgba(51, 195, 240, 0.5)' 
+						boxShadow: '0 0 8px theme("colors.space.DEFAULT"), 0 0 15px rgba(51, 195, 240, 0.3)' 
 					},
 				},
 				'ethereal-fade': {
@@ -151,15 +151,25 @@ export default {
 						backgroundPosition: '200% 0%' 
 					},
 				},
+				'grid-pulse': {
+					'0%, 100%': { opacity: '0.3' },
+					'50%': { opacity: '0.5' }
+				},
+				'scanner-line': {
+					'0%': { transform: 'translateY(-100%)' },
+					'100%': { transform: 'translateY(100%)' }
+				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'holo-glow': 'holo-glow 2s infinite',
+				'holo-glow': 'holo-glow 4s ease-in-out infinite',
 				'ethereal-fade': 'ethereal-fade 3s infinite',
 				'holo-scan': 'holo-scan 15s linear infinite',
 				'float': 'float 5s ease-in-out infinite',
 				'light-reflect': 'light-reflect 4s ease-in-out infinite',
+				'grid-pulse': 'grid-pulse 8s ease-in-out infinite',
+				'scanner-line': 'scanner-line 10s ease-in-out infinite'
 			}
 		}
 	},

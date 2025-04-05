@@ -21,7 +21,7 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         glass: "glass-button text-white hover:shadow-glass before:bg-white/5 before:absolute before:inset-0 before:w-full before:h-full before:translate-x-[-100%] hover:before:animate-light-reflect",
         steel: "steel-button text-white hover:shadow-steel before:bg-space/10 before:absolute before:inset-0 before:w-full before:h-full before:translate-x-[-100%] hover:before:animate-light-reflect",
-        tron: "relative bg-transparent text-space border border-space/40 hover:border-space/70 hover:text-space hover:shadow-holo before:absolute before:inset-0 before:bg-space/5 before:opacity-0 hover:before:opacity-100 before:transition-opacity",
+        tron: "relative bg-transparent text-space border border-space/40 hover:border-space/70 hover:text-space before:absolute before:inset-0 before:bg-space/5 before:opacity-0 hover:before:opacity-100 before:transition-opacity duration-300",
       },
       size: {
         default: "h-10 px-4 py-2",

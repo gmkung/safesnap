@@ -56,7 +56,7 @@ export default function QuestionDetails({
             : "Unable to verify: No transactions found in proposal to calculate hash";
     
     return (
-        <div className="steel-panel h-full relative overflow-hidden">
+        <div className="steel-panel h-full relative overflow-hidden tron-grid">
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-space/30 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-space/20 to-transparent"></div>
