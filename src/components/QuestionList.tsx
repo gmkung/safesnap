@@ -1,10 +1,10 @@
-
 import { Question } from 'reality-kleros-subgraph';
 import { useNavigate } from 'react-router-dom';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Skeleton } from './ui/skeleton';
 import { Progress } from './ui/progress';
+import { formatUnits } from 'viem';
 import {
   Table,
   TableBody,
@@ -32,6 +32,62 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString();
+  };
+
+  const formatBond = (bond: string, question: Question) => {
+    if (!question?.contract?.config) return `${bond} ETH`;
+
+    try {
+      // Convert from wei to the appropriate unit
+      const formattedAmount = formatUnits(BigInt(bond), 18);
+      return `${formattedAmount} ${question.contract.config.token_ticker}`;
+    } catch (error) {
+      console.error('Error formatting bond:', error);
+      return `${bond} ${question?.contract?.config?.token_ticker || 'ETH'}`;
+    }
+  };
+
+  const parseQuestionData = (question: Question) => {
+    const parts = question.data.split('␟');
+    if (parts.length >= 2) {
+      // Extract DAO name from the title - it's usually in the format "Did the Snapshot proposal ... in the {dao}.eth space pass ..."
+      const daoMatch = question.title.match(/in the ([a-zA-Z0-9]+\.eth) space/);
+      return {
+        proposalId: parts[0],
+        transactionHash: parts[1],
+        dao: daoMatch ? daoMatch[1] : null
+      };
+    }
+    return null;
+  };
+
+  const formatTitle = (question: Question) => {
+    const parsedData = parseQuestionData(question);
+    if (!parsedData) return question.title;
+
+    return (
+      <div className="space-y-2">
+        {parsedData.dao && (
+          <div className="text-tron text-sm font-medium">
+            DAO: {parsedData.dao}
+          </div>
+        )}
+        <div className="space-y-1">
+          <div className="text-sm">
+            <span className="text-tron-light/70">Proposal ID:</span>
+            <code className="ml-2 bg-tron-dark/30 px-2 py-1 rounded text-xs">
+              {parsedData.proposalId}
+            </code>
+          </div>
+          <div className="text-sm">
+            <span className="text-tron-light/70">Transaction Array Hash:</span>
+            <code className="ml-2 bg-tron-dark/30 px-2 py-1 rounded text-xs">
+              {parsedData.transactionHash}
+            </code>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const handleQuestionClick = (question: Question) => {
@@ -65,7 +121,7 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
           <Table className="tron-table min-w-full divide-y divide-tron-dark/30">
             <TableHeader>
               <TableRow>
-                <TableHead className="bg-tron-gray/50 text-tron-light">Title</TableHead>
+                <TableHead className="bg-tron-gray/50 text-tron-light">Details</TableHead>
                 <TableHead className="bg-tron-gray/50 text-tron-light">Status</TableHead>
                 <TableHead className="bg-tron-gray/50 text-tron-light">Created</TableHead>
                 <TableHead className="bg-tron-gray/50 text-tron-light">Bond</TableHead>
@@ -79,7 +135,7 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
                   className="transition-colors duration-200 hover:bg-tron-dark/20 cursor-pointer"
                 >
                   <TableCell className="font-medium text-tron-light">
-                    {question.title}
+                    {formatTitle(question)}
                   </TableCell>
                   <TableCell>
                     <Badge 
@@ -97,7 +153,7 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
                     {formatDate(question.createdTimestamp)}
                   </TableCell>
                   <TableCell className="text-tron-light/70">
-                    {question.currentBond}
+                    {formatBond(question.currentBond, question)}
                   </TableCell>
                 </TableRow>
               ))}

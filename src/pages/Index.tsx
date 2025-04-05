@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { retrieveQuestions, Question, QuestionProgress } from 'reality-kleros-subgraph';
 import { namehash, normalize } from 'viem/ens';
@@ -94,7 +93,8 @@ export default function Home() {
           1, // Ethereum mainnet
           {
             batchSize: 100,
-            ...(userFilter && { user: userFilter })
+            ...(userFilter && { user: userFilter }),
+            arbitrator: '0xf72cfd1b34a91a64f9a98537fe63fbab7530adca'
           },
           (progress) => {
             setProgress(progress);

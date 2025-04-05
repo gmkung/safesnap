@@ -2,17 +2,23 @@ import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
 import { formatUnits, parseUnits } from 'viem';
-import { ArrowLeft, Plus } from 'lucide-react';
+import { ArrowLeft, Plus, ExternalLink, Info } from 'lucide-react';
 import { useAccount, useChains, useWalletClient, useConnect, usePublicClient } from 'wagmi';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { RealityEthV3Abi__factory } from '@/types/contracts/factories/RealityEthV3Abi__factory';
 import { RealityEthV21Witharbitratorappeals__factory } from '@/types/contracts/factories/RealityEthV21Witharbitratorappeals__factory';
 import { injected } from 'wagmi/connectors';
+import ProposalModal from '@/components/ProposalModal';
 
 interface ContractConfig {
     address: string;
@@ -195,7 +201,7 @@ function SubmitAnswerButton({ question, onAnswerSubmitted }: SubmitAnswerButtonP
                     <span>
                         <Dialog open={isOpen} onOpenChange={setIsOpen}>
                             <DialogTrigger asChild>
-                                <Button 
+                                <Button
                                     className="flex items-center gap-2"
                                     disabled={!!disabledReason}
                                 >
@@ -343,8 +349,8 @@ function RequestArbitrationButton({ question, onArbitrationRequested }: { questi
                     <span>
                         <Dialog open={isOpen} onOpenChange={setIsOpen}>
                             <DialogTrigger asChild>
-                                <Button 
-                                    variant="outline" 
+                                <Button
+                                    variant="outline"
                                     className={disabledReason ? "border-gray-500 text-gray-500" : "border-yellow-500 text-yellow-500"}
                                     disabled={!!disabledReason}
                                 >
@@ -394,6 +400,8 @@ export default function QuestionDetail() {
     const [question, setQuestion] = useState<Question | null>(location.state?.question || null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
+    const [proposalId, setProposalId] = useState<string | null>(null);
 
     const loadQuestionDetails = async () => {
         try {
@@ -465,6 +473,64 @@ export default function QuestionDetail() {
         return answerHex;
     };
 
+    const getProposalId = (data: string) => {
+        const parts = data.split('␟');
+        return parts[0] || null;
+    };
+
+    const parseQuestionData = (question: Question) => {
+        const parts = question.data.split('␟');
+        if (parts.length >= 2) {
+            // Extract DAO name from the title - it's usually in the format "Did the Snapshot proposal ... in the {dao}.eth space pass ..."
+            const daoMatch = question.title.match(/in the ([a-zA-Z0-9]+\.eth) space/);
+            return {
+                proposalId: parts[0],
+                transactionHash: parts[1],
+                dao: daoMatch ? daoMatch[1] : null
+            };
+        }
+        return null;
+    };
+
+    const formatTitle = (question: Question) => {
+        const parsedData = parseQuestionData(question);
+        if (!parsedData) return question.title;
+
+        return (
+            <div className="space-y-2">
+                {parsedData.dao && (
+                    <div className="text-tron text-xl font-medium flex items-center gap-2">
+                        DAO: {parsedData.dao}
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger>
+                                    <Info className="h-4 w-4 text-tron-light/70" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p className="max-w-md text-sm">{question.title}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                )}
+                <div className="space-y-2">
+                    <div className="text-lg">
+                        <span className="text-tron-light/70">Proposal ID:</span>
+                        <code className="ml-2 bg-tron-dark/30 px-2 py-1 rounded text-base">
+                            {parsedData.proposalId}
+                        </code>
+                    </div>
+                    <div className="text-lg">
+                        <span className="text-tron-light/70">Transaction Array Hash:</span>
+                        <code className="ml-2 bg-tron-dark/30 px-2 py-1 rounded text-base">
+                            {parsedData.transactionHash}
+                        </code>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     if (loading && !question) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -518,7 +584,9 @@ export default function QuestionDetail() {
                 </button>
             </div>
 
-            <h1 className="text-3xl font-bold mb-6 text-tron text-glow">{question.title}</h1>
+            <h1 className="text-3xl font-bold mb-6 text-tron text-glow">
+                {formatTitle(question)}
+            </h1>
 
             {/* Basic Question Details */}
             <div className="tron-card mb-6">
@@ -534,9 +602,9 @@ export default function QuestionDetail() {
                             <span className={`px-3 py-1 text-sm font-medium rounded-full border ${getStatusBadgeClass(question.phase)}`}>
                                 {question.phase}
                             </span>
-                            <RequestArbitrationButton 
-                                question={question} 
-                                onArbitrationRequested={() => loadQuestionDetails()} 
+                            <RequestArbitrationButton
+                                question={question}
+                                onArbitrationRequested={() => loadQuestionDetails()}
                             />
                         </dd>
                     </div>
@@ -563,9 +631,25 @@ export default function QuestionDetail() {
                     <div>
                         <dt className="font-medium text-tron-light/70">Raw Data</dt>
                         <dd className="mt-1">
-                            <pre className="bg-tron-black/30 p-4 rounded-md overflow-x-auto text-sm border border-tron-dark/30">
-                                {question.data}
-                            </pre>
+                            <div className="flex items-start gap-4">
+                                <pre className="flex-1 bg-tron-black/30 p-4 rounded-md overflow-x-auto text-sm border border-tron-dark/30">
+                                    {question.data}
+                                </pre>
+                                {getProposalId(question.data) && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="border-tron flex items-center gap-2"
+                                        onClick={() => {
+                                            setProposalId(getProposalId(question.data));
+                                            setIsProposalModalOpen(true);
+                                        }}
+                                    >
+                                        <ExternalLink className="h-4 w-4" />
+                                        View Proposal
+                                    </Button>
+                                )}
+                            </div>
                         </dd>
                     </div>
                     <div>
@@ -610,9 +694,9 @@ export default function QuestionDetail() {
             </div>
 
             <div className="flex justify-end mb-6">
-                <SubmitAnswerButton 
-                    question={question} 
-                    onAnswerSubmitted={() => loadQuestionDetails()} 
+                <SubmitAnswerButton
+                    question={question}
+                    onAnswerSubmitted={() => loadQuestionDetails()}
                 />
             </div>
 
@@ -742,6 +826,14 @@ export default function QuestionDetail() {
                         )}
                     </dl>
                 </div>
+            )}
+
+            {proposalId && (
+                <ProposalModal
+                    proposalId={proposalId}
+                    isOpen={isProposalModalOpen}
+                    onClose={() => setIsProposalModalOpen(false)}
+                />
             )}
         </div>
     );
