@@ -162,7 +162,7 @@ export function compareTransactionHashes(expectedHash: string, calculatedHash: s
     }
 
     // Normalize hashes for comparison (ensure both have 0x prefix and same case)
-    const normalizedExpected = expectedHash.toLowerCase();
+    const normalizedExpected = expectedHash.startsWith('0x') ? expectedHash.toLowerCase() : `0x${expectedHash.toLowerCase()}`;
     const normalizedCalculated = calculatedHash.toLowerCase();
 
     const match = normalizedExpected === normalizedCalculated;

@@ -25,6 +25,9 @@ export default function TransactionHashModal({
 }: TransactionHashModalProps) {
   const { toast } = useToast();
 
+  // Ensure expected hash has 0x prefix
+  const normalizedExpectedHash = expectedHash.startsWith('0x') ? expectedHash : `0x${expectedHash}`;
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
@@ -63,13 +66,13 @@ export default function TransactionHashModal({
             <h3 className="text-lg font-semibold text-space-light">Expected Hash (from Question)</h3>
             <div className="flex items-center">
               <code className="glass-panel p-3 rounded text-base font-mono break-all flex-1">
-                {expectedHash}
+                {normalizedExpectedHash}
               </code>
               <Button 
                 variant="ghost" 
                 size="icon" 
                 className="ml-2"
-                onClick={() => copyToClipboard(expectedHash)}
+                onClick={() => copyToClipboard(normalizedExpectedHash)}
               >
                 <Copy className="h-4 w-4" />
               </Button>

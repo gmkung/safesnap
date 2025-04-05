@@ -44,9 +44,10 @@ export const parseQuestionData = (question: Question) => {
     const parts = question.data.split('␟');
     if (parts.length >= 2) {
         const daoMatch = question.title.match(/in the ([a-zA-Z0-9]+\.eth) space/);
+        const transactionHash = parts[1].startsWith('0x') ? parts[1] : `0x${parts[1]}`;
         return {
             proposalId: parts[0],
-            transactionHash: parts[1],
+            transactionHash: transactionHash,
             dao: daoMatch ? daoMatch[1] : null
         };
     }
