@@ -1,5 +1,4 @@
 
-import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { injected } from 'wagmi/connectors';
@@ -12,7 +11,10 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut } from 'lucide-react';
+import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
+import AppSidebar from './AppSidebar';
 import Footer from './Footer';
+import { useState } from 'react';
 
 function ConnectWallet() {
     const { address, isConnected } = useAccount();
@@ -97,28 +99,32 @@ function ConnectWallet() {
 
 export default function Layout() {
     return (
-        <div className="min-h-screen flex flex-col">
-            {/* Header */}
-            <header className="border-b border-space-gray/30 backdrop-blur-md z-10 shadow-steel">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="h-16 flex items-center justify-between">
-                        <div className="flex items-center">
-                            <a href="/" className="ethereal-text text-xl font-bold">
-                                Kleros SafeSnap
-                            </a>
+        <SidebarProvider defaultOpen={true}>
+            <div className="flex w-full min-h-screen bg-background">
+                <AppSidebar />
+                
+                <SidebarInset className="min-h-screen flex flex-col">
+                    {/* Header */}
+                    <header className="border-b border-space-gray/30 backdrop-blur-md z-10 shadow-steel">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="h-16 flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <SidebarTrigger />
+                                </div>
+                                <ConnectWallet />
+                            </div>
                         </div>
-                        <ConnectWallet />
-                    </div>
-                </div>
-            </header>
+                    </header>
 
-            {/* Main content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow">
-                <Outlet />
-            </main>
-            
-            {/* Footer */}
-            <Footer />
-        </div>
+                    {/* Main content */}
+                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+                        <Outlet />
+                    </main>
+                    
+                    {/* Footer */}
+                    <Footer />
+                </SidebarInset>
+            </div>
+        </SidebarProvider>
     );
-} 
+}

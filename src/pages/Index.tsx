@@ -81,22 +81,14 @@ export default function Home() {
     : 0;
 
   return (
-    <div className="p-4">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold relative inline-block">
-          <span className="relative z-10 bg-gradient-to-r from-space via-space-light to-space bg-clip-text text-transparent animate-ethereal-fade">
-            Kleros SafeSnap Questions
+    <div>
+      {ensName && (
+        <div className="mb-6 text-xl">
+          <span className="bg-space-dark/60 text-space px-3 py-1 rounded-md border border-space/30 shadow-holo">
+            {ensName}
           </span>
-          <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-space/60 to-transparent"></div>
-        </h1>
-        {ensName && (
-          <div className="mt-2 text-xl">
-            <span className="bg-space-dark/60 text-space px-3 py-1 rounded-md border border-space/30 shadow-holo">
-              {ensName}
-            </span>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {error ? (
         <div className="text-destructive bg-destructive/10 p-4 rounded-md border border-destructive/30">
