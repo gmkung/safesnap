@@ -16,7 +16,7 @@ import {
   SidebarMenuItem,
   SidebarTrigger
 } from "@/components/ui/sidebar";
-import { Search, Filter, Home } from "lucide-react";
+import { Search, Home } from "lucide-react";
 import { DAOList } from './DAOList';
 import { useDAOList } from '@/hooks/useDAOList';
 import { useQuestions } from '@/hooks/useQuestions';
@@ -96,38 +96,6 @@ export default function AppSidebar() {
           <SidebarGroupLabel>Filter by DAO</SidebarGroupLabel>
           <SidebarGroupContent>
             <DAOList daoList={daoList} currentDao={ensPath} />
-          </SidebarGroupContent>
-        </SidebarGroup>
-        
-        <SidebarGroup>
-          <SidebarGroupLabel>Filters</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <div className="space-y-2 text-sm">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full justify-start text-xs h-8"
-              >
-                <Filter className="mr-2 h-3 w-3" />
-                Pending Questions
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full justify-start text-xs h-8"
-              >
-                <Filter className="mr-2 h-3 w-3" />
-                Answered Questions
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full justify-start text-xs h-8"
-              >
-                <Filter className="mr-2 h-3 w-3" />
-                Disputed Questions
-              </Button>
-            </div>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
