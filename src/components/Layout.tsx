@@ -104,7 +104,7 @@ export default function Layout() {
                     <div className="h-16 flex items-center justify-between">
                         <div className="flex items-center">
                             <a href="/" className="ethereal-text text-xl font-bold">
-                                Reality.eth
+                                Kleros SafeSnap
                             </a>
                         </div>
                         <ConnectWallet />

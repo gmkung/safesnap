@@ -85,7 +85,7 @@ export default function Home() {
       <div className="mb-8 text-center">
         <h1 className="text-3xl md:text-4xl font-bold relative inline-block">
           <span className="relative z-10 bg-gradient-to-r from-space via-space-light to-space bg-clip-text text-transparent animate-ethereal-fade">
-            RealityETH Questions
+            Kleros SafeSnap Questions
           </span>
           <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-space/60 to-transparent"></div>
         </h1>

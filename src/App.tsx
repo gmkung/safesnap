@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { createConfig, WagmiProvider, http } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { ThemeProvider } from "next-themes";
+import { useEffect } from "react";
 import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import QuestionDetail from "./pages/QuestionDetail";
@@ -20,26 +21,33 @@ const config = createConfig({
   }
 });
 
-const App = () => (
-  <WagmiProvider config={config}>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="dark">
-        <BrowserRouter>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/ens/*" element={<Index />} />
-              <Route path="/question/:id" element={<QuestionDetail />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
-          <Toaster />
-          <Sonner className="backdrop-blur-md" />
-        </BrowserRouter>
-      </ThemeProvider>
-    </QueryClientProvider>
-  </WagmiProvider>
-);
+const App = () => {
+  // Set document title when the app loads
+  useEffect(() => {
+    document.title = "Kleros SafeSnap";
+  }, []);
+
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider attribute="class" defaultTheme="dark">
+          <BrowserRouter>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/ens/*" element={<Index />} />
+                <Route path="/question/:id" element={<QuestionDetail />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+            <Toaster />
+            <Sonner className="backdrop-blur-md" />
+          </BrowserRouter>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
+};
 
 export default App;
