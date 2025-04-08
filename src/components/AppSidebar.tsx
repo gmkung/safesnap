@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -16,7 +15,7 @@ import {
   SidebarMenuItem,
   SidebarTrigger
 } from "@/components/ui/sidebar";
-import { Search, Home } from "lucide-react";
+import { Home } from "lucide-react";
 import { DAOList } from './DAOList';
 import { useDAOList } from '@/hooks/useDAOList';
 import { useQuestions } from '@/hooks/useQuestions';
@@ -24,17 +23,9 @@ import { useQuestions } from '@/hooks/useQuestions';
 export default function AppSidebar() {
   const navigate = useNavigate();
   const { '*': ensPath } = useParams();
-  const [searchQuery, setSearchQuery] = useState("");
   const { questions, isLoading } = useQuestions();
   const daoList = useDAOList(questions);
   
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/ens/${searchQuery.trim()}`);
-    }
-  };
-
   return (
     <Sidebar>
       <SidebarHeader className="pt-6 pb-2">
@@ -65,30 +56,6 @@ export default function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        
-        <SidebarGroup>
-          <SidebarGroupLabel>Search</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <form onSubmit={handleSearch} className="space-y-2">
-              <div className="flex items-center space-x-1">
-                <Input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search DAO..."
-                  className="h-8 bg-secondary/30 text-sm"
-                />
-                <Button size="sm" type="submit" variant="secondary" className="h-8 px-2">
-                  <Search className="h-4 w-4" />
-                </Button>
-              </div>
-              {ensPath && (
-                <div className="text-xs py-1 px-2 rounded bg-space-dark/60 text-space-light/80">
-                  Searching: <span className="font-mono">{ensPath}</span>
-                </div>
-              )}
-            </form>
           </SidebarGroupContent>
         </SidebarGroup>
         
