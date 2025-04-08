@@ -1,4 +1,3 @@
-
 import { Question } from 'reality-kleros-subgraph';
 import { useNavigate } from 'react-router-dom';
 import { Card } from './ui/card';
@@ -30,17 +29,14 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
   const [loadingProposals, setLoadingProposals] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    // Fetch proposal titles for each question
     const fetchProposalTitles = async () => {
       for (const question of questions) {
         const parsedData = parseQuestionData(question);
         if (parsedData?.proposalId) {
           const proposalId = parsedData.proposalId;
           
-          // Skip if already loaded or loading
           if (proposalTitles[proposalId] || loadingProposals[proposalId]) continue;
           
-          // Mark as loading
           setLoadingProposals(prev => ({ ...prev, [proposalId]: true }));
           
           try {
@@ -69,7 +65,6 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
     if (!question?.contract?.config) return `${bond} ETH`;
 
     try {
-      // Convert from wei to the appropriate unit
       const formattedAmount = formatUnits(BigInt(bond), 18);
       return `${formattedAmount} ${question.contract.config.token_ticker}`;
     } catch (error) {
@@ -81,7 +76,6 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
   const parseQuestionData = (question: Question) => {
     const parts = question.data.split('␟');
     if (parts.length >= 2) {
-      // Extract DAO name from the title - it's usually in the format "Did the Snapshot proposal ... in the {dao}.eth space pass ..."
       const daoMatch = question.title.match(/in the ([a-zA-Z0-9]+\.eth) space/);
       return {
         proposalId: parts[0],
@@ -101,11 +95,6 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
     
     return (
       <div className="space-y-2">
-        {/* Original question title with reduced opacity */}
-        <div className="text-space-light/60 text-sm">
-          {question.title}
-        </div>
-        
         {parsedData.dao && (
           <div className="text-space text-sm font-medium flex items-center">
             <span className="bg-space/10 px-2 py-0.5 rounded border border-space/20 shadow-holo-sm">
@@ -114,14 +103,12 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
           </div>
         )}
         
-        {/* Show proposal title when available */}
         {proposalTitle ? (
           <div className="text-lg font-medium text-space-light">
             {proposalTitle}
           </div>
         ) : null}
         
-        {/* Always show proposal ID and transaction hash */}
         <div className="space-y-1.5 mt-2">
           <div className="text-sm flex items-center">
             <span className="text-space-light/70 font-medium min-w-24 flex items-center">
@@ -148,7 +135,6 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
     navigate(`/question/${question.id}`, { state: { question } });
   };
 
-  // Show skeletons while loading
   if (isLoading && questions.length === 0) {
     return (
       <Card className="tron-card max-w-5xl mx-auto bg-transparent">
@@ -167,7 +153,6 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
     <TooltipProvider>
       <Card className="tron-card max-w-5xl mx-auto bg-transparent backdrop-blur-sm">
         <div className="p-4 space-y-4">
-          {/* Questions List */}
           <div className="space-y-6">
             {questions.map((question) => {
               const parsedData = parseQuestionData(question);
@@ -234,7 +219,6 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
             })}
           </div>
 
-          {/* Pagination */}
           <div className="flex items-center justify-between border-t border-space/20 px-4 py-3 mt-4">
             <div className="flex flex-1 justify-between sm:hidden">
               <Button
@@ -282,9 +266,7 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   
-                  {/* Show limited page numbers with ellipsis */}
                   {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                    // Calculate which pages to show
                     let pageNum;
                     if (totalPages <= 5) {
                       pageNum = i + 1;
