@@ -1,7 +1,7 @@
-
 import { formatDate } from '@/utils/questionUtils';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ExternalLink } from 'lucide-react';
 import CopyButton from './CopyButton';
+import { Button } from '@/components/ui/button';
 
 interface SnapshotProposalSummaryProps {
   proposalLoading: boolean;
@@ -29,9 +29,25 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData 
     );
   }
 
+  const getSnapshotProposalUrl = () => {
+    if (!proposalData) return '#';
+    const spaceName = proposalData.space?.id || proposalData.space?.name;
+    return `https://snapshot.org/#/${spaceName}/proposal/${proposalData.id}`;
+  };
+
   return (
     <div className="w-full steel-panel">
-      <h2 className="text-xl font-semibold ethereal-text p-4 border-b border-space-dark/30">Snapshot Proposal Summary</h2>
+      <div className="flex justify-between items-center border-b border-space-dark/30 p-4">
+        <h2 className="text-xl font-semibold ethereal-text">Snapshot Proposal Summary</h2>
+        <Button 
+          variant="tron" 
+          size="sm"
+          className="ml-2"
+          onClick={() => window.open(getSnapshotProposalUrl(), '_blank')}
+        >
+          View on Snapshot <ExternalLink className="h-3.5 w-3.5 ml-1" />
+        </Button>
+      </div>
       <div className="p-4 space-y-4 overflow-y-auto">
         <div className="flex justify-between items-center">
           <div className="text-xl font-bold text-space">
