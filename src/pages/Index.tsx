@@ -1,11 +1,10 @@
-
 import { useEffect, useState } from 'react';
 import { retrieveQuestions, Question, QuestionProgress } from 'reality-kleros-subgraph';
 import { useParams } from 'react-router-dom';
 import { QuestionList } from '../components/QuestionList';
 import { Progress } from '@/components/ui/progress';
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 10;
 
 export default function Home() {
   const [questions, setQuestions] = useState<Question[]>([]);

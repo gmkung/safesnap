@@ -1,4 +1,3 @@
-
 import { Question } from 'reality-kleros-subgraph';
 import { useNavigate } from 'react-router-dom';
 import { Card } from './ui/card';
@@ -17,7 +16,7 @@ interface QuestionListProps {
   totalQuestions: number;
 }
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 10;
 
 export function QuestionList({ questions, currentPage, onPageChange, isLoading, totalQuestions }: QuestionListProps) {
   const navigate = useNavigate();
