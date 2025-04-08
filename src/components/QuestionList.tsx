@@ -109,6 +109,12 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
           </div>
         )}
         
+        {/* Show original question title */}
+        <div className="text-sm text-space-light/80">
+          {question.title}
+        </div>
+        
+        {/* Show proposal title if available */}
         {proposalTitle ? (
           <div className="text-lg font-medium text-space-light">
             {proposalTitle}
