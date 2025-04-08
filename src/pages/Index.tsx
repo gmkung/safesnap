@@ -1,68 +1,36 @@
-import { useEffect, useState } from 'react';
-import { retrieveQuestions, Question, QuestionProgress } from 'reality-kleros-subgraph';
-import { useParams } from 'react-router-dom';
+
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { QuestionList } from '../components/QuestionList';
 import { Progress } from '@/components/ui/progress';
+import { useQuestions } from '@/hooks/useQuestions';
 
 const ITEMS_PER_PAGE = 10;
 
 export default function Home() {
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState<QuestionProgress>({
-    total: 0,
-    processed: 0,
-    failed: 0
-  });
   const [currentPage, setCurrentPage] = useState(1);
-
-  // Get ENS name from URL path
-  const { '*': ensPath } = useParams();
-  const ensName = ensPath || null;
-
-  // Log when ENS is detected
+  
+  // Get ENS name or DAO name from URL path
+  const { '*': pathParam } = useParams();
+  const navigate = useNavigate();
+  
+  // Handle both ENS and DAO filtering
+  const filterParam = pathParam || null;
+  const { questions, isLoading, error, progress } = useQuestions(filterParam);
+  
+  // Reset to page 1 when filter changes
   useEffect(() => {
-    if (ensName) {
-      console.log('🔍 DAO name detected in URL:', ensName);
+    setCurrentPage(1);
+  }, [filterParam]);
+
+  // Log when filter is detected
+  useEffect(() => {
+    if (filterParam) {
+      console.log('🔍 Filter detected in URL:', filterParam);
     } else {
-      console.log('📄 No DAO name in URL - showing all questions');
+      console.log('📄 No filter in URL - showing all questions');
     }
-  }, [ensName]);
-
-  useEffect(() => {
-    const loadQuestions = async () => {
-      try {
-        setIsLoading(true);
-        setQuestions([]);
-        setProgress({ total: 0, processed: 0, failed: 0 });
-
-        // Process questions as they come in
-        for await (const question of retrieveQuestions(
-          1, // Ethereum mainnet
-          {
-            batchSize: 100,
-            ...(ensName && { qTitle: ensName }),
-            arbitrator: '0xf72cfd1b34a91a64f9a98537fe63fbab7530adca'
-          },
-          (progress) => {
-            setProgress(progress);
-          }
-        )) {
-          setQuestions(prev => [...prev, question]);
-        }
-
-        setError(null);
-      } catch (err) {
-        console.error('Error loading questions:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load questions');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadQuestions();
-  }, [ensName]);
+  }, [filterParam]);
 
   // Calculate paginated questions
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -81,10 +49,10 @@ export default function Home() {
 
   return (
     <div>
-      {ensName && (
+      {filterParam && (
         <div className="mb-6 text-xl">
           <span className="bg-space-dark/60 text-space px-3 py-1 rounded-md border border-space/30 shadow-holo">
-            {ensName}
+            {filterParam}
           </span>
         </div>
       )}

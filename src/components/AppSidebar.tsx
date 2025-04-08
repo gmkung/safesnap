@@ -17,11 +17,16 @@ import {
   SidebarTrigger
 } from "@/components/ui/sidebar";
 import { Search, Filter, Home } from "lucide-react";
+import { DAOList } from './DAOList';
+import { useDAOList } from '@/hooks/useDAOList';
+import { useQuestions } from '@/hooks/useQuestions';
 
 export default function AppSidebar() {
   const navigate = useNavigate();
   const { '*': ensPath } = useParams();
   const [searchQuery, setSearchQuery] = useState("");
+  const { questions, isLoading } = useQuestions();
+  const daoList = useDAOList(questions);
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,6 +89,13 @@ export default function AppSidebar() {
                 </div>
               )}
             </form>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        <SidebarGroup>
+          <SidebarGroupLabel>Filter by DAO</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <DAOList daoList={daoList} currentDao={ensPath} />
           </SidebarGroupContent>
         </SidebarGroup>
         
