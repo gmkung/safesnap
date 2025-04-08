@@ -14,8 +14,20 @@ export default function Home() {
   const { '*': pathParam } = useParams();
   const navigate = useNavigate();
   
-  // Handle both ENS and DAO filtering
-  const filterParam = pathParam || null;
+  // Parse the filter param from the path
+  // This handles both /ens/DAOName and direct /DAOName paths for backward compatibility
+  let filterParam = pathParam || null;
+  
+  // Check if the path doesn't already start with 'ens/' but is still a valid filter
+  if (filterParam && !filterParam.startsWith('ens/')) {
+    // For backward compatibility, treat direct DAO names as filters too
+    console.log('Using direct path filter:', filterParam);
+  } else if (filterParam && filterParam.startsWith('ens/')) {
+    // Extract the actual DAO name from the ens/ prefix
+    filterParam = filterParam.substring(4);
+    console.log('Using ens/ path filter:', filterParam);
+  }
+  
   const { questions, isLoading, error, progress } = useQuestions(filterParam);
   
   // Reset to page 1 when filter changes
