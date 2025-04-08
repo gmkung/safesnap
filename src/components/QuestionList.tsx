@@ -7,7 +7,7 @@ import { QuestionRowSkeleton } from './ui/skeleton';
 import { Progress } from './ui/progress';
 import { formatUnits } from 'viem';
 import { Button } from './ui/button';
-import { ChevronLeft, ChevronRight, Info } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Info, Hash } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getProposalDetails } from '@/lib/snapshotQuery';
 import { parseQuestionData } from '@/utils/questionUtils';
@@ -101,6 +101,11 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
     
     return (
       <div className="space-y-2">
+        {/* Original question title with reduced opacity */}
+        <div className="text-space-light/60 text-sm">
+          {question.title}
+        </div>
+        
         {parsedData.dao && (
           <div className="text-space text-sm font-medium flex items-center">
             <span className="bg-space/10 px-2 py-0.5 rounded border border-space/20 shadow-holo-sm">
@@ -109,26 +114,32 @@ export function QuestionList({ questions, currentPage, onPageChange, isLoading, 
           </div>
         )}
         
+        {/* Show proposal title when available */}
         {proposalTitle ? (
           <div className="text-lg font-medium text-space-light">
             {proposalTitle}
           </div>
-        ) : (
-          <div className="space-y-1.5">
-            <div className="text-sm flex items-center">
-              <span className="text-space-light/70 font-medium min-w-24">Proposal ID:</span>
-              <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light">
-                {parsedData.proposalId}
-              </code>
-            </div>
-            <div className="text-sm flex items-center">
-              <span className="text-space-light/70 font-medium min-w-24">Tx Array Hash:</span>
-              <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light overflow-hidden text-ellipsis whitespace-nowrap max-w-[calc(100%-100px)]">
-                {parsedData.transactionHash}
-              </code>
-            </div>
+        ) : null}
+        
+        {/* Always show proposal ID and transaction hash */}
+        <div className="space-y-1.5 mt-2">
+          <div className="text-sm flex items-center">
+            <span className="text-space-light/70 font-medium min-w-24 flex items-center">
+              <Hash size={14} className="mr-1" /> Proposal ID:
+            </span>
+            <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light">
+              {parsedData.proposalId}
+            </code>
           </div>
-        )}
+          <div className="text-sm flex items-center">
+            <span className="text-space-light/70 font-medium min-w-24 flex items-center">
+              <Hash size={14} className="mr-1" /> Tx Array Hash:
+            </span>
+            <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light overflow-hidden text-ellipsis whitespace-nowrap max-w-[calc(100%-100px)]">
+              {parsedData.transactionHash}
+            </code>
+          </div>
+        </div>
       </div>
     );
   };
