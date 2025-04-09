@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
 import { ArrowLeft } from 'lucide-react';
@@ -38,10 +38,12 @@ export default function QuestionDetail() {
     } | null>(null);
     const [hashModalOpen, setHashModalOpen] = useState(false);
     const { toast } = useToast();
+    const proposalFetchAttempted = useRef<boolean>(false);
 
     const loadQuestionDetails = async () => {
         try {
             setLoading(true);
+            // Your implementation for loading question details
         } catch (err) {
             console.error('Error loading question details:', err);
             setError(err instanceof Error ? err.message : 'Failed to load question details');
@@ -55,9 +57,10 @@ export default function QuestionDetail() {
     }, [question]);
 
     useEffect(() => {
-        if (question) {
+        if (question && !proposalFetchAttempted.current) {
             const parsedData = parseQuestionData(question);
             if (parsedData?.proposalId) {
+                proposalFetchAttempted.current = true;
                 fetchProposalData(parsedData.proposalId);
             }
         }
@@ -95,7 +98,7 @@ export default function QuestionDetail() {
             toast({
                 variant: "destructive",
                 title: "Error",
-                description: "Failed to load proposal details. Please try again."
+                description: "Failed to load proposal details. Please try again later."
             });
         } finally {
             setProposalLoading(false);
