@@ -20,6 +20,7 @@ import { useQuestions } from '@/hooks/useQuestions';
 import { QuestionPhaseValue } from './StatusFilter';
 import { StatusFilterAccordion } from './StatusFilterAccordion';
 import { DAOFilterAccordion } from './DAOFilterAccordion';
+import { parseQuestionData } from '@/utils/questionUtils';
 
 export default function AppSidebar() {
   const navigate = useNavigate();
@@ -39,7 +40,10 @@ export default function AppSidebar() {
   // Transform the string[] into the expected format for DAOFilterAccordion
   const formattedDaoList = rawDaoList.map(dao => ({
     name: dao,
-    count: questions.filter(q => q.dao === dao).length
+    count: questions.filter(q => {
+      const parsedData = parseQuestionData(q);
+      return parsedData?.dao === dao;
+    }).length
   }));
   
   const handleStatusChange = (statuses: QuestionPhaseValue[]) => {
