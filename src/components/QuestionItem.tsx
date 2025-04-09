@@ -34,6 +34,13 @@ export function QuestionItem({ question, proposalTitles, loadingProposals, onQue
     }
   };
 
+  // Function to truncate identifiers
+  const truncateId = (id: string, start = 6, end = 4) => {
+    if (!id) return '';
+    if (id.length <= start + end) return id;
+    return `${id.slice(0, start)}...${id.slice(-end)}`;
+  };
+
   const formatTitle = () => {
     if (!parsedData) return null;
 
@@ -58,25 +65,46 @@ export function QuestionItem({ question, proposalTitles, loadingProposals, onQue
             <span className="text-space-light/70 font-medium min-w-24 flex items-center">
               <FileText size={14} className="mr-1" /> Question ID:
             </span>
-            <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light overflow-hidden text-ellipsis whitespace-nowrap max-w-[calc(100%-100px)]">
-              {question.id}
-            </code>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light cursor-pointer">
+                  {truncateId(question.id)}
+                </code>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs font-mono">{question.id}</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
           <div className="text-sm flex items-center">
             <span className="text-space-light/70 font-medium min-w-24 flex items-center">
               <Hash size={14} className="mr-1" /> Proposal ID:
             </span>
-            <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light">
-              {parsedData.proposalId}
-            </code>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light cursor-pointer">
+                  {truncateId(parsedData.proposalId)}
+                </code>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs font-mono">{parsedData.proposalId}</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
           <div className="text-sm flex items-center">
             <span className="text-space-light/70 font-medium min-w-24 flex items-center">
               <Hash size={14} className="mr-1" /> Tx Array Hash:
             </span>
-            <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light overflow-hidden text-ellipsis whitespace-nowrap max-w-[calc(100%-100px)]">
-              {parsedData.transactionHash}
-            </code>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light cursor-pointer">
+                  {truncateId(parsedData.transactionHash)}
+                </code>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs font-mono">{parsedData.transactionHash}</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>
