@@ -41,14 +41,14 @@ export function DAOFilterAccordion({ daoList, currentDao }: DAOFilterAccordionPr
                      style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }} />
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="flex items-center justify-between mb-2 text-xs">
+        <div className="flex items-center justify-between mb-2 mt-2 text-xs">
           <span className="text-muted-foreground">Filter Mode</span>
           <Toggle 
             size="sm" 
             aria-label="Toggle whitelist" 
             pressed={showOnlyWhitelisted}
             onPressedChange={handleWhitelistToggle}
-            className="h-6 text-xs"
+            className="h-6 text-xs p-0.5"
           >
             {showOnlyWhitelisted ? (
               <ShieldCheck className="h-3 w-3 mr-1" />
