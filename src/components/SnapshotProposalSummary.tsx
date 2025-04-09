@@ -1,14 +1,22 @@
 import { formatDate } from '@/utils/questionUtils';
-import { Loader2, ExternalLink } from 'lucide-react';
+import { Loader2, ExternalLink, BookText } from 'lucide-react';
 import CopyButton from './CopyButton';
 import { Button } from '@/components/ui/button';
+import { parseQuestionData } from '@/utils/questionUtils';
+import { Question } from 'reality-kleros-subgraph';
 
 interface SnapshotProposalSummaryProps {
   proposalLoading: boolean;
   proposalData: any;
+  question?: Question;
 }
 
-export default function SnapshotProposalSummary({ proposalLoading, proposalData }: SnapshotProposalSummaryProps) {
+export default function SnapshotProposalSummary({ proposalLoading, proposalData, question }: SnapshotProposalSummaryProps) {
+  const parsedData = question ? parseQuestionData(question) : null;
+  const daoName = parsedData?.dao || null;
+  
+  const constitutionUrl = daoName ? `https://example.com/dao/${daoName}/constitution` : "https://example.com/constitution";
+  
   if (proposalLoading) {
     return (
       <div className="w-full steel-panel p-6 flex items-center justify-center">
@@ -143,6 +151,26 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData 
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {daoName && (
+          <div className="mt-6 mb-2">
+            <Button 
+              variant="tron" 
+              size="sm" 
+              asChild
+              className="text-space hover:text-space-accent transition-colors text-sm gap-1"
+            >
+              <a 
+                href={constitutionUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <BookText className="h-3.5 w-3.5" />
+                <span>View DAO Constitution</span>
+              </a>
+            </Button>
           </div>
         )}
 

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
@@ -145,6 +146,7 @@ export default function QuestionDetail() {
                             <SnapshotProposalSummary
                                 proposalLoading={proposalLoading}
                                 proposalData={proposalData}
+                                question={question}
                             />
                         </div>
                     </ResizablePanel>
