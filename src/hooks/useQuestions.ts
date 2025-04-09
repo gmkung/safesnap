@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { retrieveQuestions, Question, QuestionProgress } from 'reality-kleros-subgraph';
+import { CHAIN_ID } from '@/config/chainConfig';
 
 export function useQuestions(ensName?: string | null) {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -21,7 +22,7 @@ export function useQuestions(ensName?: string | null) {
 
         // Process questions as they come in
         for await (const question of retrieveQuestions(
-          1, // Ethereum mainnet
+          CHAIN_ID, // Using centralized chain ID
           {
             batchSize: 100,
             ...(ensName && { qTitle: ensName }),

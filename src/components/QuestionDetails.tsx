@@ -1,4 +1,3 @@
-
 import { Question } from 'reality-kleros-subgraph';
 import RequestArbitrationButton from './RequestArbitration';
 import { formatBond, formatDate, getHumanReadableAnswer, getStatusBadgeClass, parseQuestionData } from '@/utils/questionUtils';
@@ -12,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/t
 import { cn } from '@/lib/utils';
 import { QuestionDetailsSkeleton } from './ui/skeleton';
 import CopyButton from './CopyButton';
+import { getRealityEthUrl } from '@/config/chainConfig';
 
 interface QuestionDetailsProps {
     question: Question;
@@ -42,14 +42,12 @@ export default function QuestionDetails({
         return `https://v1.snapshot.box/#/${spaceId}/proposal/${proposalId}`;
     };
     
-    // Get the icon based on the verification status
     const StatusIcon = hashVerification?.match 
         ? CheckCircle 
         : hashVerification?.calculatedHash 
             ? XCircle 
             : AlertTriangle;
     
-    // Get the tooltip text based on the verification status
     const tooltipText = hashVerification?.match 
         ? "Hash in question matches calculated hash from Snapshot Proposal" 
         : hashVerification?.calculatedHash 
@@ -65,10 +63,21 @@ export default function QuestionDetails({
                 <div className="absolute top-0 bottom-0 right-0 w-[1px] bg-gradient-to-b from-transparent via-space/20 to-transparent"></div>
             </div>
             
-            <h2 className="text-xl font-semibold mb-4 ethereal-text p-4 border-b border-space-dark/30 relative">
-                Question Details
+            <div className="flex justify-between items-center p-4 border-b border-space-dark/30 relative">
+                <h2 className="text-xl font-semibold ethereal-text">
+                    Question Details
+                </h2>
+                <a 
+                    href={getRealityEthUrl(question.id)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center text-space hover:text-space-accent transition-colors text-sm"
+                >
+                    <span>View on Reality.eth</span>
+                    <ExternalLink className="ml-1 h-3.5 w-3.5" />
+                </a>
                 <span className="absolute bottom-0 left-[5%] right-[5%] h-[1px] bg-gradient-to-r from-transparent via-space/30 to-transparent"></span>
-            </h2>
+            </div>
             
             <dl className="grid grid-cols-1 gap-4 p-4">
                 <div>
@@ -194,7 +203,6 @@ export default function QuestionDetails({
                 </div>
             </dl>
             
-            {/* Additional data at the bottom */}
             {(parsedData?.proposalId || parsedData?.transactionHash) && (
                 <div className="border-t border-space-dark/30 p-4 relative">
                     <span className="absolute top-0 left-[5%] right-[5%] h-[1px] bg-gradient-to-r from-transparent via-space/30 to-transparent"></span>
