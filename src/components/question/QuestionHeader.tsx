@@ -1,8 +1,9 @@
 
 import { Question } from 'reality-kleros-subgraph';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, BookText } from 'lucide-react';
 import { CHAIN_ID } from '@/config/chainConfig';
 import { Button } from '../ui/button';
+import { parseQuestionData } from '@/utils/questionUtils';
 
 interface QuestionHeaderProps {
   question: Question;
@@ -14,26 +15,51 @@ export function getRealityEthUrl(question: Question): string {
 }
 
 export default function QuestionHeader({ question }: QuestionHeaderProps) {
+  const parsedData = parseQuestionData(question);
+  const daoName = parsedData?.dao || null;
+  
+  // Placeholder URL for the constitution
+  const constitutionUrl = daoName ? `https://example.com/dao/${daoName}/constitution` : "https://example.com/constitution";
+  
   return (
     <div className="flex justify-between items-center p-4 border-b border-space-dark/30 relative">
       <h2 className="text-xl font-semibold ethereal-text">
         Question Details
       </h2>
-      <Button 
-        variant="tron" 
-        size="sm" 
-        asChild
-        className="text-space hover:text-space-accent transition-colors text-sm gap-1"
-      >
-        <a 
-          href={getRealityEthUrl(question)}
-          target="_blank"
-          rel="noopener noreferrer"
+      <div className="flex space-x-2">
+        {daoName && (
+          <Button 
+            variant="tron" 
+            size="sm" 
+            asChild
+            className="text-space hover:text-space-accent transition-colors text-sm gap-1"
+          >
+            <a 
+              href={constitutionUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <BookText className="h-3.5 w-3.5" />
+              <span>DAO Constitution</span>
+            </a>
+          </Button>
+        )}
+        <Button 
+          variant="tron" 
+          size="sm" 
+          asChild
+          className="text-space hover:text-space-accent transition-colors text-sm gap-1"
         >
-          <span>View on Reality.eth</span>
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
-      </Button>
+          <a 
+            href={getRealityEthUrl(question)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>View on Reality.eth</span>
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        </Button>
+      </div>
       <span className="absolute bottom-0 left-[5%] right-[5%] h-[1px] bg-gradient-to-r from-transparent via-space/30 to-transparent"></span>
     </div>
   );

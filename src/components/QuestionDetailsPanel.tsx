@@ -5,6 +5,7 @@ import ResponseHistory from '@/components/ResponseHistory';
 import SubmitAnswerButton from '@/components/SubmitAnswer';
 import { Question } from 'reality-kleros-subgraph';
 import { parseQuestionData } from '@/utils/questionUtils';
+import QuestionHeader from '@/components/question/QuestionHeader';
 
 interface QuestionDetailsPanelProps {
   question: Question;
@@ -27,14 +28,17 @@ export default function QuestionDetailsPanel({
     <div className="flex flex-col gap-6 pr-4">
       {/* Question Details Section */}
       <div className="w-full">
-        <QuestionDetails 
-          question={question} 
-          onArbitrationRequested={onArbitrationRequested}
-          onViewProposal={() => {}} 
-          proposalData={proposalData}
-          hashVerification={hashVerification}
-          onViewHashDetails={onViewHashDetails}
-        />
+        <div className="steel-panel h-full relative overflow-hidden tron-grid">
+          <QuestionHeader question={question} />
+          <QuestionDetails 
+            question={question} 
+            onArbitrationRequested={onArbitrationRequested}
+            onViewProposal={() => {}} 
+            proposalData={proposalData}
+            hashVerification={hashVerification}
+            onViewHashDetails={onViewHashDetails}
+          />
+        </div>
       </div>
       
       {/* Answer History Section */}

@@ -1,7 +1,7 @@
 import { Question } from 'reality-kleros-subgraph';
 import RequestArbitrationButton from './RequestArbitration';
 import { formatBond, formatDate, getHumanReadableAnswer, getStatusBadgeClass, parseQuestionData } from '@/utils/questionUtils';
-import { ExternalLink, Info, Calculator, CheckCircle, XCircle, AlertTriangle, FileText } from 'lucide-react';
+import { Info, Calculator, CheckCircle, XCircle, AlertTriangle, FileText } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import TemplateInfo from './TemplateInfo';
@@ -11,7 +11,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/t
 import { cn } from '@/lib/utils';
 import { QuestionDetailsSkeleton } from './ui/skeleton';
 import CopyButton from './CopyButton';
-import { CHAIN_ID } from '@/config/chainConfig';
 
 interface QuestionDetailsProps {
     question: Question;
@@ -21,11 +20,6 @@ interface QuestionDetailsProps {
     hashVerification?: any;
     onViewHashDetails?: () => void;
     isLoading?: boolean;
-}
-
-// Function to get Reality.eth URL for a question
-function getRealityEthUrl(question: Question): string {
-  return `https://reality.eth.limo/app/index.html#!/network/${CHAIN_ID}/question/${question.contract.address}-${question.id}`;
 }
 
 export default function QuestionDetails({ 
@@ -60,30 +54,7 @@ export default function QuestionDetails({
             : "Unable to verify: No transactions found in proposal to calculate hash";
     
     return (
-        <div className="steel-panel h-full relative overflow-hidden tron-grid">
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-space/30 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-space/20 to-transparent"></div>
-                <div className="absolute top-0 bottom-0 left-0 w-[1px] bg-gradient-to-b from-transparent via-space/20 to-transparent"></div>
-                <div className="absolute top-0 bottom-0 right-0 w-[1px] bg-gradient-to-b from-transparent via-space/20 to-transparent"></div>
-            </div>
-            
-            <div className="flex justify-between items-center p-4 border-b border-space-dark/30 relative">
-                <h2 className="text-xl font-semibold ethereal-text">
-                    Question Details
-                </h2>
-                <a 
-                    href={getRealityEthUrl(question)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center text-space hover:text-space-accent transition-colors text-sm"
-                >
-                    <span>View on Reality.eth</span>
-                    <ExternalLink className="ml-1 h-3.5 w-3.5" />
-                </a>
-                <span className="absolute bottom-0 left-[5%] right-[5%] h-[1px] bg-gradient-to-r from-transparent via-space/30 to-transparent"></span>
-            </div>
-            
+        <div className="h-full relative overflow-hidden">
             <dl className="grid grid-cols-1 gap-4 p-4">
                 <div>
                     <dt className="font-medium text-space-light/70">Question ID</dt>
