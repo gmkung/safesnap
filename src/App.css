@@ -1,4 +1,3 @@
-
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -213,4 +212,12 @@ table tr:hover td {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(12, 250, 96, 0.8);
+}
+
+.ethereal-text {
+  background-clip: initial;
+  background-image: none;
+  animation: none;
+  color: #33C3F0;
+  text-shadow: none;
 }

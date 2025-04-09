@@ -21,7 +21,7 @@ export default function QuestionSummary({ question, proposalData }: QuestionSumm
     <Card className="steel-panel mb-6">
       <div className="p-4 border-b border-space-dark/30 flex items-center">
         <FileText className="h-5 w-5 mr-2 text-space" />
-        <CardTitle className="text-xl font-semibold ethereal-text">Question Summary</CardTitle>
+        <CardTitle className="text-xl font-semibold text-space">Question Summary</CardTitle>
       </div>
       <CardContent className="p-4 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

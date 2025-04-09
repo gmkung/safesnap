@@ -67,7 +67,7 @@ export default function AppSidebar() {
             alt="Kleros Logo" 
             className="w-16 h-16"
           />
-          <h1 className="text-xl font-bold bg-gradient-to-r from-space via-space-light to-space bg-clip-text text-transparent animate-ethereal-fade">
+          <h1 className="text-xl font-bold text-space">
             Kleros SafeSnap
           </h1>
         </div>

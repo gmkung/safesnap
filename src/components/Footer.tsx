@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="steel-panel px-6 py-3 rounded-lg animate-holo-glow">
             <p className="text-space-light/90 text-sm flex items-center">
-              <span className="ethereal-text font-medium mr-2">Kleros SafeSnap</span> 
+              <span className="text-space font-medium mr-2">Kleros SafeSnap</span> 
               <span className="text-space-accent">2025</span>
             </p>
           </div>
