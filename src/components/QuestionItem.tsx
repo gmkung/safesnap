@@ -79,10 +79,9 @@ export function QuestionItem({ question, proposalTitles, loadingProposals, onQue
     <div 
       onClick={() => onQuestionClick(question)}
       className="rounded-lg border border-space/20 bg-space-darkBlue/30 transition-all duration-300 
-                hover:shadow-holo-lg hover:bg-space-darkBlue/40 cursor-pointer p-4 mb-6 relative
+                cursor-pointer p-4 mb-6 relative
                 before:absolute before:inset-0 before:bg-gradient-to-r before:from-space/5 before:to-transparent 
-                before:rounded-lg before:-z-10 before:blur-md before:translate-y-1 before:translate-x-1
-                hover:translate-y-[-2px] hover:translate-x-[-1px] tron-scanner"
+                before:rounded-lg before:-z-10 before:blur-md before:translate-y-1 before:translate-x-1"
     >
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
         <div className="flex-1 text-left">
