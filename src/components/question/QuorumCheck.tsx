@@ -19,20 +19,15 @@ export default function QuorumCheck({ question, proposalData }: QuorumCheckProps
     return null;
   }
   
-  // Find the "Yes" option index - usually it's the first choice, but we can look for "yes" in the label as well
-  const yesIndex = proposalData.choices.findIndex((choice: string) => 
-    choice.toLowerCase() === "yes" || choice.toLowerCase().includes("yes"));
-  
-  if (yesIndex === -1) return null;
-  
-  const yesScore = proposalData.scores[yesIndex] || 0;
-  const quorumPassed = yesScore >= proposalData.quorum;
+  // Get the total votes from scores_total
+  const totalVotes = proposalData.scores_total || 0;
+  const quorumPassed = totalVotes >= proposalData.quorum;
   
   const StatusIcon = quorumPassed ? CheckCircle : XCircle;
   
   const tooltipText = quorumPassed
-    ? `Quorum requirement met: ${yesScore.toFixed(2)} ${proposalData.symbol} > ${proposalData.quorum} ${proposalData.symbol}`
-    : `Quorum requirement not met: ${yesScore.toFixed(2)} ${proposalData.symbol} < ${proposalData.quorum} ${proposalData.symbol}`;
+    ? `Quorum requirement met: ${totalVotes.toFixed(2)} ${proposalData.symbol} > ${proposalData.quorum} ${proposalData.symbol}`
+    : `Quorum requirement not met: ${totalVotes.toFixed(2)} ${proposalData.symbol} < ${proposalData.quorum} ${proposalData.symbol}`;
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="border border-space-dark/30 rounded-md overflow-hidden mt-3">
@@ -65,7 +60,7 @@ export default function QuorumCheck({ question, proposalData }: QuorumCheckProps
           </TooltipProvider>
           
           <div className="text-sm ml-1">
-            <span className="text-space-light/70">{yesScore.toFixed(2)} {proposalData.symbol} / {proposalData.quorum} {proposalData.symbol}</span>
+            <span className="text-space-light/70">{totalVotes.toFixed(2)} {proposalData.symbol} / {proposalData.quorum} {proposalData.symbol}</span>
           </div>
         </div>
         <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "transform rotate-180")} />
@@ -89,7 +84,7 @@ export default function QuorumCheck({ question, proposalData }: QuorumCheckProps
                       <div 
                         className={cn(
                           "h-full rounded-full", 
-                          index === yesIndex ? "bg-green-500" : "bg-blue-500"
+                          index === 0 ? "bg-green-500" : "bg-blue-500"
                         )}
                         style={{ width: `${percentage}%` }}
                       ></div>
