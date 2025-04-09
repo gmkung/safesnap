@@ -2,7 +2,7 @@
 import { Question } from 'reality-kleros-subgraph';
 import RequestArbitrationButton from './RequestArbitration';
 import { formatBond, formatDate, getHumanReadableAnswer, getStatusBadgeClass, parseQuestionData } from '@/utils/questionUtils';
-import { ExternalLink, Info, Calculator, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { ExternalLink, Info, Calculator, CheckCircle, XCircle, AlertTriangle, FileText } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import TemplateInfo from './TemplateInfo';
@@ -71,6 +71,16 @@ export default function QuestionDetails({
             </h2>
             
             <dl className="grid grid-cols-1 gap-4 p-4">
+                <div>
+                    <dt className="font-medium text-space-light/70">Question ID</dt>
+                    <dd className="mt-1 flex items-center">
+                        <code className="bg-space-dark/30 px-2 py-1 rounded text-xs font-mono break-all flex-grow">
+                            {question.id}
+                        </code>
+                        <CopyButton textToCopy={question.id} className="ml-1" />
+                    </dd>
+                </div>
+                
                 <div>
                     <dt className="font-medium text-space-light/70">Status</dt>
                     <dd className="mt-1 flex items-center gap-4">

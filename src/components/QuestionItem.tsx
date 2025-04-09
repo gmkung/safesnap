@@ -2,7 +2,7 @@
 import { Question } from 'reality-kleros-subgraph';
 import { Badge } from './ui/badge';
 import { formatUnits } from 'viem';
-import { Hash, Info } from 'lucide-react';
+import { Hash, Info, FileText } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { parseQuestionData } from '@/utils/questionUtils';
 
@@ -54,6 +54,14 @@ export function QuestionItem({ question, proposalTitles, loadingProposals, onQue
         ) : null}
         
         <div className="space-y-1.5 mt-2">
+          <div className="text-sm flex items-center">
+            <span className="text-space-light/70 font-medium min-w-24 flex items-center">
+              <FileText size={14} className="mr-1" /> Question ID:
+            </span>
+            <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light overflow-hidden text-ellipsis whitespace-nowrap max-w-[calc(100%-100px)]">
+              {question.id}
+            </code>
+          </div>
           <div className="text-sm flex items-center">
             <span className="text-space-light/70 font-medium min-w-24 flex items-center">
               <Hash size={14} className="mr-1" /> Proposal ID:
