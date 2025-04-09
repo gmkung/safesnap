@@ -31,5 +31,15 @@ export const whitelistedDAOs: WhitelistedDAO[] = [
     ens: "uniswap.eth",
     logo: "https://app.uniswap.org/images/512x512_App_Icon.png",
     description: "Decentralized exchange protocol"
+  },
+  {
+    ens: "1inch.eth",
+    logo: "https://1inch.io/img/logo.png",
+    description: "DEX aggregator protocol"
+  },
+  {
+    ens: "zufunding.eth",
+    logo: "https://avatars.githubusercontent.com/u/54278783",
+    description: "DeFi funding platform"
   }
 ];
