@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -19,12 +19,35 @@ import { Home } from "lucide-react";
 import { DAOList } from './DAOList';
 import { useDAOList } from '@/hooks/useDAOList';
 import { useQuestions } from '@/hooks/useQuestions';
+import { QuestionPhase } from 'reality-kleros-subgraph';
+import { StatusFilter } from './StatusFilter';
 
 export default function AppSidebar() {
   const navigate = useNavigate();
   const { '*': ensPath } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Get status filters from URL
+  const statusParamString = searchParams.get('statuses');
+  const initialStatuses = statusParamString 
+    ? statusParamString.split(',').filter(s => Object.values(QuestionPhase).includes(s as QuestionPhase)) as QuestionPhase[]
+    : [];
+  const [selectedStatuses, setSelectedStatuses] = useState<QuestionPhase[]>(initialStatuses);
+  
   const { questions, isLoading } = useQuestions();
   const daoList = useDAOList(questions);
+  
+  const handleStatusChange = (statuses: QuestionPhase[]) => {
+    setSelectedStatuses(statuses);
+    
+    // Update URL with selected statuses
+    if (statuses.length > 0) {
+      searchParams.set('statuses', statuses.join(','));
+    } else {
+      searchParams.delete('statuses');
+    }
+    setSearchParams(searchParams);
+  };
   
   return (
     <Sidebar>
@@ -56,6 +79,16 @@ export default function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        <SidebarGroup>
+          <SidebarGroupLabel>Filter by Status</SidebarGroupLabel>
+          <SidebarGroupContent className="px-3 py-2">
+            <StatusFilter
+              selectedStatuses={selectedStatuses}
+              onChange={handleStatusChange}
+            />
           </SidebarGroupContent>
         </SidebarGroup>
         

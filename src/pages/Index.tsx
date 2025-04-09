@@ -1,9 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { QuestionList } from '../components/QuestionList';
 import { Progress } from '@/components/ui/progress';
 import { useQuestions } from '@/hooks/useQuestions';
+import { QuestionPhase } from 'reality-kleros-subgraph';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -12,8 +13,15 @@ export default function Home() {
   
   // Get ENS name or DAO name from URL path
   const { '*': pathParam } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
+  // Get status filters from URL
+  const statusParamString = searchParams.get('statuses');
+  const statusFilters = statusParamString 
+    ? statusParamString.split(',').filter(s => Object.values(QuestionPhase).includes(s as QuestionPhase)) as QuestionPhase[]
+    : [];
+
   // Parse the filter param from the path
   // This handles both /ens/DAOName and direct /DAOName paths for backward compatibility
   let filterParam = pathParam || null;
@@ -33,7 +41,7 @@ export default function Home() {
   // Reset to page 1 when filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterParam]);
+  }, [filterParam, statusFilters]);
 
   // Log when filter is detected
   useEffect(() => {
@@ -42,12 +50,21 @@ export default function Home() {
     } else {
       console.log('📄 No filter in URL - showing all questions');
     }
-  }, [filterParam]);
+    
+    if (statusFilters.length > 0) {
+      console.log('🏷️ Status filters:', statusFilters);
+    }
+  }, [filterParam, statusFilters]);
+
+  // Filter questions based on status
+  const filteredQuestions = statusFilters.length > 0
+    ? questions.filter(q => statusFilters.includes(q.phase))
+    : questions;
 
   // Calculate paginated questions
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedQuestions = questions.slice(startIndex, endIndex);
+  const paginatedQuestions = filteredQuestions.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -69,6 +86,14 @@ export default function Home() {
         </div>
       )}
 
+      {statusFilters.length > 0 && (
+        <div className="mb-6 text-sm">
+          <span className="text-space-accent">
+            Filtering by: {statusFilters.join(', ')}
+          </span>
+        </div>
+      )}
+
       {error ? (
         <div className="text-destructive bg-destructive/10 p-4 rounded-md border border-destructive/30">
           <p className="font-medium">Error</p>
@@ -80,7 +105,7 @@ export default function Home() {
           currentPage={currentPage}
           onPageChange={handlePageChange}
           isLoading={isLoading}
-          totalQuestions={questions.length}
+          totalQuestions={filteredQuestions.length}
         />
       )}
 
