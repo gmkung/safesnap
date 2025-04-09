@@ -25,7 +25,7 @@ interface QuestionDetailsProps {
 
 // Function to get Reality.eth URL for a question
 function getRealityEthUrl(question: Question): string {
-  return `https://reality.eth.limo/app/index.html#!/network/${CHAIN_ID}/question/${question.contract.address}-${question.questionId}`;
+  return `https://reality.eth.limo/app/index.html#!/network/${CHAIN_ID}/question/${question.contract.address}-${question.id}`;
 }
 
 export default function QuestionDetails({ 
