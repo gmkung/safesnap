@@ -49,13 +49,6 @@ export default function QuestionSummary({ question, proposalData }: QuestionSumm
               </div>
               
               <div>
-                <h4 className="text-sm font-medium text-space-light/70 flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" /> Opening Time
-                </h4>
-                <p className="mt-1 text-sm">{formatDate(question.openingTimestamp * 1000)}</p>
-              </div>
-              
-              <div>
                 <h4 className="text-sm font-medium text-space-light/70">Current Bond</h4>
                 <p className="mt-1 text-sm">{formatBond(question.currentBond, question)}</p>
               </div>
