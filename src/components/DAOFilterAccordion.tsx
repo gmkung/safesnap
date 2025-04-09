@@ -1,8 +1,10 @@
 
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Shield, ShieldCheck } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useNavigate } from 'react-router-dom';
+import { Toggle } from "@/components/ui/toggle";
+import { whitelistedDAOs } from '@/config/daoWhitelist';
 
 interface DAOFilterAccordionProps {
   daoList: { name: string; count: number }[];
@@ -11,6 +13,7 @@ interface DAOFilterAccordionProps {
 
 export function DAOFilterAccordion({ daoList, currentDao }: DAOFilterAccordionProps) {
   const [open, setOpen] = useState(true);
+  const [showOnlyWhitelisted, setShowOnlyWhitelisted] = useState(true);
   const navigate = useNavigate();
 
   const handleDaoClick = (daoName: string) => {
@@ -21,6 +24,15 @@ export function DAOFilterAccordion({ daoList, currentDao }: DAOFilterAccordionPr
     }
   };
 
+  // Filter the list based on whitelist toggle
+  const filteredDaoList = showOnlyWhitelisted
+    ? daoList.filter(dao => whitelistedDAOs.some(wl => wl.ens === dao.name))
+    : daoList;
+
+  const handleWhitelistToggle = () => {
+    setShowOnlyWhitelisted(!showOnlyWhitelisted);
+  };
+
   return (
     <Collapsible open={open} onOpenChange={setOpen} className="w-full">
       <CollapsibleTrigger className="flex w-full items-center justify-between">
@@ -29,23 +41,51 @@ export function DAOFilterAccordion({ daoList, currentDao }: DAOFilterAccordionPr
                      style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }} />
       </CollapsibleTrigger>
       <CollapsibleContent>
+        <div className="flex items-center justify-between mb-2 text-xs">
+          <span className="text-muted-foreground">Filter Mode</span>
+          <Toggle 
+            size="sm" 
+            aria-label="Toggle whitelist" 
+            pressed={showOnlyWhitelisted}
+            onPressedChange={handleWhitelistToggle}
+            className="h-6 text-xs"
+          >
+            {showOnlyWhitelisted ? (
+              <ShieldCheck className="h-3 w-3 mr-1" />
+            ) : (
+              <Shield className="h-3 w-3 mr-1" />
+            )}
+            {showOnlyWhitelisted ? "Whitelisted" : "All"}
+          </Toggle>
+        </div>
+
         <div className="space-y-1 mt-2">
-          {daoList.map((dao) => (
-            <button
-              key={dao.name}
-              onClick={() => handleDaoClick(dao.name)}
-              className={`
-                flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-md
-                ${currentDao === dao.name ? 'bg-space/15 text-space font-medium' : 'hover:bg-space-darkBlue/20 text-space-light/90'}
-                transition-colors duration-200
-              `}
-            >
-              <span className="truncate">{dao.name}</span>
-              <span className="ml-2 text-xs rounded-full px-2 py-0.5 bg-space-darkBlue/30">
-                {dao.count}
-              </span>
-            </button>
-          ))}
+          {filteredDaoList.map((dao) => {
+            const whitelistedDAO = whitelistedDAOs.find(wl => wl.ens === dao.name);
+            return (
+              <button
+                key={dao.name}
+                onClick={() => handleDaoClick(dao.name)}
+                className={`
+                  flex items-center w-full px-2 py-1.5 text-sm rounded-md
+                  ${currentDao === dao.name ? 'bg-space/15 text-space font-medium' : 'hover:bg-space-darkBlue/20 text-space-light/90'}
+                  transition-colors duration-200
+                `}
+              >
+                {whitelistedDAO && (
+                  <img 
+                    src={whitelistedDAO.logo} 
+                    alt={`${dao.name} logo`} 
+                    className="h-4 w-4 mr-2 rounded-full" 
+                  />
+                )}
+                <span className="truncate">{dao.name}</span>
+                {whitelistedDAO && (
+                  <ShieldCheck className="h-3 w-3 ml-2 text-blue-500" />
+                )}
+              </button>
+            );
+          })}
         </div>
       </CollapsibleContent>
     </Collapsible>
