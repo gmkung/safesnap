@@ -19,8 +19,8 @@ export default function QuorumCheck({ question, proposalData }: QuorumCheckProps
     return null;
   }
   
-  // Get the total votes from scores_total
-  const totalVotes = proposalData.scores_total || 0;
+  // Calculate the total votes by summing all scores (Yes, No, Abstain, etc.)
+  const totalVotes = proposalData.scores.reduce((total: number, score: number) => total + (score || 0), 0);
   const quorumPassed = totalVotes >= proposalData.quorum;
   
   const StatusIcon = quorumPassed ? CheckCircle : XCircle;
@@ -72,7 +72,7 @@ export default function QuorumCheck({ question, proposalData }: QuorumCheckProps
             <div className="mt-3 space-y-2">
               {proposalData.choices.map((choice: string, index: number) => {
                 const score = proposalData.scores[index] || 0;
-                const percentage = proposalData.scores_total ? (score / proposalData.scores_total) * 100 : 0;
+                const percentage = totalVotes > 0 ? (score / totalVotes) * 100 : 0;
                 
                 return (
                   <div key={index} className="glass-panel border border-space-dark/20 p-2 rounded">
@@ -99,7 +99,7 @@ export default function QuorumCheck({ question, proposalData }: QuorumCheckProps
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h3 className="text-sm font-medium text-space-light/70">Total Votes:</h3>
-                <p className="mt-1">{proposalData.scores_total?.toFixed(2)} {proposalData.symbol}</p>
+                <p className="mt-1">{totalVotes.toFixed(2)} {proposalData.symbol}</p>
               </div>
               <div>
                 <h3 className="text-sm font-medium text-space-light/70">Required Quorum:</h3>
