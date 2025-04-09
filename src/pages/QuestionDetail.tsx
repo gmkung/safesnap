@@ -13,12 +13,11 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import ErrorDisplay from '@/components/ErrorDisplay';
 import NotFoundDisplay from '@/components/NotFoundDisplay';
-import QuestionDetailsPanel from '@/components/QuestionDetailsPanel';
-import SnapshotProposalSummary from '@/components/SnapshotProposalSummary';
 import QuestionSummary from '@/components/question/QuestionSummary';
 import QuestionChecks from '@/components/question/QuestionChecks';
 import ResponseHistory from '@/components/ResponseHistory';
 import SubmitAnswerButton from '@/components/SubmitAnswer';
+import RequestArbitrationButton from '@/components/RequestArbitration';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function QuestionDetail() {
@@ -144,22 +143,21 @@ export default function QuestionDetail() {
                         proposalData={proposalData}
                     />
                     
-                    {/* Snapshot Proposal Section */}
-                    <SnapshotProposalSummary
-                        proposalLoading={proposalLoading}
-                        proposalData={proposalData}
-                        question={question}
-                    />
-                    
                     {/* Answer History Section */}
                     <Card>
                         <CardContent className="pt-6">
                             <div className="mb-4 flex justify-between">
                                 <div className="text-xl font-semibold ethereal-text">Answer History</div>
-                                <SubmitAnswerButton
-                                    question={question}
-                                    onAnswerSubmitted={loadQuestionDetails}
-                                />
+                                <div className="flex items-center gap-2">
+                                    <RequestArbitrationButton
+                                        question={question}
+                                        onArbitrationRequested={loadQuestionDetails}
+                                    />
+                                    <SubmitAnswerButton
+                                        question={question}
+                                        onAnswerSubmitted={loadQuestionDetails}
+                                    />
+                                </div>
                             </div>
                             <ResponseHistory question={question} />
                         </CardContent>

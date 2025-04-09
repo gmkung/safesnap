@@ -1,12 +1,14 @@
 
 import { Question } from 'reality-kleros-subgraph';
 import { formatBond, formatDate, getHumanReadableAnswer } from '@/utils/questionUtils';
+import RequestArbitrationButton from './RequestArbitration';
 
 interface ResponseHistoryProps {
     question: Question;
+    onArbitrationRequested?: () => void;
 }
 
-export default function ResponseHistory({ question }: ResponseHistoryProps) {
+export default function ResponseHistory({ question, onArbitrationRequested }: ResponseHistoryProps) {
     if (!question.responses || question.responses.length === 0) return (
         <div className="text-center p-4 glass-panel">
             <p className="text-space-light/70">No answers submitted yet</p>

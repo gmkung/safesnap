@@ -4,7 +4,7 @@ import HashCheck from './HashCheck';
 import QuorumCheck from './QuorumCheck';
 import ConstitutionalCheck from './ConstitutionalCheck';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
-import { GavelIcon, ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 interface QuestionChecksProps {
   question: Question;
@@ -30,13 +30,15 @@ export default function QuestionChecks({
           question={question} 
           hashVerification={hashVerification} 
           onViewHashDetails={onViewHashDetails} 
+          proposalData={proposalData}
         />
         <QuorumCheck 
           question={question} 
           proposalData={proposalData} 
         />
         <ConstitutionalCheck 
-          question={question} 
+          question={question}
+          proposalData={proposalData}
         />
       </CardContent>
     </Card>
