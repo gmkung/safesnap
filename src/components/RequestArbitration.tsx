@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { RealityEthV21Witharbitratorappeals__factory } from '@/types/contracts/factories/RealityEthV21Witharbitratorappeals__factory';
+import Image from '../components/ui/image';
 
 interface RequestArbitrationButtonProps {
     question: Question;
@@ -90,6 +91,11 @@ export default function RequestArbitrationButton({ question, onArbitrationReques
                     disabled={!!disabledReason}
                     title={disabledReason || "Request arbitration for this question"}
                 >
+                    <img 
+                        src="/lovable-uploads/90f16260-c3ac-4842-bc87-67d9342b295f.png" 
+                        alt="Kleros logo" 
+                        className="w-4 h-4 mr-2" 
+                    />
                     Request Arbitration
                 </Button>
             </DialogTrigger>
