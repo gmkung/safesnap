@@ -34,7 +34,13 @@ export default function AppSidebar() {
   const [selectedStatuses, setSelectedStatuses] = useState<QuestionPhaseValue[]>(initialStatuses);
   
   const { questions, isLoading } = useQuestions();
-  const daoList = useDAOList(questions);
+  const rawDaoList = useDAOList(questions);
+  
+  // Transform the string[] into the expected format for DAOFilterAccordion
+  const formattedDaoList = rawDaoList.map(dao => ({
+    name: dao,
+    count: questions.filter(q => q.dao === dao).length
+  }));
   
   const handleStatusChange = (statuses: QuestionPhaseValue[]) => {
     setSelectedStatuses(statuses);
@@ -91,7 +97,7 @@ export default function AppSidebar() {
               />
               
               <DAOFilterAccordion 
-                daoList={daoList} 
+                daoList={formattedDaoList} 
                 currentDao={ensPath} 
               />
             </div>
