@@ -1,7 +1,7 @@
 import { Question } from 'reality-kleros-subgraph';
 import RequestArbitrationButton from './RequestArbitration';
 import { formatBond, formatDate, getHumanReadableAnswer, getStatusBadgeClass, parseQuestionData } from '@/utils/questionUtils';
-import { Info, Calculator, CheckCircle, XCircle, AlertTriangle, FileText } from 'lucide-react';
+import { Info, Calculator, CheckCircle, XCircle, AlertTriangle, FileText, ExternalLink } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import TemplateInfo from './TemplateInfo';
