@@ -21,8 +21,9 @@ interface DAOListProps {
 export function DAOList({ daoList, currentDao }: DAOListProps) {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const [showOnlyWhitelisted, setShowOnlyWhitelisted] = useState(false);
-  const [filteredList, setFilteredList] = useState<string[]>(daoList);
+  // Changed default to true to make "Whitelisted" the default setting
+  const [showOnlyWhitelisted, setShowOnlyWhitelisted] = useState(true);
+  const [filteredList, setFilteredList] = useState<string[]>([]);
   
   // Update the filtered list when the whitelist toggle or daoList changes
   useEffect(() => {
