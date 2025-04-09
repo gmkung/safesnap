@@ -4,7 +4,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { QuestionList } from '../components/QuestionList';
 import { Progress } from '@/components/ui/progress';
 import { useQuestions } from '@/hooks/useQuestions';
-import { QuestionPhase } from 'reality-kleros-subgraph';
+import { QuestionPhaseValue } from '../components/StatusFilter';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -19,7 +19,7 @@ export default function Home() {
   // Get status filters from URL
   const statusParamString = searchParams.get('statuses');
   const statusFilters = statusParamString 
-    ? statusParamString.split(',').filter(s => Object.values(QuestionPhase).includes(s as QuestionPhase)) as QuestionPhase[]
+    ? statusParamString.split(',').filter(s => ["NOT_CREATED", "UPCOMING", "OPEN", "PENDING_ARBITRATION", "FINALIZED"].includes(s)) as QuestionPhaseValue[]
     : [];
 
   // Parse the filter param from the path
@@ -58,7 +58,7 @@ export default function Home() {
 
   // Filter questions based on status
   const filteredQuestions = statusFilters.length > 0
-    ? questions.filter(q => statusFilters.includes(q.phase))
+    ? questions.filter(q => statusFilters.includes(q.phase as QuestionPhaseValue))
     : questions;
 
   // Calculate paginated questions

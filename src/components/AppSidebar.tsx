@@ -19,8 +19,7 @@ import { Home } from "lucide-react";
 import { DAOList } from './DAOList';
 import { useDAOList } from '@/hooks/useDAOList';
 import { useQuestions } from '@/hooks/useQuestions';
-import { QuestionPhase } from 'reality-kleros-subgraph';
-import { StatusFilter } from './StatusFilter';
+import { StatusFilter, QuestionPhaseValue } from './StatusFilter';
 
 export default function AppSidebar() {
   const navigate = useNavigate();
@@ -30,14 +29,14 @@ export default function AppSidebar() {
   // Get status filters from URL
   const statusParamString = searchParams.get('statuses');
   const initialStatuses = statusParamString 
-    ? statusParamString.split(',').filter(s => Object.values(QuestionPhase).includes(s as QuestionPhase)) as QuestionPhase[]
+    ? statusParamString.split(',').filter(s => ["NOT_CREATED", "UPCOMING", "OPEN", "PENDING_ARBITRATION", "FINALIZED"].includes(s)) as QuestionPhaseValue[]
     : [];
-  const [selectedStatuses, setSelectedStatuses] = useState<QuestionPhase[]>(initialStatuses);
+  const [selectedStatuses, setSelectedStatuses] = useState<QuestionPhaseValue[]>(initialStatuses);
   
   const { questions, isLoading } = useQuestions();
   const daoList = useDAOList(questions);
   
-  const handleStatusChange = (statuses: QuestionPhase[]) => {
+  const handleStatusChange = (statuses: QuestionPhaseValue[]) => {
     setSelectedStatuses(statuses);
     
     // Update URL with selected statuses
