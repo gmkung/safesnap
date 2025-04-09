@@ -1,3 +1,4 @@
+
 import { Question } from 'reality-kleros-subgraph';
 import RequestArbitrationButton from './RequestArbitration';
 import { formatBond, formatDate, getHumanReadableAnswer, getStatusBadgeClass, parseQuestionData } from '@/utils/questionUtils';
@@ -11,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/t
 import { cn } from '@/lib/utils';
 import { QuestionDetailsSkeleton } from './ui/skeleton';
 import CopyButton from './CopyButton';
-import { getRealityEthUrl } from '@/config/chainConfig';
+import { CHAIN_ID } from '@/config/chainConfig';
 
 interface QuestionDetailsProps {
     question: Question;
@@ -21,6 +22,11 @@ interface QuestionDetailsProps {
     hashVerification?: any;
     onViewHashDetails?: () => void;
     isLoading?: boolean;
+}
+
+// Function to get Reality.eth URL for a question
+function getRealityEthUrl(question: Question): string {
+  return `https://reality.eth.limo/app/index.html#!/network/${CHAIN_ID}/question/${question.contract.id}-${question.questionId}`;
 }
 
 export default function QuestionDetails({ 
@@ -68,7 +74,7 @@ export default function QuestionDetails({
                     Question Details
                 </h2>
                 <a 
-                    href={getRealityEthUrl(question.id)}
+                    href={getRealityEthUrl(question)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center text-space hover:text-space-accent transition-colors text-sm"
