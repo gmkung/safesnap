@@ -68,7 +68,7 @@ export default function QuestionDetails({
                     Question Details
                 </h2>
                 <a 
-                    href={getRealityEthUrl(question)}
+                    href={getRealityEthUrl(question.id)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center text-space hover:text-space-accent transition-colors text-sm"
