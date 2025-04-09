@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -13,13 +13,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger
 } from "@/components/ui/sidebar";
 import { Home } from "lucide-react";
-import { DAOList } from './DAOList';
 import { useDAOList } from '@/hooks/useDAOList';
 import { useQuestions } from '@/hooks/useQuestions';
-import { StatusFilter, QuestionPhaseValue } from './StatusFilter';
+import { QuestionPhaseValue } from './StatusFilter';
+import { StatusFilterAccordion } from './StatusFilterAccordion';
+import { DAOFilterAccordion } from './DAOFilterAccordion';
 
 export default function AppSidebar() {
   const navigate = useNavigate();
@@ -82,19 +82,19 @@ export default function AppSidebar() {
         </SidebarGroup>
         
         <SidebarGroup>
-          <SidebarGroupLabel>Filter by Status</SidebarGroupLabel>
+          <SidebarGroupLabel>Filters</SidebarGroupLabel>
           <SidebarGroupContent className="px-3 py-2">
-            <StatusFilter
-              selectedStatuses={selectedStatuses}
-              onChange={handleStatusChange}
-            />
-          </SidebarGroupContent>
-        </SidebarGroup>
-        
-        <SidebarGroup>
-          <SidebarGroupLabel>Filter by DAO</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <DAOList daoList={daoList} currentDao={ensPath} />
+            <div className="space-y-4">
+              <StatusFilterAccordion 
+                selectedStatuses={selectedStatuses}
+                onChange={handleStatusChange}
+              />
+              
+              <DAOFilterAccordion 
+                daoList={daoList} 
+                currentDao={ensPath} 
+              />
+            </div>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

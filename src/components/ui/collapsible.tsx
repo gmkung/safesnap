@@ -12,7 +12,7 @@ const CollapsibleTrigger = React.forwardRef<
   <CollapsiblePrimitive.CollapsibleTrigger
     ref={ref}
     className={cn(
-      "flex w-full items-center justify-between px-4 py-2 steel-panel text-sm font-medium transition-all hover:bg-space-gray/70",
+      "flex w-full items-center justify-between px-4 py-2 text-sm font-medium transition-all rounded-md bg-space-darkBlue/40 hover:bg-space-darkBlue/50",
       className
     )}
     {...props}
@@ -29,7 +29,7 @@ const CollapsibleContent = React.forwardRef<
   <CollapsiblePrimitive.CollapsibleContent
     ref={ref}
     className={cn(
-      "overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down glass-panel mt-1",
+      "overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down bg-space-darkBlue/20 rounded-md",
       className
     )}
     {...props}
