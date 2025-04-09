@@ -4,7 +4,6 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
 import { ArrowLeft } from 'lucide-react';
 import TransactionHashModal from '@/components/TransactionHashModal';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { getProposalDetails, calculateTransactionArrayHash, compareTransactionHashes } from '@/lib/snapshotQuery';
 import { useToast } from '@/hooks/use-toast';
 import { parseQuestionData } from '@/utils/questionUtils';
@@ -16,6 +15,11 @@ import ErrorDisplay from '@/components/ErrorDisplay';
 import NotFoundDisplay from '@/components/NotFoundDisplay';
 import QuestionDetailsPanel from '@/components/QuestionDetailsPanel';
 import SnapshotProposalSummary from '@/components/SnapshotProposalSummary';
+import QuestionSummary from '@/components/question/QuestionSummary';
+import QuestionChecks from '@/components/question/QuestionChecks';
+import ResponseHistory from '@/components/ResponseHistory';
+import SubmitAnswerButton from '@/components/SubmitAnswer';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function QuestionDetail() {
     const { id } = useParams<{ id: string }>();
@@ -128,29 +132,39 @@ export default function QuestionDetail() {
             </div>
 
             <TooltipProvider>
-                <ResizablePanelGroup direction="horizontal" className="min-h-[600px]">
-                    <ResizablePanel defaultSize={40} minSize={30}>
-                        <QuestionDetailsPanel
-                            question={question}
-                            onArbitrationRequested={loadQuestionDetails}
-                            hashVerification={hashVerification}
-                            onViewHashDetails={() => setHashModalOpen(true)}
-                            proposalData={proposalData}
-                        />
-                    </ResizablePanel>
-
-                    <ResizableHandle withHandle />
-
-                    <ResizablePanel defaultSize={60} minSize={50}>
-                        <div className="pl-4">
-                            <SnapshotProposalSummary
-                                proposalLoading={proposalLoading}
-                                proposalData={proposalData}
-                                question={question}
-                            />
-                        </div>
-                    </ResizablePanel>
-                </ResizablePanelGroup>
+                <div className="space-y-6">
+                    {/* Question Summary Section */}
+                    <QuestionSummary question={question} proposalData={proposalData} />
+                    
+                    {/* Verification Checks Section */}
+                    <QuestionChecks 
+                        question={question} 
+                        hashVerification={hashVerification} 
+                        onViewHashDetails={() => setHashModalOpen(true)}
+                        proposalData={proposalData}
+                    />
+                    
+                    {/* Snapshot Proposal Section */}
+                    <SnapshotProposalSummary
+                        proposalLoading={proposalLoading}
+                        proposalData={proposalData}
+                        question={question}
+                    />
+                    
+                    {/* Answer History Section */}
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="mb-4 flex justify-between">
+                                <div className="text-xl font-semibold ethereal-text">Answer History</div>
+                                <SubmitAnswerButton
+                                    question={question}
+                                    onAnswerSubmitted={loadQuestionDetails}
+                                />
+                            </div>
+                            <ResponseHistory question={question} />
+                        </CardContent>
+                    </Card>
+                </div>
             </TooltipProvider>
 
             {hashVerification && (
