@@ -20,6 +20,13 @@ interface DecodedFunction {
   error: boolean;
 }
 
+interface FunctionSignature {
+  id: number;
+  created_at: string;
+  text_signature: string;
+  hex_signature: string;
+}
+
 export default function TransactionSummary({ proposalData }: TransactionSummaryProps) {
   const [decodedTransactions, setDecodedTransactions] = useState<DecodedFunction[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -74,9 +81,17 @@ export default function TransactionSummary({ proposalData }: TransactionSummaryP
             const data = await response.json();
             
             if (data.results && data.results.length > 0) {
+              // Sort by created_at date (ascending) to get the earliest signature
+              const sortedResults = [...data.results].sort((a: FunctionSignature, b: FunctionSignature) => {
+                return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+              });
+              
+              // Use the earliest signature
+              const earliestSignature = sortedResults[0];
+              
               setDecodedTransactions(current => 
                 current.map((item, idx) => idx === i 
-                  ? { ...item, functionName: data.results[0].text_signature, loading: false } 
+                  ? { ...item, functionName: earliestSignature.text_signature, loading: false } 
                   : item
                 )
               );
@@ -146,6 +161,10 @@ export default function TransactionSummary({ proposalData }: TransactionSummaryP
     if (value && value !== "0") return "transfer";
     return "call";
   };
+  
+  if (!proposalData?.plugins?.safeSnap?.safes || !decodedTransactions.length) {
+    return null;
+  }
   
   return (
     <div className="mt-4 border-t border-space-dark/20 pt-4">
