@@ -152,8 +152,7 @@ export default function QuestionSummary({ question, proposalData }: QuestionSumm
         
         {/* Transaction summary now at full width outside the grid */}
         {proposalData && <TransactionSummary proposalData={proposalData} />}
-      </div>
-    </CardContent>
-  </Card>
+      </CardContent>
+    </Card>
   );
 }
