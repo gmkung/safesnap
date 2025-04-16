@@ -145,14 +145,15 @@ export default function QuestionSummary({ question, proposalData }: QuestionSumm
                   </h4>
                   <p className="mt-1 text-sm">{formatDate(proposalData.end * 1000)}</p>
                 </div>
-
-                {/* Add the transaction summary component */}
-                <TransactionSummary proposalData={proposalData} />
               </div>
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+        
+        {/* Transaction summary now at full width outside the grid */}
+        {proposalData && <TransactionSummary proposalData={proposalData} />}
+      </div>
+    </CardContent>
+  </Card>
   );
 }

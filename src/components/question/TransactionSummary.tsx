@@ -1,11 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { ExternalLink, AlertCircle } from 'lucide-react';
+import { ExternalLink, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { ethers } from 'ethers';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface TransactionSummaryProps {
   proposalData: any;
@@ -18,6 +19,8 @@ interface DecodedFunction {
   data: string;
   loading: boolean;
   error: boolean;
+  decodedArgs: {name: string; type: string; value: string}[] | null;
+  signature: string | null;
 }
 
 interface FunctionSignature {
@@ -30,6 +33,7 @@ interface FunctionSignature {
 export default function TransactionSummary({ proposalData }: TransactionSummaryProps) {
   const [decodedTransactions, setDecodedTransactions] = useState<DecodedFunction[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [expandedTx, setExpandedTx] = useState<number | null>(null);
 
   useEffect(() => {
     const decodeTransactions = async () => {
@@ -48,7 +52,9 @@ export default function TransactionSummary({ proposalData }: TransactionSummaryP
                   value: subTx.value,
                   data: subTx.data,
                   loading: true,
-                  error: false
+                  error: false,
+                  decodedArgs: null,
+                  signature: null
                 });
               });
             }
@@ -96,9 +102,58 @@ export default function TransactionSummary({ proposalData }: TransactionSummaryP
               const earliestSignature = sortedResults[0];
               console.log('Selected earliest signature:', earliestSignature);
               
+              // Decode arguments if signature is available
+              let decodedArgs = null;
+              if (earliestSignature.text_signature) {
+                try {
+                  // Extract parameter types from the function signature
+                  const signatureMatch = earliestSignature.text_signature.match(/^([^(]+)\((.*)\)$/);
+                  if (signatureMatch && signatureMatch[2]) {
+                    const paramTypes = signatureMatch[2].split(',');
+                    
+                    // Create an ABI fragment to decode with
+                    const abiFragment = {
+                      name: signatureMatch[1],
+                      type: 'function',
+                      inputs: paramTypes.map((type, idx) => ({ 
+                        name: `arg${idx}`, 
+                        type: type.trim() 
+                      }))
+                    };
+                    
+                    const abiInterface = new ethers.Interface([abiFragment]);
+                    try {
+                      const decoded = abiInterface.decodeFunctionData(
+                        abiFragment.name,
+                        tx.data
+                      );
+                      
+                      // Format the decoded arguments
+                      decodedArgs = abiFragment.inputs.map((input, idx) => ({
+                        name: input.name,
+                        type: input.type,
+                        value: decoded[idx].toString()
+                      }));
+                      
+                      console.log('Decoded arguments:', decodedArgs);
+                    } catch (decodeError) {
+                      console.error('Error decoding function data:', decodeError);
+                    }
+                  }
+                } catch (parseError) {
+                  console.error('Error parsing function signature:', parseError);
+                }
+              }
+              
               setDecodedTransactions(current => 
                 current.map((item, idx) => idx === i 
-                  ? { ...item, functionName: earliestSignature.text_signature, loading: false } 
+                  ? { 
+                      ...item, 
+                      functionName: earliestSignature.text_signature, 
+                      loading: false,
+                      decodedArgs,
+                      signature: earliestSignature.text_signature
+                    } 
                   : item
                 )
               );
@@ -169,12 +224,39 @@ export default function TransactionSummary({ proposalData }: TransactionSummaryP
     return "call";
   };
   
+  const toggleExpand = (index: number) => {
+    if (expandedTx === index) {
+      setExpandedTx(null);
+    } else {
+      setExpandedTx(index);
+    }
+  };
+  
+  // Format argument value for display
+  const formatArgValue = (value: string, type: string) => {
+    if (type.includes('address')) {
+      return `${value.slice(0, 6)}...${value.slice(-4)}`;
+    }
+    if (type.includes('uint') || type.includes('int')) {
+      // Check if it's a large number that might be in wei
+      if (value.length > 10 && !value.includes('.')) {
+        try {
+          return `${ethers.formatEther(value)} ETH`;
+        } catch (e) {
+          // If not convertible to ETH, return as is
+          return value;
+        }
+      }
+    }
+    return value;
+  };
+  
   if (!proposalData?.plugins?.safeSnap?.safes || !decodedTransactions.length) {
     return null;
   }
   
   return (
-    <div className="mt-4 border-t border-space-dark/20 pt-4">
+    <div className="w-full mt-4 border-t border-space-dark/20 pt-4">
       <h3 className="text-base font-medium text-space mb-3 flex items-center">
         Transaction Summary
         <TooltipProvider>
@@ -207,48 +289,111 @@ export default function TransactionSummary({ proposalData }: TransactionSummaryP
                 <Skeleton className="h-4 w-32" />
               </div>
             ) : (
-              <div className="flex flex-col md:flex-row md:items-center gap-2">
-                <Badge 
-                  variant="outline" 
-                  className={cn(
-                    "h-6 w-fit px-2 text-xs",
-                    getTransactionType(tx.functionName, tx.value) === "transfer" 
-                      ? "bg-blue-500/20 text-blue-400 border-blue-500/30" 
-                      : "bg-purple-500/20 text-purple-400 border-purple-500/30"
-                  )}
-                >
-                  {getTransactionType(tx.functionName, tx.value) === "transfer" ? "Transfer" : "Call"}
-                </Badge>
-                
-                <div className="flex flex-col text-sm">
-                  <div className="flex items-center">
-                    <span className="font-medium text-space-light/90">
-                      {tx.error ? (
-                        <span className="flex items-center text-red-400">
-                          <AlertCircle className="h-3 w-3 mr-1" />
-                          Error decoding
-                        </span>
-                      ) : (
-                        formatFunctionName(tx.functionName)
+              <div className="space-y-2">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Badge 
+                      variant="outline" 
+                      className={cn(
+                        "h-6 w-fit px-2 text-xs",
+                        getTransactionType(tx.functionName, tx.value) === "transfer" 
+                          ? "bg-blue-500/20 text-blue-400 border-blue-500/30" 
+                          : "bg-purple-500/20 text-purple-400 border-purple-500/30"
                       )}
-                    </span>
-                    {tx.value && tx.value !== "0" && (
-                      <span className="ml-2 text-blue-400">{formatValue(tx.value)}</span>
-                    )}
+                    >
+                      {getTransactionType(tx.functionName, tx.value) === "transfer" ? "Transfer" : "Call"}
+                    </Badge>
+                    
+                    <div className="flex flex-col text-sm">
+                      <div className="flex items-center">
+                        <span className="font-medium text-space-light/90">
+                          {tx.error ? (
+                            <span className="flex items-center text-red-400">
+                              <AlertCircle className="h-3 w-3 mr-1" />
+                              Error decoding
+                            </span>
+                          ) : (
+                            formatFunctionName(tx.functionName)
+                          )}
+                        </span>
+                        {tx.value && tx.value !== "0" && (
+                          <span className="ml-2 text-blue-400">{formatValue(tx.value)}</span>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center text-xs text-space-light/60">
+                        <span>to: {formatAddress(tx.address)}</span>
+                        <a 
+                          href={`https://etherscan.io/address/${tx.address}`}
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="ml-1 text-space-light/50 hover:text-space-accent transition-colors"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center text-xs text-space-light/60">
-                    <span>to: {formatAddress(tx.address)}</span>
-                    <a 
-                      href={`https://etherscan.io/address/${tx.address}`}
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="ml-1 text-space-light/50 hover:text-space-accent transition-colors"
+                  {tx.decodedArgs && tx.decodedArgs.length > 0 && (
+                    <button
+                      onClick={() => toggleExpand(index)}
+                      className="flex items-center text-xs text-space-light/70 hover:text-space-accent transition-colors"
                     >
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </div>
+                      {expandedTx === index ? (
+                        <>
+                          <ChevronUp className="h-3 w-3 mr-1" />
+                          Hide Arguments
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="h-3 w-3 mr-1" />
+                          Show Arguments
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
+                
+                {expandedTx === index && tx.decodedArgs && tx.decodedArgs.length > 0 && (
+                  <div className="mt-2 bg-space-dark/30 p-2 rounded-md">
+                    <div className="text-xs text-space-light/70 mb-1">
+                      Function Signature: <span className="font-mono">{tx.signature}</span>
+                    </div>
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-space-dark/40">
+                          <TableHead className="text-xs h-7 py-1">Name</TableHead>
+                          <TableHead className="text-xs h-7 py-1">Type</TableHead>
+                          <TableHead className="text-xs h-7 py-1">Value</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {tx.decodedArgs.map((arg, argIndex) => (
+                          <TableRow key={argIndex} className="border-space-dark/40">
+                            <TableCell className="text-xs py-1 font-mono">{arg.name}</TableCell>
+                            <TableCell className="text-xs py-1 font-mono">{arg.type}</TableCell>
+                            <TableCell className="text-xs py-1 font-mono">
+                              <div className="flex items-center">
+                                {formatArgValue(arg.value, arg.type)}
+                                {arg.type.includes('address') && (
+                                  <a 
+                                    href={`https://etherscan.io/address/${arg.value}`}
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="ml-1 text-space-light/50 hover:text-space-accent transition-colors"
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </div>
             )}
           </div>
