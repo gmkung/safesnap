@@ -83,11 +83,18 @@ export default function TransactionSummary({ proposalData }: TransactionSummaryP
             if (data.results && data.results.length > 0) {
               // Sort by created_at date (ascending) to get the earliest signature
               const sortedResults = [...data.results].sort((a: FunctionSignature, b: FunctionSignature) => {
-                return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                const dateA = new Date(a.created_at).getTime();
+                const dateB = new Date(b.created_at).getTime();
+                console.log(`Comparing dates: ${a.created_at} (${dateA}) vs ${b.created_at} (${dateB})`);
+                return dateA - dateB;
               });
+              
+              console.log('Original results:', data.results);
+              console.log('Sorted results:', sortedResults);
               
               // Use the earliest signature
               const earliestSignature = sortedResults[0];
+              console.log('Selected earliest signature:', earliestSignature);
               
               setDecodedTransactions(current => 
                 current.map((item, idx) => idx === i 
