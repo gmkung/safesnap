@@ -218,8 +218,7 @@ export default function TransactionSummary({ proposalData }: TransactionSummaryP
   const getTransactionType = (functionName: string | null, value: string) => {
     if (!functionName) return "call";
     
-    const lowerFn = functionName.toLowerCase();
-    if (lowerFn.includes("transfer") || lowerFn.includes("send")) return "transfer";
+    // Use value to determine if it's a transfer - don't rely on function name
     if (value && value !== "0") return "transfer";
     return "call";
   };
@@ -232,22 +231,13 @@ export default function TransactionSummary({ proposalData }: TransactionSummaryP
     }
   };
   
-  // Format argument value for display
+  // Format argument value for display without auto-converting to ETH
   const formatArgValue = (value: string, type: string) => {
     if (type.includes('address')) {
       return `${value.slice(0, 6)}...${value.slice(-4)}`;
     }
-    if (type.includes('uint') || type.includes('int')) {
-      // Check if it's a large number that might be in wei
-      if (value.length > 10 && !value.includes('.')) {
-        try {
-          return `${ethers.formatEther(value)} ETH`;
-        } catch (e) {
-          // If not convertible to ETH, return as is
-          return value;
-        }
-      }
-    }
+    
+    // Return raw value for numeric types without auto-converting to ETH
     return value;
   };
   
