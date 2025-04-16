@@ -6,6 +6,7 @@ import { FileText, User, Calendar, ExternalLink, Clock } from 'lucide-react';
 import CopyButton from '../CopyButton';
 import { getRealityEthUrl } from './QuestionHeader';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import TransactionSummary from './TransactionSummary';
 
 interface QuestionSummaryProps {
   question: Question;
@@ -144,6 +145,9 @@ export default function QuestionSummary({ question, proposalData }: QuestionSumm
                   </h4>
                   <p className="mt-1 text-sm">{formatDate(proposalData.end * 1000)}</p>
                 </div>
+
+                {/* Add the transaction summary component */}
+                <TransactionSummary proposalData={proposalData} />
               </div>
             </div>
           )}
