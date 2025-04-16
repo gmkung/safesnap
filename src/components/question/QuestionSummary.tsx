@@ -4,6 +4,8 @@ import { parseQuestionData, formatBond, formatDate } from '@/utils/questionUtils
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { FileText, User, Calendar, ExternalLink, Clock } from 'lucide-react';
 import CopyButton from '../CopyButton';
+import { getRealityEthUrl } from './QuestionHeader';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface QuestionSummaryProps {
   question: Question;
@@ -26,7 +28,26 @@ export default function QuestionSummary({ question, proposalData }: QuestionSumm
       <CardContent className="p-4 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="border-b border-space-dark/20 pb-4">
-            <h3 className="text-base font-medium text-space mb-3">Question Information</h3>
+            <h3 className="text-base font-medium text-space mb-3 flex items-center">
+              Question Information
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <a 
+                      href={getRealityEthUrl(question)} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="ml-2 text-space-light/70 hover:text-space-accent transition-colors"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>View on Reality.eth</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </h3>
             
             <div className="space-y-3">
               <div>
@@ -62,23 +83,34 @@ export default function QuestionSummary({ question, proposalData }: QuestionSumm
           
           {proposalData && (
             <div className="border-b border-space-dark/20 pb-4">
-              <h3 className="text-base font-medium text-space mb-3">Proposal Information</h3>
+              <h3 className="text-base font-medium text-space mb-3 flex items-center">
+                Proposal Information
+                {proposalData && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <a 
+                          href={getSnapshotUrl(proposalData.space.id, proposalData.id)} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="ml-2 text-space-light/70 hover:text-space-accent transition-colors"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>View on Snapshot</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </h3>
               
               <div className="space-y-3">
                 {parsedData?.proposalId && (
                   <div>
                     <h4 className="text-sm font-medium text-space-light/70 flex items-center">
                       Proposal ID
-                      {proposalData && (
-                        <a 
-                          href={getSnapshotUrl(proposalData.space.id, proposalData.id)} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="ml-2"
-                        >
-                          <ExternalLink className="h-4 w-4 text-space-light/70 hover:text-space transition-colors" />
-                        </a>
-                      )}
                     </h4>
                     <div className="mt-1 flex items-center">
                       <code className="text-foreground font-mono text-xs break-all flex-grow">
@@ -104,13 +136,6 @@ export default function QuestionSummary({ question, proposalData }: QuestionSumm
                     </code>
                     <CopyButton textToCopy={proposalData.author} size="xs" className="ml-1" />
                   </div>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-medium text-space-light/70 flex items-center gap-1">
-                    <Calendar className="h-3.5 w-3.5" /> Created
-                  </h4>
-                  <p className="mt-1 text-sm">{formatDate(proposalData.created * 1000)}</p>
                 </div>
                 
                 <div>
