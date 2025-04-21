@@ -20,6 +20,7 @@ interface QuestionDetailsProps {
     hashVerification?: any;
     onViewHashDetails?: () => void;
     isLoading?: boolean;
+    proposalLoading?: boolean;
 }
 
 export default function QuestionDetails({ 
@@ -29,7 +30,8 @@ export default function QuestionDetails({
     proposalData,
     hashVerification,
     onViewHashDetails,
-    isLoading = false
+    isLoading = false,
+    proposalLoading = false
 }: QuestionDetailsProps) {
     if (isLoading) {
         return <QuestionDetailsSkeleton />;
