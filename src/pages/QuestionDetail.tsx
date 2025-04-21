@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
@@ -29,6 +28,7 @@ export default function QuestionDetail() {
     const [error, setError] = useState<string | null>(null);
     const [proposalData, setProposalData] = useState<any>(null);
     const [proposalLoading, setProposalLoading] = useState(false);
+    const [proposalLoadFailed, setProposalLoadFailed] = useState(false);
     const [hashVerification, setHashVerification] = useState<{
         calculatedHash: string | null;
         match: boolean;
@@ -91,10 +91,24 @@ export default function QuestionDetail() {
     const fetchProposalData = async (proposalId: string) => {
         try {
             setProposalLoading(true);
+            setProposalLoadFailed(false);
+            
             const data = await getProposalDetails(proposalId);
-            setProposalData(data);
+            
+            if (data === null) {
+                console.log('No proposal data returned from API');
+                setProposalLoadFailed(true);
+                toast({
+                    title: "Proposal Not Found",
+                    description: "This proposal was not found in Snapshot. It may not be a DAO proposal or the Snapshot API is unavailable.",
+                    variant: "default"
+                });
+            } else {
+                setProposalData(data);
+            }
         } catch (error) {
             console.error('Failed to fetch proposal:', error);
+            setProposalLoadFailed(true);
             toast({
                 variant: "destructive",
                 title: "Error",
@@ -136,7 +150,12 @@ export default function QuestionDetail() {
             <TooltipProvider>
                 <div className="space-y-6">
                     {/* Question Summary Section */}
-                    <QuestionSummary question={question} proposalData={proposalData} />
+                    <QuestionSummary 
+                        question={question} 
+                        proposalData={proposalData}
+                        proposalLoading={proposalLoading}
+                        proposalLoadFailed={proposalLoadFailed}
+                    />
                     
                     {/* Verification Checks Section */}
                     <QuestionChecks 

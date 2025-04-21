@@ -13,6 +13,8 @@ interface QuestionDetailsPanelProps {
   hashVerification: any;
   onViewHashDetails: () => void;
   proposalData: any;
+  proposalLoading?: boolean;
+  proposalLoadFailed?: boolean;
 }
 
 export default function QuestionDetailsPanel({ 
@@ -20,7 +22,9 @@ export default function QuestionDetailsPanel({
   onArbitrationRequested, 
   hashVerification, 
   onViewHashDetails,
-  proposalData 
+  proposalData,
+  proposalLoading = false,
+  proposalLoadFailed = false
 }: QuestionDetailsPanelProps) {
   const parsedData = parseQuestionData(question);
   
@@ -37,6 +41,8 @@ export default function QuestionDetailsPanel({
             proposalData={proposalData}
             hashVerification={hashVerification}
             onViewHashDetails={onViewHashDetails}
+            proposalLoading={proposalLoading}
+            proposalLoadFailed={proposalLoadFailed}
           />
         </div>
       </div>

@@ -1,5 +1,6 @@
+
 import { formatDate } from '@/utils/questionUtils';
-import { Loader2, ExternalLink, BookText } from 'lucide-react';
+import { Loader2, ExternalLink, BookText, AlertTriangle } from 'lucide-react';
 import CopyButton from './CopyButton';
 import { Button } from '@/components/ui/button';
 import { parseQuestionData } from '@/utils/questionUtils';
@@ -9,11 +10,18 @@ interface SnapshotProposalSummaryProps {
   proposalLoading: boolean;
   proposalData: any;
   question?: Question;
+  proposalLoadFailed?: boolean;
 }
 
-export default function SnapshotProposalSummary({ proposalLoading, proposalData, question }: SnapshotProposalSummaryProps) {
+export default function SnapshotProposalSummary({ 
+  proposalLoading, 
+  proposalData, 
+  question,
+  proposalLoadFailed = false
+}: SnapshotProposalSummaryProps) {
   const parsedData = question ? parseQuestionData(question) : null;
   const daoName = parsedData?.dao || null;
+  const proposalId = parsedData?.proposalId || null;
   
   const constitutionUrl = daoName ? `https://example.com/dao/${daoName}/constitution` : "https://example.com/constitution";
   
@@ -22,6 +30,27 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData,
       <div className="w-full steel-panel p-6 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-space" />
         <span className="ml-2">Loading proposal details...</span>
+      </div>
+    );
+  }
+
+  if (proposalLoadFailed) {
+    return (
+      <div className="steel-panel p-6 text-center">
+        <AlertTriangle className="h-12 w-12 text-amber-400 mx-auto mb-3" />
+        <h3 className="text-lg font-medium text-space-light mb-2">Proposal Not Found</h3>
+        <p className="text-sm text-space-light/70 mb-4">
+          This proposal could not be found on Snapshot. It may not be a DAO proposal or the Snapshot API might be unavailable.
+        </p>
+        {proposalId && (
+          <div className="inline-block bg-space-dark/30 px-3 py-2 rounded-md">
+            <div className="text-xs text-space-light/70 mb-1">Proposal ID:</div>
+            <div className="flex items-center gap-1">
+              <code className="text-xs font-mono">{proposalId}</code>
+              <CopyButton textToCopy={proposalId} size="xs" />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -38,7 +67,7 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData,
   }
 
   const getSnapshotProposalUrl = () => {
-    if (!proposalData) return '#';
+    if (!proposalData?.space?.id && !proposalData?.space?.name) return '#';
     const spaceName = proposalData.space?.id || proposalData.space?.name;
     return `https://snapshot.org/#/${spaceName}/proposal/${proposalData.id}`;
   };
@@ -47,80 +76,112 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData,
     <div className="w-full steel-panel">
       <div className="flex justify-between items-center border-b border-space-dark/30 p-4">
         <h2 className="text-xl font-semibold ethereal-text">Snapshot Proposal Summary</h2>
-        <Button 
-          variant="tron" 
-          size="sm"
-          className="ml-2"
-          onClick={() => window.open(getSnapshotProposalUrl(), '_blank')}
-        >
-          View on Snapshot <ExternalLink className="h-3.5 w-3.5 ml-1" />
-        </Button>
+        {proposalData.space && proposalData.id && (
+          <Button 
+            variant="tron" 
+            size="sm"
+            className="ml-2"
+            onClick={() => window.open(getSnapshotProposalUrl(), '_blank')}
+          >
+            View on Snapshot <ExternalLink className="h-3.5 w-3.5 ml-1" />
+          </Button>
+        )}
       </div>
       <div className="p-4 space-y-4 overflow-y-auto">
         <div className="flex justify-between items-center">
           <div className="text-xl font-bold text-space">
-            {proposalData.title}
+            {proposalData.title || 'Untitled Proposal'}
           </div>
         </div>
         
-        <div className="text-sm text-space-light/70">
-          Space: {proposalData.space.name}
-        </div>
+        {proposalData.space && (
+          <div className="text-sm text-space-light/70">
+            Space: {proposalData.space.name || proposalData.space.id || 'Unknown'}
+          </div>
+        )}
         
         <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="font-medium text-space-light/70">Author:</span>
-            <div className="flex items-center ml-2 inline-flex">
-              <code className="bg-space-dark/30 px-2 py-1 rounded">
-                {`${proposalData.author.slice(0, 6)}...${proposalData.author.slice(-4)}`}
-              </code>
-              <CopyButton textToCopy={proposalData.author} size="xs" className="ml-1" />
+          {proposalData.author && (
+            <div>
+              <span className="font-medium text-space-light/70">Author:</span>
+              <div className="flex items-center ml-2 inline-flex">
+                <code className="bg-space-dark/30 px-2 py-1 rounded">
+                  {`${proposalData.author.slice(0, 6)}...${proposalData.author.slice(-4)}`}
+                </code>
+                <CopyButton textToCopy={proposalData.author} size="xs" className="ml-1" />
+              </div>
             </div>
-          </div>
-          <div>
-            <span className="font-medium text-space-light/70">State:</span>
-            <span className="ml-2 capitalize">{proposalData.state}</span>
-          </div>
-          <div>
-            <span className="font-medium text-space-light/70">Start:</span>
-            <span className="ml-2">{formatDate(proposalData.start * 1000)}</span>
-          </div>
-          <div>
-            <span className="font-medium text-space-light/70">End:</span>
-            <span className="ml-2">{formatDate(proposalData.end * 1000)}</span>
-          </div>
-          <div>
-            <span className="font-medium text-space-light/70">Created:</span>
-            <span className="ml-2">{formatDate(proposalData.created * 1000)}</span>
-          </div>
-          <div>
-            <span className="font-medium text-space-light/70">Snapshot:</span>
-            <span className="ml-2">{proposalData.snapshot}</span>
-          </div>
-          <div>
-            <span className="font-medium text-space-light/70">Network:</span>
-            <span className="ml-2">{proposalData.network}</span>
-          </div>
-          <div>
-            <span className="font-medium text-space-light/70">Total Votes:</span>
-            <span className="ml-2">{proposalData.votes}</span>
-          </div>
+          )}
+          
+          {proposalData.state && (
+            <div>
+              <span className="font-medium text-space-light/70">State:</span>
+              <span className="ml-2 capitalize">{proposalData.state}</span>
+            </div>
+          )}
+          
+          {proposalData.start && (
+            <div>
+              <span className="font-medium text-space-light/70">Start:</span>
+              <span className="ml-2">{formatDate(proposalData.start * 1000)}</span>
+            </div>
+          )}
+          
+          {proposalData.end && (
+            <div>
+              <span className="font-medium text-space-light/70">End:</span>
+              <span className="ml-2">{formatDate(proposalData.end * 1000)}</span>
+            </div>
+          )}
+          
+          {proposalData.created && (
+            <div>
+              <span className="font-medium text-space-light/70">Created:</span>
+              <span className="ml-2">{formatDate(proposalData.created * 1000)}</span>
+            </div>
+          )}
+          
+          {proposalData.snapshot && (
+            <div>
+              <span className="font-medium text-space-light/70">Snapshot:</span>
+              <span className="ml-2">{proposalData.snapshot}</span>
+            </div>
+          )}
+          
+          {proposalData.network && (
+            <div>
+              <span className="font-medium text-space-light/70">Network:</span>
+              <span className="ml-2">{proposalData.network}</span>
+            </div>
+          )}
+          
+          {proposalData.votes !== undefined && (
+            <div>
+              <span className="font-medium text-space-light/70">Total Votes:</span>
+              <span className="ml-2">{proposalData.votes}</span>
+            </div>
+          )}
+          
           {proposalData.scores_total !== undefined && (
             <div>
               <span className="font-medium text-space-light/70">Score:</span>
               <span className="ml-2">{proposalData.scores_total.toFixed(2)}</span>
             </div>
           )}
+          
           {proposalData.quorum && (
             <div>
               <span className="font-medium text-space-light/70">Quorum:</span>
               <span className="ml-2">{proposalData.quorum} {proposalData.symbol}</span>
             </div>
           )}
-          <div>
-            <span className="font-medium text-space-light/70">Privacy:</span>
-            <span className="ml-2 capitalize">{proposalData.privacy}</span>
-          </div>
+          
+          {proposalData.privacy && (
+            <div>
+              <span className="font-medium text-space-light/70">Privacy:</span>
+              <span className="ml-2 capitalize">{proposalData.privacy}</span>
+            </div>
+          )}
         </div>
 
         {proposalData.labels && proposalData.labels.length > 0 && (

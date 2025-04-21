@@ -5,8 +5,9 @@ import { getProposalDetails } from '@/lib/snapshotQuery';
 import { parseQuestionData } from '@/utils/questionUtils';
 
 export function useProposalTitles(questions: Question[]) {
-  const [proposalTitles, setProposalTitles] = useState<Record<string, string>>({});
+  const [proposalTitles, setProposalTitles] = useState<Record<string, string | null>>({});
   const [loadingProposals, setLoadingProposals] = useState<Record<string, boolean>>({});
+  const [failedProposals, setFailedProposals] = useState<Record<string, boolean>>({});
   const inProgressRequests = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -20,7 +21,7 @@ export function useProposalTitles(questions: Question[]) {
           const proposalId = parsedData.proposalId;
           
           // Skip if we already have the title or are already loading it
-          if (proposalTitles[proposalId] || loadingProposals[proposalId] || inProgressRequests.current.has(proposalId)) {
+          if (proposalTitles[proposalId] !== undefined || loadingProposals[proposalId] || inProgressRequests.current.has(proposalId)) {
             continue;
           }
           
@@ -45,12 +46,23 @@ export function useProposalTitles(questions: Question[]) {
         
         try {
           const proposalData = await getProposalDetails(proposalId);
-          setProposalTitles(prev => ({ 
-            ...prev, 
-            [proposalId]: proposalData.title 
-          }));
+          
+          if (proposalData === null) {
+            // Handle the case where proposal data is null
+            console.log(`No proposal data available for ${proposalId}`);
+            setProposalTitles(prev => ({ ...prev, [proposalId]: null }));
+            setFailedProposals(prev => ({ ...prev, [proposalId]: true }));
+          } else {
+            setProposalTitles(prev => ({ 
+              ...prev, 
+              [proposalId]: proposalData.title || null
+            }));
+            setFailedProposals(prev => ({ ...prev, [proposalId]: false }));
+          }
         } catch (error) {
           console.error(`Error fetching proposal ${proposalId}:`, error);
+          setProposalTitles(prev => ({ ...prev, [proposalId]: null }));
+          setFailedProposals(prev => ({ ...prev, [proposalId]: true }));
         } finally {
           setLoadingProposals(prev => ({ ...prev, [proposalId]: false }));
           inProgressRequests.current.delete(proposalId);
@@ -66,5 +78,5 @@ export function useProposalTitles(questions: Question[]) {
     fetchProposalTitles();
   }, [questions]); // Removed dependencies that would cause too many effect runs
 
-  return { proposalTitles, loadingProposals };
+  return { proposalTitles, loadingProposals, failedProposals };
 }

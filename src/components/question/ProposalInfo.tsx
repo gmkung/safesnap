@@ -12,13 +12,15 @@ interface ProposalInfoProps {
   proposalData?: any;
   hashVerification?: any;
   onViewHashDetails?: () => void;
+  proposalLoadFailed?: boolean;
 }
 
 export default function ProposalInfo({ 
   question, 
   proposalData, 
   hashVerification, 
-  onViewHashDetails 
+  onViewHashDetails,
+  proposalLoadFailed = false
 }: ProposalInfoProps) {
   const parsedData = parseQuestionData(question);
   
@@ -27,7 +29,8 @@ export default function ProposalInfo({
   }
   
   const getSnapshotUrl = (spaceId: string, proposalId: string) => {
-    return `https://v1.snapshot.box/#/${spaceId}/proposal/${proposalId}`;
+    if (!spaceId || !proposalId) return "#";
+    return `https://snapshot.org/#/${spaceId}/proposal/${proposalId}`;
   };
   
   const StatusIcon = hashVerification?.match 
@@ -51,7 +54,7 @@ export default function ProposalInfo({
           <div>
             <dt className="font-medium text-space-light/70 flex items-center">
               Proposal ID
-              {proposalData && (
+              {proposalData && proposalData.space && proposalData.id && !proposalLoadFailed && (
                 <a 
                   href={getSnapshotUrl(proposalData.space.id, proposalData.id)} 
                   target="_blank" 
@@ -60,6 +63,20 @@ export default function ProposalInfo({
                 >
                   <ExternalLink className="h-4 w-4 text-space-light/70 hover:text-space transition-colors" />
                 </a>
+              )}
+              {proposalLoadFailed && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="ml-2 text-amber-400">
+                        <AlertTriangle className="h-4 w-4" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Proposal not found on Snapshot</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
             </dt>
             <dd className="mt-1 flex items-center">

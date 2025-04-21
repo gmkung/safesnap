@@ -49,7 +49,7 @@ interface SnapshotProposal {
 // Add exponential backoff for retries
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export async function getProposalDetails(proposalId: string): Promise<SnapshotProposal> {
+export async function getProposalDetails(proposalId: string): Promise<SnapshotProposal | null> {
     // Check if we have a cached version that's still valid
     if (proposalCache[proposalId] && 
         (Date.now() - proposalCache[proposalId].timestamp) < CACHE_DURATION) {
@@ -136,7 +136,19 @@ export async function getProposalDetails(proposalId: string): Promise<SnapshotPr
             }
             
             if (result.errors) {
+                console.warn('API returned errors:', result.errors);
                 throw new Error(result.errors[0].message);
+            }
+
+            // Handle case where proposal is null
+            if (!result.data || !result.data.proposal) {
+                console.log(`No proposal found for ID: ${proposalId}`);
+                // Cache the null result to avoid repeated failed requests
+                proposalCache[proposalId] = {
+                    data: null,
+                    timestamp: Date.now()
+                };
+                return null;
             }
 
             // Cache the result
@@ -161,12 +173,15 @@ export async function getProposalDetails(proposalId: string): Promise<SnapshotPr
                     console.log('Using stale cached proposal data as fallback');
                     return proposalCache[proposalId].data;
                 }
-                throw error;
+                // Return null instead of throwing to avoid crashing the app
+                console.log('Failed to fetch proposal after maximum retries, returning null');
+                return null;
             }
         }
     }
     
-    throw new Error('Failed to fetch proposal after maximum retries');
+    // Return null instead of throwing to avoid crashing the app
+    return null;
 }
 
 export function calculateTransactionArrayHash(proposal: SnapshotProposal): { 

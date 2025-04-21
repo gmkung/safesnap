@@ -1,4 +1,3 @@
-
 import { Question } from 'reality-kleros-subgraph';
 import { Badge } from './ui/badge';
 import { formatUnits } from 'viem';
@@ -8,15 +7,16 @@ import { parseQuestionData } from '@/utils/questionUtils';
 
 interface QuestionItemProps {
   question: Question;
-  proposalTitles: Record<string, string>;
+  proposalTitles: Record<string, string | null>;
   loadingProposals: Record<string, boolean>;
   onQuestionClick: (question: Question) => void;
 }
 
 export function QuestionItem({ question, proposalTitles, loadingProposals, onQuestionClick }: QuestionItemProps) {
   const parsedData = parseQuestionData(question);
-  const isLoadingProposal = parsedData?.proposalId ? loadingProposals[parsedData.proposalId] : false;
-  const proposalTitle = parsedData?.proposalId ? proposalTitles[parsedData.proposalId] : null;
+  const proposalId = parsedData?.proposalId || '';
+  const isLoadingProposal = proposalId ? loadingProposals[proposalId] : false;
+  const proposalTitle = proposalId ? proposalTitles[proposalId] : null;
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleDateString();
@@ -34,7 +34,6 @@ export function QuestionItem({ question, proposalTitles, loadingProposals, onQue
     }
   };
 
-  // Function to truncate identifiers
   const truncateId = (id: string, start = 6, end = 4) => {
     if (!id) return '';
     if (id.length <= start + end) return id;
@@ -54,11 +53,19 @@ export function QuestionItem({ question, proposalTitles, loadingProposals, onQue
           </div>
         )}
         
-        {proposalTitle ? (
+        {isLoadingProposal ? (
+          <div className="text-lg font-medium text-space-light/70">
+            Loading proposal details...
+          </div>
+        ) : proposalTitle ? (
           <div className="text-lg font-medium text-space-light">
             {proposalTitle}
           </div>
-        ) : null}
+        ) : (
+          <div className="text-lg font-medium text-space-light/70">
+            {parsedData.dao ? `${parsedData.dao} Proposal` : 'Untitled Proposal'}
+          </div>
+        )}
         
         <div className="space-y-1.5 mt-2">
           <div className="text-sm flex items-center">
@@ -76,36 +83,40 @@ export function QuestionItem({ question, proposalTitles, loadingProposals, onQue
               </TooltipContent>
             </Tooltip>
           </div>
-          <div className="text-sm flex items-center">
-            <span className="text-space-light/70 font-medium min-w-24 flex items-center">
-              <Hash size={14} className="mr-1" /> Proposal ID:
-            </span>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light cursor-pointer">
-                  {truncateId(parsedData.proposalId)}
-                </code>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="text-xs font-mono">{parsedData.proposalId}</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <div className="text-sm flex items-center">
-            <span className="text-space-light/70 font-medium min-w-24 flex items-center">
-              <Hash size={14} className="mr-1" /> Tx Array Hash:
-            </span>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light cursor-pointer">
-                  {truncateId(parsedData.transactionHash)}
-                </code>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="text-xs font-mono">{parsedData.transactionHash}</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
+          {parsedData.proposalId && (
+            <div className="text-sm flex items-center">
+              <span className="text-space-light/70 font-medium min-w-24 flex items-center">
+                <Hash size={14} className="mr-1" /> Proposal ID:
+              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light cursor-pointer">
+                    {truncateId(parsedData.proposalId)}
+                  </code>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs font-mono">{parsedData.proposalId}</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          )}
+          {parsedData.transactionHash && (
+            <div className="text-sm flex items-center">
+              <span className="text-space-light/70 font-medium min-w-24 flex items-center">
+                <Hash size={14} className="mr-1" /> Tx Array Hash:
+              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light cursor-pointer">
+                    {truncateId(parsedData.transactionHash)}
+                  </code>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs font-mono">{parsedData.transactionHash}</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          )}
         </div>
       </div>
     );
