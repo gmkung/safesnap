@@ -76,40 +76,36 @@ export function QuestionItem({ question, proposalTitles, loadingProposals, onQue
               </TooltipContent>
             </Tooltip>
           </div>
-          {parsedData.proposalId && (
-            <div className="text-sm flex items-center">
-              <span className="text-space-light/70 font-medium min-w-24 flex items-center">
-                <Hash size={14} className="mr-1" /> Proposal ID:
-              </span>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light cursor-pointer">
-                    {truncateId(parsedData.proposalId)}
-                  </code>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs font-mono">{parsedData.proposalId}</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          )}
-          {parsedData.transactionHash && (
-            <div className="text-sm flex items-center">
-              <span className="text-space-light/70 font-medium min-w-24 flex items-center">
-                <Hash size={14} className="mr-1" /> Tx Array Hash:
-              </span>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light cursor-pointer">
-                    {truncateId(parsedData.transactionHash)}
-                  </code>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs font-mono">{parsedData.transactionHash}</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          )}
+          <div className="text-sm flex items-center">
+            <span className="text-space-light/70 font-medium min-w-24 flex items-center">
+              <Hash size={14} className="mr-1" /> Proposal ID:
+            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light cursor-pointer">
+                  {truncateId(parsedData.proposalId)}
+                </code>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs font-mono">{parsedData.proposalId}</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          <div className="text-sm flex items-center">
+            <span className="text-space-light/70 font-medium min-w-24 flex items-center">
+              <Hash size={14} className="mr-1" /> Tx Array Hash:
+            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <code className="ml-2 bg-space-darkBlue/50 border border-space/10 px-2 py-0.5 rounded text-xs font-mono text-space-light cursor-pointer">
+                  {truncateId(parsedData.transactionHash)}
+                </code>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs font-mono">{parsedData.transactionHash}</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </div>
       </div>
     );
