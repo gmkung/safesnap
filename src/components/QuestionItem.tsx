@@ -62,11 +62,18 @@ export function QuestionItem({ question, proposalTitles, loadingProposals, onQue
             {proposalTitle}
           </div>
         ) : (
-          <div className="text-lg font-medium text-space-light/70">
-            {parsedData.dao ? `${parsedData.dao} Proposal` : 'Untitled Proposal'}
-          </div>
+          parsedData.dao && parsedData.proposalId ? (
+            <div className="flex items-center gap-2 text-amber-500 bg-amber-500/10 border border-amber-400/40 rounded px-2 py-1 text-sm">
+              <Info size={16} strokeWidth={2.2} />
+              Not a DAO proposal or Snapshot unavailable
+            </div>
+          ) : (
+            <div className="text-lg font-medium text-space-light/70">
+              Untitled Proposal
+            </div>
+          )
         )}
-        
+
         <div className="space-y-1.5 mt-2">
           <div className="text-sm flex items-center">
             <span className="text-space-light/70 font-medium min-w-24 flex items-center">
