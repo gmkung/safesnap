@@ -37,7 +37,10 @@ export default function TransactionSummary({ proposalData }: TransactionSummaryP
 
   useEffect(() => {
     const decodeTransactions = async () => {
-      if (!proposalData?.plugins?.safeSnap?.safes) return;
+      if (!proposalData?.plugins?.safeSnap?.safes) {
+        setDecodedTransactions([]);
+        return;
+      }
       
       const transactions: DecodedFunction[] = [];
       
@@ -216,8 +219,6 @@ export default function TransactionSummary({ proposalData }: TransactionSummaryP
   };
   
   const getTransactionType = (functionName: string | null, value: string) => {
-    if (!functionName) return "call";
-    
     // Use value to determine if it's a transfer - don't rely on function name
     if (value && value !== "0") return "transfer";
     return "call";
@@ -240,10 +241,6 @@ export default function TransactionSummary({ proposalData }: TransactionSummaryP
     // Return raw value for numeric types without auto-converting to ETH
     return value;
   };
-  
-  if (!proposalData?.plugins?.safeSnap?.safes || !decodedTransactions.length) {
-    return null;
-  }
   
   return (
     <div className="w-full mt-4 border-t border-space-dark/20 pt-4">

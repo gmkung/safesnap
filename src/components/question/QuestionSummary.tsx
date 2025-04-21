@@ -86,7 +86,7 @@ export default function QuestionSummary({ question, proposalData }: QuestionSumm
             <div className="border-b border-space-dark/20 pb-4">
               <h3 className="text-base font-medium text-space mb-3 flex items-center">
                 Proposal Information
-                {proposalData && (
+                {proposalData && proposalData.space && proposalData.id && (
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -124,7 +124,7 @@ export default function QuestionSummary({ question, proposalData }: QuestionSumm
                 
                 <div>
                   <h4 className="text-sm font-medium text-space-light/70">Proposal Title</h4>
-                  <p className="mt-1 text-sm">{proposalData.title}</p>
+                  <p className="mt-1 text-sm">{proposalData?.title || "Unknown Title"}</p>
                 </div>
                 
                 <div>
@@ -133,9 +133,14 @@ export default function QuestionSummary({ question, proposalData }: QuestionSumm
                   </h4>
                   <div className="mt-1 flex items-center">
                     <code className="text-foreground font-mono text-xs">
-                      {`${proposalData.author.slice(0, 6)}...${proposalData.author.slice(-4)}`}
+                      {proposalData?.author ? 
+                        `${proposalData.author.slice(0, 6)}...${proposalData.author.slice(-4)}` : 
+                        "Unknown"
+                      }
                     </code>
-                    <CopyButton textToCopy={proposalData.author} size="xs" className="ml-1" />
+                    {proposalData?.author && (
+                      <CopyButton textToCopy={proposalData.author} size="xs" className="ml-1" />
+                    )}
                   </div>
                 </div>
                 
@@ -143,7 +148,9 @@ export default function QuestionSummary({ question, proposalData }: QuestionSumm
                   <h4 className="text-sm font-medium text-space-light/70 flex items-center gap-1">
                     <Calendar className="h-3.5 w-3.5" /> End Date
                   </h4>
-                  <p className="mt-1 text-sm">{formatDate(proposalData.end * 1000)}</p>
+                  <p className="mt-1 text-sm">
+                    {proposalData?.end ? formatDate(proposalData.end * 1000) : "Unknown"}
+                  </p>
                 </div>
               </div>
             </div>
