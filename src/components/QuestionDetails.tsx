@@ -1,3 +1,4 @@
+
 import { Question } from 'reality-kleros-subgraph';
 import RequestArbitrationButton from './RequestArbitration';
 import { formatBond, formatDate, getHumanReadableAnswer, getStatusBadgeClass, parseQuestionData } from '@/utils/questionUtils';
@@ -21,6 +22,7 @@ interface QuestionDetailsProps {
     onViewHashDetails?: () => void;
     isLoading?: boolean;
     proposalLoading?: boolean;
+    proposalLoadFailed?: boolean;
 }
 
 export default function QuestionDetails({ 
@@ -31,7 +33,8 @@ export default function QuestionDetails({
     hashVerification,
     onViewHashDetails,
     isLoading = false,
-    proposalLoading = false
+    proposalLoading = false,
+    proposalLoadFailed = false
 }: QuestionDetailsProps) {
     if (isLoading) {
         return <QuestionDetailsSkeleton />;
