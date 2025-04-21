@@ -1,3 +1,4 @@
+
 import { formatDate } from '@/utils/questionUtils';
 import { Loader2, ExternalLink, BookText } from 'lucide-react';
 import CopyButton from './CopyButton';
@@ -37,9 +38,19 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData,
     );
   }
 
+  // Ensure all required properties exist before trying to use them
+  const title = proposalData.title || "Untitled Proposal";
+  const spaceName = proposalData.space?.id || proposalData.space?.name || "Unknown Space";
+  const authorAddress = proposalData.author || "Unknown";
+  const state = proposalData.state || "unknown";
+  const startDate = proposalData.start ? formatDate(proposalData.start * 1000) : "Unknown";
+  const endDate = proposalData.end ? formatDate(proposalData.end * 1000) : "Unknown";
+  const createdDate = proposalData.created ? formatDate(proposalData.created * 1000) : "Unknown";
+  const snapshot = proposalData.snapshot || "Unknown";
+  const network = proposalData.network || "Unknown";
+  const votes = proposalData.votes !== undefined ? proposalData.votes : "Unknown";
+
   const getSnapshotProposalUrl = () => {
-    if (!proposalData) return '#';
-    const spaceName = proposalData.space?.id || proposalData.space?.name;
     return `https://snapshot.org/#/${spaceName}/proposal/${proposalData.id}`;
   };
 
@@ -59,12 +70,12 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData,
       <div className="p-4 space-y-4 overflow-y-auto">
         <div className="flex justify-between items-center">
           <div className="text-xl font-bold text-space">
-            {proposalData.title}
+            {title}
           </div>
         </div>
         
         <div className="text-sm text-space-light/70">
-          Space: {proposalData.space.name}
+          Space: {spaceName}
         </div>
         
         <div className="grid grid-cols-2 gap-4 text-sm">
@@ -72,38 +83,38 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData,
             <span className="font-medium text-space-light/70">Author:</span>
             <div className="flex items-center ml-2 inline-flex">
               <code className="bg-space-dark/30 px-2 py-1 rounded">
-                {`${proposalData.author.slice(0, 6)}...${proposalData.author.slice(-4)}`}
+                {`${authorAddress.slice(0, 6)}...${authorAddress.slice(-4)}`}
               </code>
-              <CopyButton textToCopy={proposalData.author} size="xs" className="ml-1" />
+              <CopyButton textToCopy={authorAddress} size="xs" className="ml-1" />
             </div>
           </div>
           <div>
             <span className="font-medium text-space-light/70">State:</span>
-            <span className="ml-2 capitalize">{proposalData.state}</span>
+            <span className="ml-2 capitalize">{state}</span>
           </div>
           <div>
             <span className="font-medium text-space-light/70">Start:</span>
-            <span className="ml-2">{formatDate(proposalData.start * 1000)}</span>
+            <span className="ml-2">{startDate}</span>
           </div>
           <div>
             <span className="font-medium text-space-light/70">End:</span>
-            <span className="ml-2">{formatDate(proposalData.end * 1000)}</span>
+            <span className="ml-2">{endDate}</span>
           </div>
           <div>
             <span className="font-medium text-space-light/70">Created:</span>
-            <span className="ml-2">{formatDate(proposalData.created * 1000)}</span>
+            <span className="ml-2">{createdDate}</span>
           </div>
           <div>
             <span className="font-medium text-space-light/70">Snapshot:</span>
-            <span className="ml-2">{proposalData.snapshot}</span>
+            <span className="ml-2">{snapshot}</span>
           </div>
           <div>
             <span className="font-medium text-space-light/70">Network:</span>
-            <span className="ml-2">{proposalData.network}</span>
+            <span className="ml-2">{network}</span>
           </div>
           <div>
             <span className="font-medium text-space-light/70">Total Votes:</span>
-            <span className="ml-2">{proposalData.votes}</span>
+            <span className="ml-2">{votes}</span>
           </div>
           {proposalData.scores_total !== undefined && (
             <div>
@@ -114,12 +125,12 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData,
           {proposalData.quorum && (
             <div>
               <span className="font-medium text-space-light/70">Quorum:</span>
-              <span className="ml-2">{proposalData.quorum} {proposalData.symbol}</span>
+              <span className="ml-2">{proposalData.quorum} {proposalData.symbol || ""}</span>
             </div>
           )}
           <div>
             <span className="font-medium text-space-light/70">Privacy:</span>
-            <span className="ml-2 capitalize">{proposalData.privacy}</span>
+            <span className="ml-2 capitalize">{proposalData.privacy || "Unknown"}</span>
           </div>
         </div>
 
@@ -127,7 +138,7 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData,
           <div className="mt-4">
             <h3 className="font-medium text-space-light/70 mb-2">Labels:</h3>
             <div className="flex flex-wrap gap-2">
-              {proposalData.labels.map((label, index) => (
+              {proposalData.labels.map((label: string, index: number) => (
                 <span key={index} className="px-2 py-1 bg-space-dark/30 rounded">
                   {label}
                 </span>
@@ -140,12 +151,12 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData,
           <div className="mt-4">
             <h3 className="font-medium text-space-light/70 mb-2">Choices:</h3>
             <ul className="list-disc list-inside space-y-1">
-              {proposalData.choices.map((choice, index) => (
+              {proposalData.choices.map((choice: string, index: number) => (
                 <li key={index}>
                   {choice}
                   {proposalData.scores && proposalData.scores[index] !== undefined && (
                     <span className="ml-2 text-space-light/70">
-                      ({proposalData.scores[index].toFixed(2)} {proposalData.symbol})
+                      ({proposalData.scores[index].toFixed(2)} {proposalData.symbol || ""})
                     </span>
                   )}
                 </li>
@@ -178,104 +189,128 @@ export default function SnapshotProposalSummary({ proposalLoading, proposalData,
           <div className="mt-6">
             <h3 className="font-medium text-space-light/70 mb-2">SafeSnap Transactions:</h3>
             <div className="space-y-4">
-              {proposalData.plugins.safeSnap.safes.map((safe, safeIndex) => (
+              {proposalData.plugins.safeSnap.safes.map((safe: any, safeIndex: number) => (
                 <div key={safeIndex} className="bg-space-dark/30 p-4 rounded">
                   <div className="grid grid-cols-2 gap-2 text-sm mb-4">
                     <div>
                       <span className="font-medium text-space-light/70">Network:</span>
-                      <span className="ml-2">{safe.network}</span>
+                      <span className="ml-2">{safe.network || "Unknown"}</span>
                     </div>
-                    <div>
-                      <span className="font-medium text-space-light/70">Reality Address:</span>
-                      <div className="flex items-center ml-2 inline-flex">
-                        <code className="bg-space-dark/50 px-2 py-1 rounded">
-                          {`${safe.realityAddress.slice(0, 6)}...${safe.realityAddress.slice(-4)}`}
-                        </code>
-                        <CopyButton textToCopy={safe.realityAddress} size="xs" className="ml-1" />
+                    {safe.realityAddress && (
+                      <div>
+                        <span className="font-medium text-space-light/70">Reality Address:</span>
+                        <div className="flex items-center ml-2 inline-flex">
+                          <code className="bg-space-dark/50 px-2 py-1 rounded">
+                            {`${safe.realityAddress.slice(0, 6)}...${safe.realityAddress.slice(-4)}`}
+                          </code>
+                          <CopyButton textToCopy={safe.realityAddress} size="xs" className="ml-1" />
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      <span className="font-medium text-space-light/70">MultiSend Address:</span>
-                      <div className="flex items-center ml-2 inline-flex">
-                        <code className="bg-space-dark/50 px-2 py-1 rounded">
-                          {`${safe.multiSendAddress.slice(0, 6)}...${safe.multiSendAddress.slice(-4)}`}
-                        </code>
-                        <CopyButton textToCopy={safe.multiSendAddress} size="xs" className="ml-1" />
+                    )}
+                    {safe.multiSendAddress && (
+                      <div>
+                        <span className="font-medium text-space-light/70">MultiSend Address:</span>
+                        <div className="flex items-center ml-2 inline-flex">
+                          <code className="bg-space-dark/50 px-2 py-1 rounded">
+                            {`${safe.multiSendAddress.slice(0, 6)}...${safe.multiSendAddress.slice(-4)}`}
+                          </code>
+                          <CopyButton textToCopy={safe.multiSendAddress} size="xs" className="ml-1" />
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      <span className="font-medium text-space-light/70">Safe Hash:</span>
-                      <div className="flex items-center ml-2 inline-flex">
-                        <code className="bg-space-dark/50 px-2 py-1 rounded">
-                          {`${safe.hash.slice(0, 6)}...${safe.hash.slice(-4)}`}
-                        </code>
-                        <CopyButton textToCopy={safe.hash} size="xs" className="ml-1" />
+                    )}
+                    {safe.hash && (
+                      <div>
+                        <span className="font-medium text-space-light/70">Safe Hash:</span>
+                        <div className="flex items-center ml-2 inline-flex">
+                          <code className="bg-space-dark/50 px-2 py-1 rounded">
+                            {`${safe.hash.slice(0, 6)}...${safe.hash.slice(-4)}`}
+                          </code>
+                          <CopyButton textToCopy={safe.hash} size="xs" className="ml-1" />
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
 
-                  <div className="space-y-3">
-                    {safe.txs.map((tx, txIndex) => (
-                      <div key={txIndex} className="bg-space-dark/50 p-3 rounded">
-                        <div className="grid grid-cols-2 gap-2 text-sm mb-2">
-                          <div>
-                            <span className="font-medium text-space-light/70">Transaction Hash:</span>
-                            <div className="flex items-center ml-2 inline-flex">
-                              <code className="bg-space-dark/70 px-2 py-1 rounded">
-                                {`${tx.hash.slice(0, 6)}...${tx.hash.slice(-4)}`}
-                              </code>
-                              <CopyButton textToCopy={tx.hash} size="xs" className="ml-1" />
-                            </div>
-                          </div>
-                          <div>
-                            <span className="font-medium text-space-light/70">Nonce:</span>
-                            <span className="ml-2">{tx.nonce}</span>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          {tx.transactions.map((subTx, subTxIndex) => (
-                            <div key={subTxIndex} className="bg-space-dark/70 p-2 rounded text-xs">
-                              <div className="grid grid-cols-2 gap-1">
-                                <div>
-                                  <span className="font-medium text-space-light/70">To:</span>
-                                  <div className="flex items-center ml-2 inline-flex">
-                                    <code>
-                                      {`${subTx.to.slice(0, 6)}...${subTx.to.slice(-4)}`}
-                                    </code>
-                                    <CopyButton textToCopy={subTx.to} size="xs" className="ml-1" />
-                                  </div>
-                                </div>
-                                <div>
-                                  <span className="font-medium text-space-light/70">Value:</span>
-                                  <span className="ml-2">{subTx.value}</span>
-                                </div>
-                                <div>
-                                  <span className="font-medium text-space-light/70">Operation:</span>
-                                  <span className="ml-2">{subTx.operation}</span>
-                                </div>
-                                <div>
-                                  <span className="font-medium text-space-light/70">Nonce:</span>
-                                  <span className="ml-2">{subTx.nonce}</span>
+                  {safe.txs && safe.txs.length > 0 && (
+                    <div className="space-y-3">
+                      {safe.txs.map((tx: any, txIndex: number) => (
+                        <div key={txIndex} className="bg-space-dark/50 p-3 rounded">
+                          <div className="grid grid-cols-2 gap-2 text-sm mb-2">
+                            {tx.hash && (
+                              <div>
+                                <span className="font-medium text-space-light/70">Transaction Hash:</span>
+                                <div className="flex items-center ml-2 inline-flex">
+                                  <code className="bg-space-dark/70 px-2 py-1 rounded">
+                                    {`${tx.hash.slice(0, 6)}...${tx.hash.slice(-4)}`}
+                                  </code>
+                                  <CopyButton textToCopy={tx.hash} size="xs" className="ml-1" />
                                 </div>
                               </div>
-                              <div className="mt-1">
-                                <span className="font-medium text-space-light/70">Data:</span>
-                                <div className="flex items-center gap-1">
-                                  <code className="ml-2 break-all">
-                                    {subTx.data}
-                                  </code>
-                                  {subTx.data && subTx.data.startsWith('0x') && (
-                                    <CopyButton textToCopy={subTx.data} size="xs" />
+                            )}
+                            {tx.nonce !== undefined && (
+                              <div>
+                                <span className="font-medium text-space-light/70">Nonce:</span>
+                                <span className="ml-2">{tx.nonce}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {tx.transactions && tx.transactions.length > 0 && (
+                            <div className="space-y-2">
+                              {tx.transactions.map((subTx: any, subTxIndex: number) => (
+                                <div key={subTxIndex} className="bg-space-dark/70 p-2 rounded text-xs">
+                                  <div className="grid grid-cols-2 gap-1">
+                                    {subTx.to && (
+                                      <div>
+                                        <span className="font-medium text-space-light/70">To:</span>
+                                        <div className="flex items-center ml-2 inline-flex">
+                                          <code>
+                                            {`${subTx.to.slice(0, 6)}...${subTx.to.slice(-4)}`}
+                                          </code>
+                                          <CopyButton textToCopy={subTx.to} size="xs" className="ml-1" />
+                                        </div>
+                                      </div>
+                                    )}
+                                    {subTx.value !== undefined && (
+                                      <div>
+                                        <span className="font-medium text-space-light/70">Value:</span>
+                                        <span className="ml-2">{subTx.value}</span>
+                                      </div>
+                                    )}
+                                    {subTx.operation !== undefined && (
+                                      <div>
+                                        <span className="font-medium text-space-light/70">Operation:</span>
+                                        <span className="ml-2">{subTx.operation}</span>
+                                      </div>
+                                    )}
+                                    {subTx.nonce !== undefined && (
+                                      <div>
+                                        <span className="font-medium text-space-light/70">Nonce:</span>
+                                        <span className="ml-2">{subTx.nonce}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                  {subTx.data && (
+                                    <div className="mt-1">
+                                      <span className="font-medium text-space-light/70">Data:</span>
+                                      <div className="flex items-center gap-1">
+                                        <code className="ml-2 break-all">
+                                          {subTx.data}
+                                        </code>
+                                        {subTx.data.startsWith('0x') && (
+                                          <CopyButton textToCopy={subTx.data} size="xs" />
+                                        )}
+                                      </div>
+                                    </div>
                                   )}
                                 </div>
-                              </div>
+                              ))}
                             </div>
-                          ))}
+                          )}
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
