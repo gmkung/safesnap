@@ -3,13 +3,11 @@ import { useState, useEffect, useRef } from 'react';
 import { Question } from 'reality-kleros-subgraph';
 import { getProposalDetails } from '@/lib/snapshotQuery';
 import { parseQuestionData } from '@/utils/questionUtils';
-import { toast } from '@/hooks/use-toast';
 
 export function useProposalTitles(questions: Question[]) {
   const [proposalTitles, setProposalTitles] = useState<Record<string, string>>({});
   const [loadingProposals, setLoadingProposals] = useState<Record<string, boolean>>({});
   const inProgressRequests = useRef<Set<string>>(new Set());
-  const erroredProposals = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const fetchProposalTitles = async () => {
@@ -17,22 +15,16 @@ export function useProposalTitles(questions: Question[]) {
       
       // First collect all unique proposal IDs that we don't already have
       for (const question of questions) {
-        try {
-          const parsedData = parseQuestionData(question);
-          if (parsedData?.proposalId) {
-            const proposalId = parsedData.proposalId;
-            
-            // Skip if we already have the title or are already loading it
-            if (proposalTitles[proposalId] || loadingProposals[proposalId] || inProgressRequests.current.has(proposalId) || erroredProposals.current.has(proposalId)) {
-              continue;
-            }
-            
-            uniqueProposalIds.add(proposalId);
+        const parsedData = parseQuestionData(question);
+        if (parsedData?.proposalId) {
+          const proposalId = parsedData.proposalId;
+          
+          // Skip if we already have the title or are already loading it
+          if (proposalTitles[proposalId] || loadingProposals[proposalId] || inProgressRequests.current.has(proposalId)) {
+            continue;
           }
-        } catch (error) {
-          console.error("Error parsing question data:", error);
-          // Continue to the next question if there's an error parsing this one
-          continue;
+          
+          uniqueProposalIds.add(proposalId);
         }
       }
       
@@ -53,29 +45,12 @@ export function useProposalTitles(questions: Question[]) {
         
         try {
           const proposalData = await getProposalDetails(proposalId);
-          
-          if (proposalData && proposalData.title) {
-            setProposalTitles(prev => ({ 
-              ...prev, 
-              [proposalId]: proposalData.title 
-            }));
-          } else {
-            // Handle case where proposal data is null or missing title
-            console.warn(`Proposal ${proposalId} returned data without a title`);
-            erroredProposals.current.add(proposalId);
-          }
+          setProposalTitles(prev => ({ 
+            ...prev, 
+            [proposalId]: proposalData.title 
+          }));
         } catch (error) {
           console.error(`Error fetching proposal ${proposalId}:`, error);
-          erroredProposals.current.add(proposalId);
-          
-          // Display a toast only for the first few errors to avoid spamming
-          if (erroredProposals.current.size <= 3) {
-            toast({
-              title: "Error loading proposal",
-              description: `Failed to load proposal ${proposalId.slice(0, 8)}...`,
-              variant: "destructive"
-            });
-          }
         } finally {
           setLoadingProposals(prev => ({ ...prev, [proposalId]: false }));
           inProgressRequests.current.delete(proposalId);
