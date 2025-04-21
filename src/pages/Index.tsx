@@ -9,11 +9,12 @@ import { QuestionPhaseValue } from '../components/StatusFilter';
 const ITEMS_PER_PAGE = 10;
 
 export default function Home() {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const pageParam = searchParams.get('page');
+  const [currentPage, setCurrentPage] = useState(pageParam ? parseInt(pageParam, 10) : 1);
   
   // Get ENS name or DAO name from URL path
   const { '*': pathParam } = useParams();
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
   // Get status filters from URL
@@ -38,10 +39,23 @@ export default function Home() {
   
   const { questions, isLoading, error, progress } = useQuestions(filterParam);
   
+  // Update URL when page changes
+  useEffect(() => {
+    if (pageParam && parseInt(pageParam, 10) !== currentPage) {
+      setCurrentPage(parseInt(pageParam, 10));
+    }
+  }, [pageParam, currentPage]);
+  
   // Reset to page 1 when filter changes
   useEffect(() => {
-    setCurrentPage(1);
-  }, [filterParam, statusFilters]);
+    if (filterParam || statusFilters.length > 0) {
+      // Only reset page if filter changes, while preserving it in other cases
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set('page', '1');
+      setSearchParams(newParams);
+      setCurrentPage(1);
+    }
+  }, [filterParam, statusFilters.join(',')]);
 
   // Log when filter is detected
   useEffect(() => {
