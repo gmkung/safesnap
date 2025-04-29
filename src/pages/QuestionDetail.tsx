@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
@@ -5,8 +6,9 @@ import { ArrowLeft } from 'lucide-react';
 import TransactionHashModal from '@/components/TransactionHashModal';
 import { getProposalDetails, calculateTransactionArrayHash, compareTransactionHashes } from '@/lib/snapshotQuery';
 import { useToast } from '@/hooks/use-toast';
-import { parseQuestionData } from '@/utils/questionUtils';
+import { parseQuestionData, fetchQuestion } from '@/utils/questionUtils';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { CHAIN_ID } from '@/config/chainConfig';
 
 // Import our components
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -24,7 +26,7 @@ export default function QuestionDetail() {
     const location = useLocation();
     const navigate = useNavigate();
     const [question, setQuestion] = useState<Question | null>(location.state?.question || null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!location.state?.question);
     const [error, setError] = useState<string | null>(null);
     const [proposalData, setProposalData] = useState<any>(null);
     const [proposalLoading, setProposalLoading] = useState(false);
@@ -41,9 +43,22 @@ export default function QuestionDetail() {
     const proposalFetchAttempted = useRef<boolean>(false);
 
     const loadQuestionDetails = async () => {
+        // Only try to fetch if we have an ID and don't already have the question data
+        if (!id || (question && !loading)) return;
+        
         try {
             setLoading(true);
-            // Your implementation for loading question details
+            
+            // Use the fetchQuestion function from reality-kleros-subgraph
+            const questionData = await fetchQuestion(CHAIN_ID, id);
+            
+            if (!questionData) {
+                setError('Question not found');
+                return;
+            }
+            
+            setQuestion(questionData);
+            setError(null);
         } catch (err) {
             console.error('Error loading question details:', err);
             setError(err instanceof Error ? err.message : 'Failed to load question details');
@@ -53,8 +68,10 @@ export default function QuestionDetail() {
     };
 
     useEffect(() => {
-        loadQuestionDetails();
-    }, [question]);
+        if (id && !question) {
+            loadQuestionDetails();
+        }
+    }, [id]); // Only run when ID changes or on initial load
 
     useEffect(() => {
         if (question && !proposalFetchAttempted.current) {
@@ -123,7 +140,7 @@ export default function QuestionDetail() {
         navigate(-1);
     };
 
-    if (loading && !question) {
+    if (loading) {
         return <LoadingSpinner />;
     }
 
