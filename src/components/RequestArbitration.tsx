@@ -84,7 +84,7 @@ export default function RequestArbitrationButton({ question, onArbitrationReques
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger>
+            <DialogTrigger asChild>
                 <Button
                     variant="outline"
                     className={disabledReason ? "border-gray-500 text-gray-500" : "border-yellow-500 text-yellow-500"}

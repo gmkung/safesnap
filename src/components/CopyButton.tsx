@@ -2,12 +2,7 @@
 import { useState } from 'react';
 import { Copy, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 
 interface CopyButtonProps {
@@ -43,7 +38,7 @@ export default function CopyButton({ textToCopy, size = 'sm', className = '' }: 
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger asChild>
           <Button
             type="button"
             variant="ghost"

@@ -4,11 +4,11 @@ import RequestArbitrationButton from './RequestArbitration';
 import { formatBond, formatDate, getHumanReadableAnswer, getStatusBadgeClass, parseQuestionData } from '@/utils/questionUtils';
 import { Info, Calculator, CheckCircle, XCircle, AlertTriangle, FileText, ExternalLink } from 'lucide-react';
 import { Button } from './ui/button';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import TemplateInfo from './TemplateInfo';
 import ContractInfo from './ContractInfo';
 import { Badge } from './ui/badge';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "./ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { cn } from '@/lib/utils';
 import { QuestionDetailsSkeleton } from './ui/skeleton';
 import CopyButton from './CopyButton';
@@ -58,19 +58,6 @@ export default function QuestionDetails({
             ? "Hash mismatch: The expected hash does not match the calculated hash" 
             : "Unable to verify: No transactions found in proposal to calculate hash";
     
-    // Calculate time remaining safely
-    const getTimeRemaining = (): string => {
-        if (!question.openingTimestamp) return 'No time remaining';
-        
-        // Get the timeout value - this might be stored differently depending on the API
-        const timeout = (question as any).timeout; // Use type assertion for compatibility
-        
-        if (!timeout) return 'No time remaining';
-        
-        const remaining = Math.max(0, Math.floor(((question.openingTimestamp + timeout) - Math.floor(Date.now() / 1000)) / 60));
-        return `${remaining} minutes`;
-    };
-    
     return (
         <div className="h-full relative overflow-hidden">
             <dl className="grid grid-cols-1 gap-4 p-4">
@@ -118,9 +105,7 @@ export default function QuestionDetails({
                 
                 <div>
                     <dt className="font-medium text-space-light/70">Time Remaining</dt>
-                    <dd className="mt-1 text-foreground">
-                        {getTimeRemaining()}
-                    </dd>
+                    <dd className="mt-1 text-foreground">{question.timeRemaining ? `${Math.floor(question.timeRemaining / 1000)} seconds` : 'No time remaining'}</dd>
                 </div>
                 
                 <div>
@@ -142,7 +127,7 @@ export default function QuestionDetails({
                 
                 <div className="flex space-x-4">
                     <Dialog>
-                        <DialogTrigger className="w-auto">
+                        <DialogTrigger asChild>
                             <Button variant="tron" size="sm" glow={false}>
                                 <Info className="mr-2 h-4 w-4" />
                                 Additional Details
@@ -150,7 +135,7 @@ export default function QuestionDetails({
                         </DialogTrigger>
                         <DialogContent className="glass-panel max-h-[90vh] max-w-4xl w-[90vw] overflow-y-auto">
                             <DialogHeader>
-                                <DialogTitle>Additional Details</DialogTitle>
+                                <DialogTitle className="text-xl ethereal-text">Additional Details</DialogTitle>
                             </DialogHeader>
                             <div className="space-y-6 mt-4">
                                 {question.description && (
@@ -238,7 +223,7 @@ export default function QuestionDetails({
                                     {hashVerification && (
                                         <TooltipProvider>
                                             <Tooltip>
-                                                <TooltipTrigger>
+                                                <TooltipTrigger asChild>
                                                     <Badge 
                                                         className={cn(
                                                             "flex items-center gap-1 cursor-pointer",

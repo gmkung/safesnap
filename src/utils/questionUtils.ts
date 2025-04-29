@@ -1,6 +1,5 @@
+
 import { Question } from 'reality-kleros-subgraph';
-import { retrieveQuestions } from 'reality-kleros-subgraph';
-import { CHAIN_ID } from '@/config/chainConfig';
 
 // Answer constants
 export const ANSWERED_TOO_SOON = "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe";
@@ -70,27 +69,3 @@ export const formatBond = (bond: string, question?: Question) => {
 export const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
 };
-
-/**
- * Fetches a single question by ID
- * @param chainId The blockchain chain ID
- * @param questionId The question ID to fetch
- * @returns Promise resolving to the Question or null if not found
- */
-export async function fetchQuestion(chainId: number, questionId: string) {
-  try {
-    for await (const question of retrieveQuestions(chainId, {
-      questionId: questionId,
-      batchSize: 1,
-      arbitrator: '0xf72cfd1b34a91a64f9a98537fe63fbab7530adca'
-    })) {
-      if (question.id === questionId) {
-        return question;
-      }
-    }
-    return null;
-  } catch (error) {
-    console.error('Error fetching specific question:', error);
-    throw error;
-  }
-}

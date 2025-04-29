@@ -1,5 +1,4 @@
-
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
 import { ArrowLeft } from 'lucide-react';
@@ -8,8 +7,6 @@ import { getProposalDetails, calculateTransactionArrayHash, compareTransactionHa
 import { useToast } from '@/hooks/use-toast';
 import { parseQuestionData } from '@/utils/questionUtils';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { CHAIN_ID } from '@/config/chainConfig';
-import { useQuestion } from '@/hooks/useQuestion';
 
 // Import our components
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -26,18 +23,9 @@ export default function QuestionDetail() {
     const { id } = useParams<{ id: string }>();
     const location = useLocation();
     const navigate = useNavigate();
-    
-    // Use the router state if available, otherwise it will be null
-    const questionFromState = location.state?.question || null;
-    
-    // Use the useQuestion hook when we don't have the question from state
-    const { question: fetchedQuestion, isLoading, error } = useQuestion(
-        questionFromState ? undefined : id
-    );
-    
-    // Use either the question from state or the fetched question
-    const [question, setQuestion] = useState<Question | null>(questionFromState);
-    
+    const [question, setQuestion] = useState<Question | null>(location.state?.question || null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [proposalData, setProposalData] = useState<any>(null);
     const [proposalLoading, setProposalLoading] = useState(false);
     const [proposalLoadFailed, setProposalLoadFailed] = useState(false);
@@ -52,14 +40,22 @@ export default function QuestionDetail() {
     const { toast } = useToast();
     const proposalFetchAttempted = useRef<boolean>(false);
 
-    // Update question when fetched question changes
-    useEffect(() => {
-        if (fetchedQuestion && !question) {
-            setQuestion(fetchedQuestion);
+    const loadQuestionDetails = async () => {
+        try {
+            setLoading(true);
+            // Your implementation for loading question details
+        } catch (err) {
+            console.error('Error loading question details:', err);
+            setError(err instanceof Error ? err.message : 'Failed to load question details');
+        } finally {
+            setLoading(false);
         }
-    }, [fetchedQuestion, question]);
+    };
 
-    // Handle loading proposal data when question is available
+    useEffect(() => {
+        loadQuestionDetails();
+    }, [question]);
+
     useEffect(() => {
         if (question && !proposalFetchAttempted.current) {
             const parsedData = parseQuestionData(question);
@@ -123,35 +119,18 @@ export default function QuestionDetail() {
         }
     };
 
-    // Function to reload question details
-    const loadQuestionDetails = () => {
-        if (id) {
-            // Reset the current state
-            proposalFetchAttempted.current = false;
-            
-            // Force a re-fetch of the question
-            const { question: refetchedQuestion } = useQuestion(id);
-            if (refetchedQuestion) {
-                setQuestion(refetchedQuestion);
-            }
-        }
-    };
-
     const handleBack = () => {
         navigate(-1);
     };
 
-    // Show loading state if we're still loading the question
-    if (isLoading) {
+    if (loading && !question) {
         return <LoadingSpinner />;
     }
 
-    // Show error if there was an error fetching the question
     if (error) {
         return <ErrorDisplay error={error} onBack={handleBack} />;
     }
 
-    // Show not found if there's no question
     if (!question) {
         return <NotFoundDisplay onBack={handleBack} />;
     }
