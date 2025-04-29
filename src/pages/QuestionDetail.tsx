@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { Question } from 'reality-kleros-subgraph';
+import { Question, retrieveQuestions } from 'reality-kleros-subgraph';
 import { ArrowLeft } from 'lucide-react';
 import TransactionHashModal from '@/components/TransactionHashModal';
 import { getProposalDetails, calculateTransactionArrayHash, compareTransactionHashes } from '@/lib/snapshotQuery';
 import { useToast } from '@/hooks/use-toast';
 import { parseQuestionData } from '@/utils/questionUtils';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { CHAIN_ID } from '@/config/chainConfig';
 
 // Import our components
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -43,7 +44,38 @@ export default function QuestionDetail() {
     const loadQuestionDetails = async () => {
         try {
             setLoading(true);
-            // Your implementation for loading question details
+            setError(null);
+
+            // If we already have the question from navigation state, no need to fetch
+            if (question) {
+                setLoading(false);
+                return;
+            }
+
+            // If no ID in URL, we can't fetch
+            if (!id) {
+                setError('No question ID provided');
+                setLoading(false);
+                return;
+            }
+
+            // Fetch the question using the subgraph
+            for await (const q of retrieveQuestions(
+                CHAIN_ID,
+                {
+                    questionId: id,
+                    arbitrator: '0xf72cfd1b34a91a64f9a98537fe63fbab7530adca'
+                }
+            )) {
+                setQuestion(q);
+                console.log("Question URL used, fetching and setting the data for this question singly.")
+                break; // We only need the first (and should be only) result
+            }
+
+            // If we didn't find the question
+            if (!question) {
+                setError('Question not found');
+            }
         } catch (err) {
             console.error('Error loading question details:', err);
             setError(err instanceof Error ? err.message : 'Failed to load question details');
