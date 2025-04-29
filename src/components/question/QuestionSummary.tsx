@@ -1,4 +1,3 @@
-
 import { Question } from 'reality-kleros-subgraph';
 import { parseQuestionData, formatBond, formatDate } from '@/utils/questionUtils';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
@@ -6,6 +5,10 @@ import { FileText, User, Calendar, ExternalLink, Clock, AlertTriangle } from 'lu
 import CopyButton from '../CopyButton';
 import { getRealityEthUrl } from './QuestionHeader';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useState } from 'react';
 import TransactionSummary from './TransactionSummary';
 
 interface QuestionSummaryProps {
@@ -72,9 +75,53 @@ export default function QuestionSummary({
                 <h4 className="text-sm font-medium text-space-light/70 flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" /> Time Remaining
                 </h4>
-                <p className="mt-1 text-sm">
-                  {question.timeRemaining ? `${Math.floor(question.timeRemaining / 1000)} seconds` : 'No time remaining'}
-                </p>
+                <div className="mt-1">
+                  {question.currentAnswer ? (
+                    <Collapsible className="border border-space-dark/30 rounded-md overflow-hidden">
+                      <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium hover:bg-space-dark/20">
+                        <div className="flex items-center gap-2">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Badge className={cn(
+                                  "bg-purple-500/20 hover:bg-purple-500/30 text-purple-500 border-purple-500/30",
+                                  question.timeRemainingInPhase <= 0 && "bg-amber-500/20 hover:bg-amber-500/30 text-amber-500 border-amber-500/30"
+                                )}>
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  {question.timeRemainingInPhase <= 0 ? (
+                                    "Phase ended"
+                                  ) : (
+                                    formatTimeRemaining(question.timeRemainingInPhase)
+                                  )}
+                                </Badge>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs glass-panel border-space/30">
+                                <div className="flex items-start space-x-2">
+                                  <Clock className="h-4 w-4 mt-0.5 shrink-0" />
+                                  <span>Time remaining in the current phase</span>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="p-3 space-y-2">
+                          <div className="glass-panel border border-space-dark/20 p-3 rounded">
+                            <h3 className="text-sm font-medium text-space-light/70 mb-2">Phase Information:</h3>
+                            <ul className="list-disc pl-5 space-y-1 text-sm text-space-light/90">
+                              <li>Current Phase: {question.phase}</li>
+                              <li>Time Remaining: {formatTimeRemaining(question.timeRemainingInPhase)}</li>
+                              <li>Total Seconds: {Math.floor(question.timeRemainingInPhase / 1000)}s</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  ) : (
+                    <p className="text-sm text-space-light/70">No current answer</p>
+                  )}
+                </div>
               </div>
               
               <div>
@@ -195,4 +242,22 @@ export default function QuestionSummary({
       </CardContent>
     </Card>
   );
+}
+
+function formatTimeRemaining(timeRemainingInPhase: number): string {
+  const timeRemainingInSeconds = Math.floor(timeRemainingInPhase / 1000);
+  if (timeRemainingInSeconds <= 0) return "Phase ended";
+
+  const days = Math.floor(timeRemainingInSeconds / 86400);
+  const hours = Math.floor((timeRemainingInSeconds % 86400) / 3600);
+  const minutes = Math.floor((timeRemainingInSeconds % 3600) / 60);
+  const seconds = timeRemainingInSeconds % 60;
+
+  let timeStr = '';
+  if (days > 0) timeStr += `${days}d `;
+  if (hours > 0) timeStr += `${hours}h `;
+  if (minutes > 0) timeStr += `${minutes}m `;
+  if (seconds > 0) timeStr += `${seconds}s`;
+
+  return timeStr.trim();
 }

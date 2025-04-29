@@ -6019,23 +6019,13 @@ real-require@^0.1.0:
   resolved "https://registry.npmjs.org/real-require/-/real-require-0.1.0.tgz"
   integrity sha512-r/H9MzAWtrv8aSVjPCMFpDMl5q66GqtmmRkRjpHTsp4zBAa+snZyiQNlMONiUmEJcsnaw0wCauJ2GWODr/aFkg==
 
-reality-kleros-subgraph@^1.0.0:
-  version "1.2.5"
-  resolved "https://registry.npmjs.org/reality-kleros-subgraph/-/reality-kleros-subgraph-1.2.5.tgz"
-  integrity sha512-sGBmvgBQHPkP1+LedocvtfWo1MpNTTC7xEWv+xIejdb/yfVvqa3yc+atr7mBfAOFLnm6Gj9CGB2xJVRoBvWmPg==
+reality-kleros-subgraph@^1.3.6:
+  version "1.3.6"
+  resolved "https://registry.yarnpkg.com/reality-kleros-subgraph/-/reality-kleros-subgraph-1.3.6.tgz#1b17beaa45189f8f75b97b632a539b47d85bbe78"
+  integrity sha512-9nE9CDnFYlMfF/j4xld6zDcd7TrEfUhTCH2bQ9soZ9MK9beu9WJD0dGNbjFnd5HrAGq4ScWY6Dqca/8nEZUx4A==
   dependencies:
     "@reality.eth/contracts" "^3.2.2"
     ethers "^5.8.0"
-    reality-kleros-subgraph "^1.0.0"
-
-reality-kleros-subgraph@^1.2.6:
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/reality-kleros-subgraph/-/reality-kleros-subgraph-1.2.6.tgz#96c73bbc482cb265fe6c0865b128da4064e1a58d"
-  integrity sha512-6nkjJQJTUmoG8N1Pk44W+N3ANz8kJuqKUBgWeGb0/RT+YLMW4wXuA5YnmvChnPUlORZ1U7VksXGfyAQ1R3Dc/w==
-  dependencies:
-    "@reality.eth/contracts" "^3.2.2"
-    ethers "^5.8.0"
-    reality-kleros-subgraph "^1.0.0"
 
 recharts-scale@^0.4.4:
   version "0.4.5"
