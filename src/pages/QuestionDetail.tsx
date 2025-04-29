@@ -1,14 +1,14 @@
-
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
 import { ArrowLeft } from 'lucide-react';
 import TransactionHashModal from '@/components/TransactionHashModal';
 import { getProposalDetails, calculateTransactionArrayHash, compareTransactionHashes } from '@/lib/snapshotQuery';
 import { useToast } from '@/hooks/use-toast';
-import { parseQuestionData, fetchQuestion } from '@/utils/questionUtils';
+import { parseQuestionData } from '@/utils/questionUtils';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { CHAIN_ID } from '@/config/chainConfig';
+import { useQuestion } from '@/hooks/useQuestion';
 
 // Import our components
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -25,9 +25,18 @@ export default function QuestionDetail() {
     const { id } = useParams<{ id: string }>();
     const location = useLocation();
     const navigate = useNavigate();
-    const [question, setQuestion] = useState<Question | null>(location.state?.question || null);
-    const [loading, setLoading] = useState(!location.state?.question);
-    const [error, setError] = useState<string | null>(null);
+    
+    // Use the router state if available, otherwise it will be null
+    const questionFromState = location.state?.question || null;
+    
+    // Use the useQuestion hook when we don't have the question from state
+    const { question: fetchedQuestion, isLoading, error } = useQuestion(
+        questionFromState ? undefined : id
+    );
+    
+    // Use either the question from state or the fetched question
+    const [question, setQuestion] = useState<Question | null>(questionFromState);
+    
     const [proposalData, setProposalData] = useState<any>(null);
     const [proposalLoading, setProposalLoading] = useState(false);
     const [proposalLoadFailed, setProposalLoadFailed] = useState(false);
@@ -42,38 +51,15 @@ export default function QuestionDetail() {
     const { toast } = useToast();
     const proposalFetchAttempted = useRef<boolean>(false);
 
-    const loadQuestionDetails = async () => {
-        // Only try to fetch if we have an ID and don't already have the question data
-        if (!id || (question && !loading)) return;
-        
-        try {
-            setLoading(true);
-            
-            // Use the fetchQuestion function from reality-kleros-subgraph
-            const questionData = await fetchQuestion(CHAIN_ID, id);
-            
-            if (!questionData) {
-                setError('Question not found');
-                return;
-            }
-            
-            setQuestion(questionData);
-            setError(null);
-        } catch (err) {
-            console.error('Error loading question details:', err);
-            setError(err instanceof Error ? err.message : 'Failed to load question details');
-        } finally {
-            setLoading(false);
+    // Update question when fetched question changes
+    useState(() => {
+        if (fetchedQuestion && !question) {
+            setQuestion(fetchedQuestion);
         }
-    };
+    });
 
-    useEffect(() => {
-        if (id && !question) {
-            loadQuestionDetails();
-        }
-    }, [id]); // Only run when ID changes or on initial load
-
-    useEffect(() => {
+    // Handle loading proposal data when question is available
+    useState(() => {
         if (question && !proposalFetchAttempted.current) {
             const parsedData = parseQuestionData(question);
             if (parsedData?.proposalId) {
@@ -83,7 +69,7 @@ export default function QuestionDetail() {
         }
     }, [question]);
 
-    useEffect(() => {
+    useState(() => {
         if (proposalData && question) {
             validateTransactionHash();
         }
@@ -140,14 +126,17 @@ export default function QuestionDetail() {
         navigate(-1);
     };
 
-    if (loading) {
+    // Show loading state if we're still loading the question
+    if (isLoading) {
         return <LoadingSpinner />;
     }
 
+    // Show error if there was an error fetching the question
     if (error) {
         return <ErrorDisplay error={error} onBack={handleBack} />;
     }
 
+    // Show not found if there's no question
     if (!question) {
         return <NotFoundDisplay onBack={handleBack} />;
     }

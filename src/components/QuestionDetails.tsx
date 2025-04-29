@@ -1,4 +1,3 @@
-
 import { Question } from 'reality-kleros-subgraph';
 import RequestArbitrationButton from './RequestArbitration';
 import { formatBond, formatDate, getHumanReadableAnswer, getStatusBadgeClass, parseQuestionData } from '@/utils/questionUtils';
@@ -105,7 +104,11 @@ export default function QuestionDetails({
                 
                 <div>
                     <dt className="font-medium text-space-light/70">Time Remaining</dt>
-                    <dd className="mt-1 text-foreground">{question.timeRemaining ? `${Math.floor(question.timeRemaining / 1000)} seconds` : 'No time remaining'}</dd>
+                    <dd className="mt-1 text-foreground">
+                        {question.openingTimestamp && question.timeout ? 
+                            `${Math.max(0, Math.floor(((question.openingTimestamp + question.timeout) - Math.floor(Date.now() / 1000)) / 60))} minutes` : 
+                            'No time remaining'}
+                    </dd>
                 </div>
                 
                 <div>

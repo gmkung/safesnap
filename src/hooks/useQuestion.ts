@@ -1,32 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { Question, retrieveQuestions } from 'reality-kleros-subgraph';
+import { Question } from 'reality-kleros-subgraph';
 import { CHAIN_ID } from '@/config/chainConfig';
-
-export async function fetchQuestion(chainId: number, questionId: string): Promise<Question | null> {
-  try {
-    // Use the retrieveQuestions generator but filter by specific question ID
-    for await (const question of retrieveQuestions(chainId, {
-      questionId: questionId,
-      batchSize: 1,
-      arbitrator: '0xf72cfd1b34a91a64f9a98537fe63fbab7530adca'
-    })) {
-      if (question.id === questionId) {
-        return question;
-      }
-    }
-    
-    // If we didn't find the question
-    return null;
-  } catch (error) {
-    console.error('Error fetching question:', error);
-    throw error;
-  }
-}
+import { fetchQuestion } from '@/utils/questionUtils';
 
 export function useQuestion(questionId: string | undefined) {
   const [question, setQuestion] = useState<Question | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(!!questionId);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -58,7 +38,9 @@ export function useQuestion(questionId: string | undefined) {
       }
     };
 
-    loadQuestion();
+    if (questionId) {
+      loadQuestion();
+    }
   }, [questionId]);
 
   return { question, isLoading, error };
