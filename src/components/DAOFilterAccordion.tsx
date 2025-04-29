@@ -34,7 +34,7 @@ export function DAOFilterAccordion({ daoList, currentDao }: DAOFilterAccordionPr
   };
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen} className="w-full">
+    <Collapsible open={open} onOpenChange={setOpen}>
       <CollapsibleTrigger className="flex w-full items-center justify-between">
         <span>DAOs</span>
         <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200 ml-auto mr-1" 
@@ -45,16 +45,11 @@ export function DAOFilterAccordion({ daoList, currentDao }: DAOFilterAccordionPr
           <span className="text-muted-foreground">Filter Mode</span>
           <Toggle 
             size="sm" 
-            aria-label="Toggle whitelist" 
             pressed={showOnlyWhitelisted}
             onPressedChange={handleWhitelistToggle}
             className="h-6 text-xs p-0.5"
           >
-            {showOnlyWhitelisted ? (
-              <ShieldCheck className="h-3 w-3 mr-1" />
-            ) : (
-              <Shield className="h-3 w-3 mr-1" />
-            )}
+            {showOnlyWhitelisted ? <ShieldCheck className="h-3 w-3 mr-1" /> : <Shield className="h-3 w-3 mr-1" />}
             {showOnlyWhitelisted ? "Whitelisted" : "All"}
           </Toggle>
         </div>

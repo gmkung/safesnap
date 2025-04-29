@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { Question } from 'reality-kleros-subgraph';
 import { ArrowLeft } from 'lucide-react';
@@ -52,14 +53,14 @@ export default function QuestionDetail() {
     const proposalFetchAttempted = useRef<boolean>(false);
 
     // Update question when fetched question changes
-    useState(() => {
+    useEffect(() => {
         if (fetchedQuestion && !question) {
             setQuestion(fetchedQuestion);
         }
-    });
+    }, [fetchedQuestion, question]);
 
     // Handle loading proposal data when question is available
-    useState(() => {
+    useEffect(() => {
         if (question && !proposalFetchAttempted.current) {
             const parsedData = parseQuestionData(question);
             if (parsedData?.proposalId) {
@@ -69,7 +70,7 @@ export default function QuestionDetail() {
         }
     }, [question]);
 
-    useState(() => {
+    useEffect(() => {
         if (proposalData && question) {
             validateTransactionHash();
         }
@@ -119,6 +120,20 @@ export default function QuestionDetail() {
             });
         } finally {
             setProposalLoading(false);
+        }
+    };
+
+    // Function to reload question details
+    const loadQuestionDetails = () => {
+        if (id) {
+            // Reset the current state
+            proposalFetchAttempted.current = false;
+            
+            // Force a re-fetch of the question
+            const { question: refetchedQuestion } = useQuestion(id);
+            if (refetchedQuestion) {
+                setQuestion(refetchedQuestion);
+            }
         }
     };
 

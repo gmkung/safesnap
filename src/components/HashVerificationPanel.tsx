@@ -2,7 +2,12 @@
 import { Button } from '@/components/ui/button';
 import { Calculator, CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { 
+  Tooltip, 
+  TooltipContent, 
+  TooltipProvider, 
+  TooltipTrigger 
+} from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 
 interface HashVerificationPanelProps {
@@ -51,7 +56,7 @@ export default function HashVerificationPanel({
       
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>
+          <TooltipTrigger>
             <Badge 
               className={cn(
                 "flex items-center gap-1 cursor-pointer",

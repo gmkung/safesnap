@@ -1,7 +1,7 @@
 
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { createConfig, WagmiProvider, http } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
@@ -13,9 +13,7 @@ import QuestionDetail from "./pages/QuestionDetail";
 import NotFound from "./pages/NotFound";
 
 // Create a new QueryClient instance directly
-// @tanstack/react-query v5 requires using the createQueryClient function
-import { createQueryClient } from "@tanstack/react-query";
-const queryClient = createQueryClient();
+const queryClient = new QueryClient();
 
 const config = createConfig({
   chains: [mainnet],
