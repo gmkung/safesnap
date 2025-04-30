@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -13,11 +14,11 @@
 }
 
 .logo:hover {
-  filter: drop-shadow(0 0 2em rgba(12, 250, 96, 0.8));
+  filter: drop-shadow(0 0 2em rgba(76, 171, 205, 0.6));
 }
 
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em rgba(14, 165, 233, 0.8));
+  filter: drop-shadow(0 0 2em rgba(76, 129, 170, 0.6));
 }
 
 @keyframes logo-spin {
@@ -39,7 +40,7 @@
   padding: 2em;
   position: relative;
   background: rgba(30, 41, 59, 0.5);
-  border: 1px solid rgba(12, 250, 96, 0.2);
+  border: 1px solid rgba(76, 171, 205, 0.15);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -51,7 +52,7 @@
   left: 0;
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(12, 250, 96, 0.5), transparent);
+  background: linear-gradient(90deg, transparent, rgba(76, 171, 205, 0.3), transparent);
 }
 
 .card::after {
@@ -61,21 +62,21 @@
   right: 0;
   width: 1px;
   height: 100%;
-  background: linear-gradient(180deg, transparent, rgba(12, 250, 96, 0.5), transparent);
+  background: linear-gradient(180deg, transparent, rgba(76, 171, 205, 0.3), transparent);
 }
 
 .read-the-docs {
-  color: rgba(12, 250, 96, 0.8);
-  text-shadow: 0 0 5px rgba(12, 250, 96, 0.3);
+  color: rgba(76, 171, 205, 0.6);
+  text-shadow: 0 0 3px rgba(76, 171, 205, 0.2);
 }
 
 /* Tron-specific animations */
 @keyframes circuit-pulse {
   0%, 100% {
-    opacity: 0.2;
+    opacity: 0.15;
   }
   50% {
-    opacity: 0.8;
+    opacity: 0.5;
   }
 }
 
@@ -90,21 +91,21 @@
 
 /* Custom Tron styling for common elements */
 h1, h2, h3, h4, h5, h6 {
-  color: #0CFA60;
-  text-shadow: 0 0 10px rgba(12, 250, 96, 0.5);
+  color: #8AACBD;
+  text-shadow: 0 0 7px rgba(76, 171, 205, 0.3);
   margin-bottom: 1rem;
 }
 
 a {
-  color: #0EA5E9;
+  color: #6E96B3;
   text-decoration: none;
   transition: all 0.3s ease;
   position: relative;
 }
 
 a:hover {
-  color: #0CFA60;
-  text-shadow: 0 0 5px rgba(12, 250, 96, 0.5);
+  color: #8AACBD;
+  text-shadow: 0 0 3px rgba(76, 171, 205, 0.3);
 }
 
 a::after {
@@ -114,7 +115,7 @@ a::after {
   left: 0;
   width: 0;
   height: 1px;
-  background: #0CFA60;
+  background: #8AACBD;
   transition: width 0.3s ease;
 }
 
@@ -124,8 +125,8 @@ a:hover::after {
 
 button {
   background: rgba(30, 41, 59, 0.8);
-  color: #0CFA60;
-  border: 1px solid rgba(12, 250, 96, 0.3);
+  color: #8AACBD;
+  border: 1px solid rgba(76, 171, 205, 0.2);
   border-radius: 4px;
   padding: 0.5em 1em;
   font-size: 1em;
@@ -136,8 +137,8 @@ button {
 }
 
 button:hover {
-  background: rgba(10, 128, 64, 0.3);
-  box-shadow: 0 0 10px rgba(12, 250, 96, 0.5);
+  background: rgba(76, 171, 205, 0.15);
+  box-shadow: 0 0 7px rgba(76, 171, 205, 0.3);
 }
 
 button::before {
@@ -147,7 +148,7 @@ button::before {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(12, 250, 96, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(76, 171, 205, 0.1), transparent);
   transition: left 0.5s ease;
 }
 
@@ -157,7 +158,7 @@ button:hover::before {
 
 input, select, textarea {
   background: rgba(30, 41, 59, 0.5);
-  border: 1px solid rgba(12, 250, 96, 0.3);
+  border: 1px solid rgba(76, 171, 205, 0.2);
   border-radius: 4px;
   padding: 0.5em;
   color: white;
@@ -166,8 +167,8 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: rgba(12, 250, 96, 0.7);
-  box-shadow: 0 0 5px rgba(12, 250, 96, 0.5);
+  border-color: rgba(76, 171, 205, 0.4);
+  box-shadow: 0 0 3px rgba(76, 171, 205, 0.3);
 }
 
 table {
@@ -179,20 +180,20 @@ table {
 
 table th {
   background: rgba(30, 41, 59, 0.8);
-  color: #0CFA60;
+  color: #8AACBD;
   text-align: left;
   padding: 0.75em 1em;
-  border-bottom: 1px solid rgba(12, 250, 96, 0.3);
+  border-bottom: 1px solid rgba(76, 171, 205, 0.2);
 }
 
 table td {
   padding: 0.75em 1em;
-  border-bottom: 1px solid rgba(12, 250, 96, 0.1);
+  border-bottom: 1px solid rgba(76, 171, 205, 0.1);
   transition: background 0.3s ease;
 }
 
 table tr:hover td {
-  background: rgba(12, 250, 96, 0.05);
+  background: rgba(76, 171, 205, 0.03);
 }
 
 /* Scrollbar styling */
@@ -206,18 +207,18 @@ table tr:hover td {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(12, 250, 96, 0.5);
+  background: rgba(76, 171, 205, 0.3);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(12, 250, 96, 0.8);
+  background: rgba(76, 171, 205, 0.5);
 }
 
 .ethereal-text {
   background-clip: initial;
   background-image: none;
   animation: none;
-  color: #33C3F0;
+  color: #6E96B3;
   text-shadow: none;
 }

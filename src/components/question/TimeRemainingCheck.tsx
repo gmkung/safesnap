@@ -1,3 +1,4 @@
+
 import { Question } from 'reality-kleros-subgraph';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -24,7 +25,7 @@ export default function TimeRemainingCheck({ question }: TimeRemainingCheckProps
         <CollapsibleTrigger className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium hover:bg-space-dark/20">
           <div className="flex items-center gap-2">
             <span className="text-space-light/70">Time Remaining:</span>
-            <Badge className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-500 border-purple-500/30">
+            <Badge className="bg-purple-400/15 hover:bg-purple-400/20 text-purple-300 border-purple-400/20">
               Phase ended
             </Badge>
           </div>
@@ -53,7 +54,7 @@ export default function TimeRemainingCheck({ question }: TimeRemainingCheckProps
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Badge className="bg-purple-500/20 hover:bg-purple-500/30 text-purple-500 border-purple-500/30">
+                <Badge className="bg-space/10 hover:bg-space/15 text-space border-space/20">
                   <Clock className="h-3 w-3 mr-1" />
                   {timeStr.trim()}
                 </Badge>
@@ -83,4 +84,4 @@ export default function TimeRemainingCheck({ question }: TimeRemainingCheckProps
       </CollapsibleContent>
     </Collapsible>
   );
-} 
+}

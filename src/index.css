@@ -1,86 +1,87 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 220 10% 8%;
-    --foreground: 0 0% 98%;
+    --background: 216 20% 9%;
+    --foreground: 210 15% 90%;
 
-    --card: 217 25% 12%;
-    --card-foreground: 0 0% 98%;
+    --card: 214 25% 12%;
+    --card-foreground: 210 15% 90%;
 
-    --popover: 217 25% 10%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 214 25% 10%;
+    --popover-foreground: 210 15% 90%;
 
-    --primary: 195 91% 57%;
-    --primary-foreground: 220 10% 8%;
+    --primary: 200 25% 47%;
+    --primary-foreground: 216 20% 9%;
 
-    --secondary: 215 10% 25%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 214 10% 25%;
+    --secondary-foreground: 210 15% 90%;
 
-    --muted: 215 10% 25%;
-    --muted-foreground: 215 10% 65%;
+    --muted: 214 10% 25%;
+    --muted-foreground: 214 10% 65%;
 
-    --accent: 220 5% 63%;
-    --accent-foreground: 220 10% 8%;
+    --accent: 220 5% 56%;
+    --accent-foreground: 216 20% 9%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 60% 30%;
+    --destructive-foreground: 210 15% 90%;
 
-    --border: 240 5% 25%;
-    --input: 215 10% 25%;
-    --ring: 195 91% 57%;
+    --border: 215 5% 25%;
+    --input: 214 10% 25%;
+    --ring: 200 25% 47%;
 
     --radius: 0.25rem;
 
-    --sidebar-background: 217 25% 12%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 195 91% 57%;
-    --sidebar-primary-foreground: 220 10% 8%;
-    --sidebar-accent: 215 10% 25%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 5% 25%;
-    --sidebar-ring: 195 91% 57%;
+    --sidebar-background: 214 25% 12%;
+    --sidebar-foreground: 210 15% 90%;
+    --sidebar-primary: 200 25% 47%;
+    --sidebar-primary-foreground: 216 20% 9%;
+    --sidebar-accent: 214 10% 25%;
+    --sidebar-accent-foreground: 210 15% 90%;
+    --sidebar-border: 215 5% 25%;
+    --sidebar-ring: 200 25% 47%;
   }
 
   .dark {
-    --background: 220 10% 8%;
-    --foreground: 0 0% 98%;
+    --background: 216 20% 9%;
+    --foreground: 210 15% 90%;
 
-    --card: 217 25% 12%;
-    --card-foreground: 0 0% 98%;
+    --card: 214 25% 12%;
+    --card-foreground: 210 15% 90%;
 
-    --popover: 217 25% 10%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 214 25% 10%;
+    --popover-foreground: 210 15% 90%;
 
-    --primary: 195 91% 57%;
-    --primary-foreground: 220 10% 8%;
+    --primary: 200 25% 47%;
+    --primary-foreground: 216 20% 9%;
 
-    --secondary: 215 10% 25%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 214 10% 25%;
+    --secondary-foreground: 210 15% 90%;
 
-    --muted: 215 10% 25%;
-    --muted-foreground: 215 10% 65%;
+    --muted: 214 10% 25%;
+    --muted-foreground: 214 10% 65%;
 
-    --accent: 220 5% 63%;
-    --accent-foreground: 220 10% 8%;
+    --accent: 220 5% 56%;
+    --accent-foreground: 216 20% 9%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 60% 30%;
+    --destructive-foreground: 210 15% 90%;
 
-    --border: 240 5% 25%;
-    --input: 215 10% 25%;
-    --ring: 195 91% 57%;
+    --border: 215 5% 25%;
+    --input: 214 10% 25%;
+    --ring: 200 25% 47%;
 
-    --sidebar-background: 217 25% 12%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 195 91% 57%;
-    --sidebar-primary-foreground: 220 10% 8%;
-    --sidebar-accent: 215 10% 25%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 5% 25%;
-    --sidebar-ring: 195 91% 57%;
+    --sidebar-background: 214 25% 12%;
+    --sidebar-foreground: 210 15% 90%;
+    --sidebar-primary: 200 25% 47%;
+    --sidebar-primary-foreground: 216 20% 9%;
+    --sidebar-accent: 214 10% 25%;
+    --sidebar-accent-foreground: 210 15% 90%;
+    --sidebar-border: 215 5% 25%;
+    --sidebar-ring: 200 25% 47%;
   }
 }
 
@@ -92,9 +93,9 @@
   body {
     @apply bg-background text-foreground tron-grid;
     background-image: 
-      radial-gradient(circle at 50% 50%, rgba(51, 195, 240, 0.05) 0%, transparent 70%),
-      linear-gradient(rgba(51, 195, 240, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(51, 195, 240, 0.02) 1px, transparent 1px);
+      radial-gradient(circle at 50% 50%, rgba(110, 150, 179, 0.04) 0%, transparent 70%),
+      linear-gradient(rgba(110, 150, 179, 0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(110, 150, 179, 0.015) 1px, transparent 1px);
     background-size: 100% 100%, 20px 20px, 20px 20px;
     background-position: 0 0, 0 0, 0 0;
   }
@@ -102,20 +103,20 @@
 
 @layer components {
   .holo-card {
-    @apply bg-card/80 border border-space/20 rounded-lg overflow-hidden relative backdrop-blur-sm;
+    @apply bg-card/80 border border-space/15 rounded-lg overflow-hidden relative backdrop-blur-sm;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.05);
   }
   
   .holo-card::before {
     content: '';
     @apply absolute inset-0 rounded-lg opacity-30;
-    background: linear-gradient(135deg, transparent 0%, rgba(51, 195, 240, 0.05) 100%);
+    background: linear-gradient(135deg, transparent 0%, rgba(110, 150, 179, 0.04) 100%);
     z-index: 0;
   }
   
   .holo-card::after {
     content: '';
-    @apply absolute top-0 left-0 right-0 h-[1px] bg-space/30;
+    @apply absolute top-0 left-0 right-0 h-[1px] bg-space/20;
   }
   
   .holo-card > * {
@@ -123,8 +124,8 @@
   }
   
   .holo-button {
-    @apply relative overflow-hidden bg-space-dark/80 text-white border border-space/30 rounded-md px-4 py-2 
-           transition-all duration-300 hover:bg-space/20 hover:shadow-glass;
+    @apply relative overflow-hidden bg-space-dark/80 text-white border border-space/20 rounded-md px-4 py-2 
+           transition-all duration-300 hover:bg-space/15 hover:shadow-glass;
   }
   
   .holo-button::before {
@@ -140,7 +141,7 @@
   }
   
   .holo-input {
-    @apply bg-secondary/90 border border-space-dark/50 rounded-md px-3 py-2 focus:border-space/70 
+    @apply bg-secondary/90 border border-space-dark/50 rounded-md px-3 py-2 focus:border-space/40 
            focus:shadow-glass transition-all duration-300;
   }
   
@@ -149,7 +150,7 @@
   }
   
   .holo-table th {
-    @apply bg-space-dark/50 text-space-light border-b border-space/20 px-4 py-3 text-left;
+    @apply bg-space-dark/50 text-space-light border-b border-space/15 px-4 py-3 text-left;
   }
   
   .holo-table tr {
@@ -167,7 +168,7 @@
   .holo-glow::after {
     content: '';
     @apply absolute inset-0 rounded-lg;
-    box-shadow: 0 0 15px rgba(51, 195, 240, 0.3);
+    box-shadow: 0 0 12px rgba(110, 150, 179, 0.2);
     opacity: 0;
     transition: opacity 0.3s ease;
   }
@@ -178,7 +179,7 @@
   
   .holo-badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-space-dark text-space
-           border border-space/30 shadow-glass;
+           border border-space/20 shadow-glass;
   }
   
   .holo-progress-container {
@@ -195,13 +196,13 @@
 
   .holographic-element::before {
     content: '';
-    @apply absolute inset-0 bg-holographic opacity-50 animate-holo-scan;
+    @apply absolute inset-0 bg-holographic opacity-40 animate-holo-scan;
     background-size: 200% 100%;
   }
 
   .ethereal-text {
     @apply bg-clip-text text-transparent bg-ethereal-gradient animate-ethereal-fade;
-    background-image: linear-gradient(to right, rgba(51, 195, 240, 1), rgba(159, 158, 161, 0.8));
+    background-image: linear-gradient(to right, rgba(110, 150, 179, 0.9), rgba(140, 141, 144, 0.7));
   }
 
   .floating-element {
@@ -214,22 +215,22 @@
   }
   
   .steel-panel {
-    @apply bg-steel-texture border border-space/20 rounded-md shadow-steel;
+    @apply bg-steel-texture border border-space/15 rounded-md shadow-steel;
   }
   
   .glass-button {
-    @apply backdrop-blur-md bg-black/20 border border-space/20 rounded-md px-4 py-2
+    @apply backdrop-blur-md bg-black/20 border border-space/15 rounded-md px-4 py-2
            transition-all duration-300 hover:bg-space/10 hover:shadow-glass;
   }
   
   .steel-button {
-    @apply bg-space-dark/80 border border-space/20 rounded-sm px-4 py-2
+    @apply bg-space-dark/80 border border-space/15 rounded-sm px-4 py-2
            transition-all duration-300 hover:bg-space/10 shadow-steel;
   }
   
   .glass-input {
-    @apply backdrop-blur-md bg-black/20 border border-space/20 rounded-md px-3 py-2 
-           focus:border-space/50 focus:shadow-glass transition-all duration-300;
+    @apply backdrop-blur-md bg-black/20 border border-space/15 rounded-md px-3 py-2 
+           focus:border-space/40 focus:shadow-glass transition-all duration-300;
   }
 
   /* Animations for Tron-like UI elements */
@@ -240,7 +241,7 @@
   .tron-border::before {
     content: '';
     @apply absolute -inset-px rounded-md;
-    background: linear-gradient(90deg, rgba(51, 195, 240, 0.2), rgba(51, 195, 240, 0.6), rgba(51, 195, 240, 0.2));
+    background: linear-gradient(90deg, rgba(110, 150, 179, 0.1), rgba(110, 150, 179, 0.3), rgba(110, 150, 179, 0.1));
     -webkit-mask: 
       linear-gradient(#fff 0 0) content-box, 
       linear-gradient(#fff 0 0);
@@ -254,8 +255,8 @@
     background-size: 20px 20px;
     background-position: center;
     background-image: 
-      linear-gradient(rgba(51, 195, 240, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(51, 195, 240, 0.03) 1px, transparent 1px);
+      linear-gradient(rgba(110, 150, 179, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(110, 150, 179, 0.02) 1px, transparent 1px);
   }
 
   .tron-scanner {
@@ -267,7 +268,7 @@
     @apply absolute inset-0 pointer-events-none;
     background: linear-gradient(to bottom, 
       transparent 0%, 
-      rgba(51, 195, 240, 0.15) 50%, 
+      rgba(110, 150, 179, 0.1) 50%, 
       transparent 100%);
     animation: scanner-line 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     height: 200%;
@@ -277,15 +278,15 @@
 
 @layer utilities {
   .text-glow {
-    text-shadow: 0 0 10px rgba(51, 195, 240, 0.5);
+    text-shadow: 0 0 7px rgba(110, 150, 179, 0.3);
   }
   
   .text-glow-sm {
-    text-shadow: 0 0 5px rgba(51, 195, 240, 0.3);
+    text-shadow: 0 0 3px rgba(110, 150, 179, 0.2);
   }
   
   .border-glow {
-    box-shadow: 0 0 5px rgba(51, 195, 240, 0.3), inset 0 0 5px rgba(51, 195, 240, 0.2);
+    box-shadow: 0 0 3px rgba(110, 150, 179, 0.2), inset 0 0 3px rgba(110, 150, 179, 0.15);
   }
 
   .glass-morphism {
