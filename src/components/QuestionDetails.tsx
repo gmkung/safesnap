@@ -105,7 +105,7 @@ export default function QuestionDetails({
                 
                 <div>
                     <dt className="font-medium text-space-light/70">Time Remaining</dt>
-                    <dd className="mt-1 text-foreground">{question.timeRemaining ? `${Math.floor(question.timeRemaining / 1000)} seconds` : 'No time remaining'}</dd>
+                    <dd className="mt-1 text-foreground">{question.timeRemainingInPhase ? `${Math.floor(question.timeRemainingInPhase / 1000)} seconds` : 'No time remaining'}</dd>
                 </div>
                 
                 <div>

@@ -34,7 +34,7 @@ export default function SubmitAnswerButton({ question, onAnswerSubmitted }: Subm
   const getDisabledReason = () => {
     if (question.phase === 'PENDING_ARBITRATION') return 'Question is under arbitration';
     if (question.phase === 'FINALIZED') return 'Question is already finalized';
-    if (question.timeToOpen && question.timeToOpen > 0) return 'Question is not open for answers yet';
+    if (question.phase === 'UPCOMING') return 'Question is not open for answers yet';
     return null;
   };
 
