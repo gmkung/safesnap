@@ -15,6 +15,12 @@ interface QuestionItemProps {
 export function QuestionItem({ question, proposalTitles, loadingProposals, onQuestionClick }: QuestionItemProps) {
   const parsedData = parseQuestionData(question);
   const proposalId = parsedData?.proposalId || '';
+  
+  // Skip rendering if the proposalId doesn't start with "0x"
+  if (proposalId && !proposalId.startsWith('0x')) {
+    return null;
+  }
+  
   const isLoadingProposal = proposalId ? loadingProposals[proposalId] : false;
   const proposalTitle = proposalId ? proposalTitles[proposalId] : null;
 
