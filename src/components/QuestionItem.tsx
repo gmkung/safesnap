@@ -1,4 +1,3 @@
-
 import { Question } from 'reality-kleros-subgraph';
 import { Badge } from './ui/badge';
 import { formatUnits } from 'viem';
@@ -16,10 +15,6 @@ interface QuestionItemProps {
 export function QuestionItem({ question, proposalTitles, loadingProposals, onQuestionClick }: QuestionItemProps) {
   const parsedData = parseQuestionData(question);
   const proposalId = parsedData?.proposalId || '';
-  
-  // We don't need to skip rendering here since questions without 0x prefix
-  // are already filtered out in the Index.tsx page
-  
   const isLoadingProposal = proposalId ? loadingProposals[proposalId] : false;
   const proposalTitle = proposalId ? proposalTitles[proposalId] : null;
 

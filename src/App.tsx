@@ -1,40 +1,55 @@
 
-import { useState } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { QueryClientProvider } from '@tanstack/react-query';
-import Home from './pages/Index';
-import QuestionDetail from './pages/QuestionDetail';
-import NotFound from './pages/NotFound';
-import Layout from './components/Layout';
-import { WagmiProvider, createConfig, http } from 'wagmi';
-import { mainnet, optimism, optimismSepolia } from 'wagmi/chains';
-import './App.css';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { createConfig, WagmiProvider, http } from 'wagmi';
+import { mainnet } from 'wagmi/chains';
+import { ThemeProvider } from "next-themes";
+import { useEffect } from "react";
+import Layout from "./components/Layout";
+import Index from "./pages/Index";
+import QuestionDetail from "./pages/QuestionDetail";
+import NotFound from "./pages/NotFound";
 
-// Create wagmi config
+// Create a new QueryClient instance directly
+const queryClient = new QueryClient();
+
 const config = createConfig({
-  chains: [mainnet, optimism, optimismSepolia],
+  chains: [mainnet],
   transports: {
-    [mainnet.id]: http(),
-    [optimism.id]: http(),
-    [optimismSepolia.id]: http(),
-  },
+    [mainnet.id]: http()
+  }
 });
 
-function App() {
+const App = () => {
+  // Set document title when the app loads
+  useEffect(() => {
+    document.title = "Kleros SafeSnap";
+  }, []);
+
   return (
     <WagmiProvider config={config}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="question/:questionId" element={<QuestionDetail />} />
-            <Route path=":path/*" element={<Home />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-      </Router>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider attribute="class" defaultTheme="dark">
+          <BrowserRouter>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/ens/*" element={<Index />} />
+                <Route path="/:daoName" element={<Index />} />
+                <Route path="/question/:id" element={<QuestionDetail />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+            <Toaster />
+            <Sonner className="backdrop-blur-md" />
+          </BrowserRouter>
+        </ThemeProvider>
+      </QueryClientProvider>
     </WagmiProvider>
   );
-}
+};
 
 export default App;
