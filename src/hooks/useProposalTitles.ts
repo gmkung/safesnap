@@ -15,9 +15,10 @@ export function useProposalTitles(questions: Question[]) {
       const uniqueProposalIds = new Set<string>();
       
       // First collect all unique proposal IDs that we don't already have
+      // Only include proposal IDs that start with "0x"
       for (const question of questions) {
         const parsedData = parseQuestionData(question);
-        if (parsedData?.proposalId) {
+        if (parsedData?.proposalId && parsedData.proposalId.startsWith('0x')) {
           const proposalId = parsedData.proposalId;
           
           // Skip if we already have the title or are already loading it
