@@ -4,6 +4,7 @@ import { QuestionList } from '../components/QuestionList';
 import { Progress } from '@/components/ui/progress';
 import { useQuestions } from '@/hooks/useQuestions';
 import { QuestionPhaseValue } from '../components/StatusFilter';
+import { parseQuestionData } from '@/utils/questionUtils';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -69,10 +70,22 @@ export default function Home() {
     }
   }, [filterParam, statusFilters]);
 
-  // Filter questions based on status
-  const filteredQuestions = statusFilters.length > 0
-    ? questions.filter(q => statusFilters.includes(q.phase as QuestionPhaseValue))
-    : questions;
+  // Filter questions based on status and 0x proposal IDs
+  const filteredQuestions = questions.filter(question => {
+    // First apply status filter if any
+    if (statusFilters.length > 0 && !statusFilters.includes(question.phase as QuestionPhaseValue)) {
+      return false;
+    }
+    
+    // Then filter by proposal ID format (must start with 0x)
+    const parsedData = parseQuestionData(question);
+    // If there's no proposal ID or if it starts with 0x, include it
+    // This keeps questions that don't have proposal IDs (plain questions)
+    if (!parsedData?.proposalId) return true;
+    
+    // Only include proposals with IDs starting with 0x
+    return parsedData.proposalId.startsWith('0x');
+  });
 
   // Calculate paginated questions
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
